@@ -68,3 +68,12 @@ asf.h
 config/
 .vs/
 atmel*.*
+
+## Images
+*.jpg
+*.jpeg
+*.JPG
+*.gif
+*.bmp
+*.png
+
