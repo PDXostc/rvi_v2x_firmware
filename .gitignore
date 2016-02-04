@@ -41,6 +41,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
 *.d
 *.o
 *.eep
@@ -51,3 +52,19 @@ Temporary Items
 *.map
 *.elf
 *.mk
+
+################
+## Atmel Studio
+################
+
+#Atmel Studio solution and user files
+*.atsuo
+ASF/
+asf.h
+*.hex
+[Rr]elease/
+[Dd]ebug/
+*.atsln
+config/
+.vs/
+atmel*.*
