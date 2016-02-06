@@ -478,12 +478,6 @@
     <Compile Include="src\V2X\V2X_init.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\V2X\V2X_sequence.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\V2X\V2X_sequence.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\V2X\V2X_board.h">
       <SubType>compile</SubType>
     </Compile>

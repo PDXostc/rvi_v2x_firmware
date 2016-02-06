@@ -1,14 +1,9 @@
 /**
- * \file
+ * \file V2X_board.h
  *
- * \brief XMEGA16A4U V2X power sequencer board definition
+ * \brief V2X power sequencer board definition XMEGA128A4U 
  *
- * Copyright (c) 2015 Jaguar Land Rover. All rights reserved.
- *
-*/
-
- /**
- * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
+ * Author: Jesse Banks (jbanks2)
  */
 
 #ifndef V2X_BOARD_H
@@ -19,8 +14,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//void board_init(void);
 
 /**
  * \defgroup xmega_a1u_xplained_pro_group Features
@@ -234,33 +227,6 @@ extern "C" {
 #define EXT1_PIN_SEQ_TXD                   IOPORT_CREATE_PIN(PORTD,7) //TX SIGNAL (PORT D TXD1) TO FTDI MODULE FOR SEQ AT INTERFACE, ALSO USB DP
 /** @} */
 
-/** \name Extension header #1 pin definitions by function
- *  @{
- 
-#define EXT1_PIN_IRQ_1            EXT1_PIN_ACL_INT2
-#define EXT1_PIN_IRQ_0            EXT1_PIN_ACL_INT1
-#define EXT1_PIN_GPIO_0           EXT1_PIN_HUB_STATUS
-#define EXT1_PIN_GPIO_1           EXT1_PIN_HUB_SUSPEND
-#define EXT1_PIN_GPIO_2           EXT1_PIN_HOST_SHORT_CIRCUIT
-#define EXT1_PIN_GPIO_3           EXT1_PIN_SR_CLEAR
-#define EXT1_PIN_GPIO_4           EXT1_PIN_SR_LATCH
-#define EXT1_PIN_UART_RX0         EXT1_PIN_CAN_TXD
-#define EXT1_PIN_UART_TX0         EXT1_PIN_CAN_RXD
-#define EXT1_PIN_SPI_SS           EXT1_PIN_SS
-#define EXT1_PIN_SPI_MOSI         EXT1_PIN_MOSI
-#define EXT1_PIN_SPI_MISO         EXT1_PIN_MISO
-#define EXT1_PIN_SPI_SCK          EXT1_PIN_SCK
-#define EXT1_PIN_I2C_SDA          EXT1_PIN_HUB_SDA
-#define EXT1_PIN_I2C_SCL          EXT1_PIN_HUB_SCL
-#define EXT1_PIN_UART_RX1 		  EXT1_PIN_ACL_RXD
-#define EXT1_PIN_UART_TX1 		  EXT1_PIN_ACL_TXD            
-#define EXT1_PIN_GPIO_5 		  EXT1_PIN_SIM_WAKE           
-#define EXT1_PIN_GPIO_6 		  EXT1_PIN_SIM_NETWORK        
-#define EXT1_PIN_GPIO_7 		  EXT1_PIN_SIM_PWR            
-#define EXT1_PIN_UART_RX2 		  EXT1_PIN_SEQ_RXD            
-#define EXT1_PIN_UART_TX2 		  EXT1_PIN_SEQ_TXD    */        
-/** @} */
-
 
 /** \name TWI definitions
  *  @{
@@ -302,7 +268,7 @@ extern "C" {
  */
 
 //! @{
-//#define sck_pin				  EXT1_PIN_SPI_SCK
+#define sck_pin				  EXT1_PIN_SPI_SCK
 #define ACL_SPI				  &SPIC
 #define ACL_CS			      EXT1_PIN_SPI_SS
 #define ACL_MASTER_SCK	      EXT1_PIN_SPI_SCK // SCK as output
