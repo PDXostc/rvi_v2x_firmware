@@ -1,16 +1,13 @@
 /**
- * \file
+ * /file  V2X_init.c
  *
- * \brief User board initialization template
+ * /brief V2X board initialization
  *
- */
-/*
- * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
- */
-
+ * Author: Jesse Banks (jbanks2)
+ **/
 #include "V2X_init.h"
 
-void pinInit(void)
+void pin_init(void)
 {
 		ioport_configure_pin(EXT1_PIN_ACL_INT2				, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);
 		ioport_configure_pin(EXT1_PIN_ACL_INT1				, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);
@@ -46,15 +43,14 @@ void pinInit(void)
 		ioport_configure_pin(CHARGEPUMP_0_PIN				, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 }
 
+/* This function is meant to contain board-specific initialization code
+ * for, e.g., the I/O pins. The initialization can rely on application-
+ * specific board configuration, found in conf_board.h.
+ */
 void v2x_board_init(void)
 {
-	/* This function is meant to contain board-specific initialization code
-	 * for, e.g., the I/O pins. The initialization can rely on application-
-	 * specific board configuration, found in conf_board.h.
-	 */
-	
-	ioport_init();				//Initializes the IOPORT service	
-	pinInit();					//whole chip pin init
-	shiftRegisterInit();		//Configure SR specific pin modes, sets SR to default states
-	canbusSerialRouting(BUFFER_FTDI_ROUTING);
+	ioport_init();							//Initializes the IOPORT service
+	pin_init();								//whole chip pin init, modes and initial conditions
+	shift_register_init();					//Configure SR specific pin modes, sets SR to default states
+	canbus_serial_routing(FTDI_ROUTING);	//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 }
