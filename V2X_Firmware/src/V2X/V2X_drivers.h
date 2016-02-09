@@ -1,7 +1,7 @@
 /**
  * /file V2X_drivers.h
  *
- * /brief Hardware driver functions for opperating the V2X board
+ * /brief Hardware driver functions for operating the V2X board
  *
  * Author: Jesse Banks (jbanks2)
  **/
@@ -16,9 +16,34 @@
  * @brief The two states the serial buffer can have
  **/
 enum buffer_routing{
-	AVR_ROUTING  = 0,
+	AVR_ROUTING,
 	FTDI_ROUTING
 	};
+
+/** 
+ * @def SPI struct for shift register SPI device
+ **/
+struct spi_device sr_device_conf;
+	
+/** 
+ * @def SPI struct for accelerometer SPI device
+ **/
+struct spi_device acl_device_conf;
+	
+/**
+ * @def spi_start
+ * @brief configures and enables the SPI peripheral
+ **/
+void spi_start(void);
+
+/**
+ * @def spi_write_read_packet
+ * @brief sends a multi byte packet, returns the received bytes in the same data array
+ * @param spi Base address of the SPI instance.
+ * @param data The data byte array to be sent
+ * @length size of message in bytes
+ **/
+void spi_write_read_packet (SPI_t* spi, uint8_t* data, uint8_t length);
 
 /**
  * @def charge_pump_toggle
@@ -83,8 +108,16 @@ inline static bool button_read(void) {return ioport_get_pin_level(SW0_PIN);}
  */
 void canbus_serial_routing(uint8_t direction);
 
+/**
+ * @def shift_register_state
+ * @brief variable that holds the current power state.
+ */
 static volatile uint16_t shift_register_state;
 
+/**
+ * @def STATE_DEFAULT_VALUE
+ * @brief default power state. enables 3v3 only
+ */
 #define STATE_DEFAULT_VALUE (1<<ENABLE_3V3)|(0<<ENABLE_3V3B)|(0<<ENABLE_3V3C)|(0<<ENABLE_3V3D)|\
 							(0<<ENABLE_4V1)|(0<<ENABLE_5V0)|(0<<ENABLE_5V0B)|(0<<ENABLE_SIM_WAKE)|\
 							(0<<ENABLE_HUB)|(0<<ENABLE_CAN_SLEEP)|(0<<ENABLE_CAN_RESET)|(0<<ENABLE_SIM_PWR_ON)|\

@@ -16,12 +16,32 @@ void canbus_serial_routing(uint8_t source)
 	else  /*(source == AVR_ROUTING)*/	{gpio_set_pin_high(BUF0_PIN);}
 }
 
+void spi_start(void)
+{
+	spi_master_init(ACL_SPI);
+	spi_master_setup_device(SR_SPI, &sr_device_conf, SPI_MODE_0, 5000000, EXT1_PIN_SR_LATCH);
+	spi_enable(ACL_SPI);
+}
+
 void shift_register_init(void)
 {
 	shift_register_clear();							// Clear shift register
 	shift_register_latch();							// Latch all internal registers to output
-	shift_register_state = STATE_DEFAULT_VALUE;		// set power state to dafault
+	shift_register_state = STATE_DEFAULT_VALUE;		// set power state to default
 	state_to_shift_register();						// cause shift register to update
+}
+
+void spi_write_read_packet (SPI_t* spi, uint8_t* data, uint8_t length)
+{
+	while (length--) {						//increment through buffer
+		spi_write_single(spi, *data);		//send byte pointed by data 
+
+		while (!spi_is_rx_full(spi)) {		//wait for send ccomplete
+		}
+		
+		spi_read_single(spi, data);			//read back SPI data into data array
+		data++;								//index through data array
+	}
 }
 
 void shift_register_latch(void)
@@ -38,17 +58,11 @@ void shift_register_clear(void)
 	gpio_set_pin_high(EXT1_PIN_SR_CLEAR);
 }
 
-void state_to_shift_register(void) {
-	uint16_t bits = shift_register_state;
-	for (int i=0; i<16; i++) {					//soft SPI routine to send data
-		if (bits>>i & 1)
-		{gpio_set_pin_high(EXT1_PIN_SPI_MOSI);}
-		else
-		{gpio_set_pin_low(EXT1_PIN_SPI_MOSI);}
-		
-		gpio_set_pin_high(EXT1_PIN_SPI_SCK);
-		gpio_set_pin_low(EXT1_PIN_SPI_SCK);
-	}
+void state_to_shift_register(void) {  //uses shift_register_state to update the shift register
+	uint8_t data[2];
+	data[1] = shift_register_state & 0xff;
+	data[0] = (shift_register_state >> 8) & 0xff; 
+	spi_write_packet(SR_SPI, data, 2);
 	shift_register_latch();
 }
 

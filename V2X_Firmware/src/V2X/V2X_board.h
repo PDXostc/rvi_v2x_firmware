@@ -283,24 +283,26 @@ extern "C" {
  * This is used for power and reset sequencing
  *
  */
-#define ENABLE_3V3 15
-#define ENABLE_3V3B 14
-#define ENABLE_3V3C 13
-#define ENABLE_3V3D 12
-#define ENABLE_4V1 11
-#define ENABLE_5V0 10
-#define ENABLE_5V0B 9
-#define ENABLE_SIM_WAKE 8
-#define ENABLE_HUB 7
-#define ENABLE_CAN_SLEEP 6
-#define ENABLE_CAN_RESET 5
-#define ENABLE_SIM_PWR_ON 4
-#define ENABLE_SIM_RESET 3
-#define ENABLE_SIM_RF_OFF 2
-#define ENABLE_SIM_VBUS 1
-#define ENABLE_FTDI_RESET 0
-//! @}
 
+#define ENABLE_3V3			0
+#define ENABLE_3V3B			1
+#define ENABLE_3V3C			2
+#define ENABLE_3V3D			3
+#define ENABLE_4V1			4
+#define ENABLE_5V0			5
+#define ENABLE_5V0B			6
+#define ENABLE_SIM_WAKE		7
+#define ENABLE_HUB			8
+#define ENABLE_CAN_SLEEP	9
+#define ENABLE_CAN_RESET	10
+#define ENABLE_SIM_PWR_ON	11
+#define ENABLE_SIM_RESET	12
+#define ENABLE_SIM_RF_OFF	13
+#define ENABLE_SIM_VBUS		14
+#define ENABLE_FTDI_RESET	15
+
+#define SR_SPI				&SPIC
+//! @}
 
 #ifdef __cplusplus
 }
