@@ -13,7 +13,7 @@
  */
 
 #include <asf.h>
-#include "V2X/V2X_init.h"
+#include "V2X/V2X.h"
 
 #ifndef V2X_CLOCK_DEF
 #warning Clock file is not updated. please follow instructions in src/V2X/clock_conf.h header.

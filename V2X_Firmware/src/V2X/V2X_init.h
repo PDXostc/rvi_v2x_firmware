@@ -8,9 +8,6 @@
 #ifndef V2X_INIT_H_
 #define V2X_INIT_H_
 
-#include "V2X_board.h"
-#include "V2X_drivers.h"
-
 /**
  * @def pin_init
  * @brief Whole chip pin initialization (mode, state)
