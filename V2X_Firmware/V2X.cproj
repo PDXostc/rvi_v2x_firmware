@@ -472,6 +472,15 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\V2X\V2X_Accel.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_Accel.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\V2X\V2X_init.c">
       <SubType>compile</SubType>
     </Compile>

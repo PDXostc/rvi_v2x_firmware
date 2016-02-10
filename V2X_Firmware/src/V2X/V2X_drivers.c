@@ -6,7 +6,7 @@
  * Author: Jesse Banks (jbanks2)
  **/ 
 
-#include "V2X_drivers.h"
+#include "V2X.h"
 
 void canbus_serial_routing(uint8_t source)
 {
@@ -19,7 +19,10 @@ void canbus_serial_routing(uint8_t source)
 void spi_start(void)
 {
 	spi_master_init(ACL_SPI);
-	spi_master_setup_device(SR_SPI, &sr_device_conf, SPI_MODE_0, 5000000, EXT1_PIN_SR_LATCH);
+	sr_device_conf.id = EXT1_PIN_SR_LATCH;
+	acl_device_conf.id = ACL_CS;
+	spi_master_setup_device(SR_SPI, &sr_device_conf, SPI_MODE_0, 5000000, 0);
+	spi_master_setup_device(ACL_SPI, &acl_device_conf, SPI_MODE_3, 5000000, 0);
 	spi_enable(ACL_SPI);
 }
 
@@ -36,7 +39,7 @@ void spi_write_read_packet (SPI_t* spi, uint8_t* data, uint8_t length)
 	while (length--) {						//increment through buffer
 		spi_write_single(spi, *data);		//send byte pointed by data 
 
-		while (!spi_is_rx_full(spi)) {		//wait for send ccomplete
+		while (!spi_is_rx_full(spi)) {		//wait for send complete
 		}
 		
 		spi_read_single(spi, data);			//read back SPI data into data array

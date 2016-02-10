@@ -5,7 +5,7 @@
  *
  * Author: Jesse Banks (jbanks2)
  **/
-#include "V2X_init.h"
+#include "V2X.h"
 
 void pin_init(void)
 {
@@ -66,5 +66,6 @@ void v2x_board_init(void)
 	pin_init();								//whole chip pin init, modes and initial conditions
 	spi_start();							//start SPI driver
 	shift_register_init();					//sets SR to default states - holds power up
+	accelerometer_init();					//
 	canbus_serial_routing(FTDI_ROUTING);	//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 }
