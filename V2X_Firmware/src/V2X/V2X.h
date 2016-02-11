@@ -12,5 +12,6 @@
 #include "V2X_drivers.h"
 #include "V2X_init.h"
 #include "V2X_Accel.h"
+#include "V2X_USB.h"
 
 #endif /* V2X_H_ */

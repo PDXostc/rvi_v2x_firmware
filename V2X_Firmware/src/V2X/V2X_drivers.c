@@ -76,3 +76,10 @@ void turn_on (uint16_t pins_mask) {  //updates teh power state variable but does
 void turn_off(uint16_t pins_mask) {  //updates teh power state variable but does not update shift register
 	shift_register_state &= ~(pins_mask);
 }
+
+uint8_t host_is_on (void)
+{
+	if (shift_register_state & (1<<ENABLE_5V0)) 
+			{		return true;	}
+	else	{		return false;	}
+}

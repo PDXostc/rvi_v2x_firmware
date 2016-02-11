@@ -304,6 +304,8 @@ extern "C" {
 #define SR_SPI				&SPIC
 //! @}
 
+#define CONF_BOARD_USB_PORT
+
 #ifdef __cplusplus
 }
 #endif

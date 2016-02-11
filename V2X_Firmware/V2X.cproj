@@ -496,6 +496,12 @@
     <Compile Include="src\V2X\V2X_drivers.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\V2X\V2X_USB.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_USB.h">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="atmel_devices_cdc.cat">
       <SubType>compile</SubType>
     </None>

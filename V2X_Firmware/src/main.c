@@ -19,8 +19,10 @@
 #warning Clock file is not updated. please follow instructions in src/V2X/clock_conf.h header.
 #endif
 
+
 int main ()
 {
+
 	sysclk_init();		//configure clock sources for core and USB
 	v2x_board_init();	//configure pins and initial safe condition
 	delay_ms(200);		//allow power to stabilize

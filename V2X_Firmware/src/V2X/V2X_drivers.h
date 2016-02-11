@@ -163,4 +163,5 @@ void turn_on(uint16_t pins_mask);
  **/
 void turn_off(uint16_t pins_mask);
 
+uint8_t host_is_on (void);
 #endif /* V2X_DRIVERS_H_ */
