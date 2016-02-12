@@ -40,8 +40,8 @@ void pin_init(void)
 		ioport_configure_pin(EXT1_PIN_SIM_RXD				, IOPORT_DIR_INPUT						);
 
 		ioport_configure_pin(EXT1_PIN_SIM_PWR				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
-		ioport_configure_pin(EXT1_PIN_SEQ_RXD				, IOPORT_DIR_INPUT						);	//USB data
-		ioport_configure_pin(EXT1_PIN_SEQ_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);	//USB data
+		ioport_configure_pin(EXT1_PIN_SEQ_RXD				, IOPORT_DIR_INPUT						);
+		ioport_configure_pin(EXT1_PIN_SEQ_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 
 		ioport_configure_pin(LED_0_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 		ioport_configure_pin(LED_1_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
@@ -67,7 +67,5 @@ void v2x_board_init(void)
 	spi_start();							//start SPI driver
 	shift_register_init();					//sets SR to default states - holds power up
 	accelerometer_init();					//
-	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI
-	irq_initialize_vectors();				//needed by USB
-	cpu_irq_enable();						//needed by USB
+	canbus_serial_routing(FTDI_ROUTING);	//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 }
