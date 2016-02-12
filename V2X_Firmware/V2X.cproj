@@ -481,6 +481,18 @@
     <Compile Include="src\V2X\V2X.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\V2X\V2X_button.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_button.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_gsm.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_gsm.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\V2X\V2X_init.c">
       <SubType>compile</SubType>
     </Compile>
@@ -490,10 +502,34 @@
     <Compile Include="src\V2X\V2X_board.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\V2X\V2X_drivers.c">
+    <Compile Include="src\V2X\V2X_led.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\V2X\V2X_drivers.h">
+    <Compile Include="src\V2X\V2X_led.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_power_control.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_power_control.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_spi.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_spi.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_uart.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_uart.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_usb.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_usb.h">
       <SubType>compile</SubType>
     </Compile>
     <None Include="atmel_devices_cdc.cat">

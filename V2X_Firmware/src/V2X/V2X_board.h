@@ -9,8 +9,6 @@
 #ifndef V2X_BOARD_H
 #define V2X_BOARD_H
 
-#include <../asf.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
