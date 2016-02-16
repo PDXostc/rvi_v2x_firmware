@@ -51,4 +51,10 @@ inline static void led_2_on		(void) {gpio_set_pin_high(LED_2_PIN);	}
  **/
 inline static void led_2_off	(void) {gpio_set_pin_low(LED_2_PIN);	}
 
+/**
+ * @def led_update
+ * @brief Updates the leds
+ **/
+void led_update(void);
+
 #endif /* V2X_LED_H_ */

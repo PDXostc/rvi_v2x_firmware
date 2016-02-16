@@ -25,13 +25,7 @@ int main ()
 	
 	while (1){
 		//copies status signals from around the board to the LEDs, purely test code
-		if (simcard_status() == true)							{led_0_on();	}
-		else													{led_0_off();	}
-		if (ioport_get_pin_level(EXT1_PIN_SIM_NETWORK) == true)	{led_1_on();	}
-		else													{led_1_off();	}
-		if (ioport_get_pin_level(EXT1_PIN_SIM_PWR) == true)		{led_2_on();	}
-		else													{led_2_off();	}
-		
+		led_update();
  		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 	}
 }
