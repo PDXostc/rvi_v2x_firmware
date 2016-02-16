@@ -508,10 +508,10 @@
     <Compile Include="src\V2X\V2X_led.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\V2X\V2X_power_control.c">
+    <Compile Include="src\V2X\V2X_power.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\V2X\V2X_power_control.h">
+    <Compile Include="src\V2X\V2X_power.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\V2X\V2X_spi.c">

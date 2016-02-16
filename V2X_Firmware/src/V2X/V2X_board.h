@@ -302,6 +302,16 @@ extern "C" {
 #define SR_SPI				&SPIC
 //! @}
 
+#define  USART               USARTE0
+#define  USART_RX_Vect       USARTE0_RXC_vect
+#define  USART_DRE_Vect      USARTE0_DRE_vect
+#define  USART_SYSCLK        SYSCLK_USART0
+#define  USART_PORT          PORTE
+#define  USART_PORT_PIN_TX   (1<<3)  // PC3 (TXE0)
+#define  USART_PORT_PIN_RX   (1<<2)  // PC2 (RXE0)
+#define  USART_PORT_SYSCLK   SYSCLK_PORT_E
+
+
 #ifdef __cplusplus
 }
 #endif

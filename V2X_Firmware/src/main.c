@@ -24,6 +24,7 @@ int main ()
 	v2x_board_init();	//configure pins and initial safe condition
 	
 	while (1){
+		//sleepmgr_enter_sleep();
 		//copies status signals from around the board to the LEDs, purely test code
 		led_update();
  		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
