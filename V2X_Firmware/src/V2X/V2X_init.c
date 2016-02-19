@@ -62,10 +62,16 @@ void pin_init(void)
  */
 void v2x_board_init(void)
 {
+	irq_initialize_vectors();
+	cpu_irq_enable();
+	sleepmgr_init();						// Initialize the sleep manager
+	sysclk_init();							//configure clock sources for core and USB
 	ioport_init();							//Initializes the IOPORT service
 	pin_init();								//whole chip pin init, modes and initial conditions
 	spi_start();							//start SPI driver
-	shift_register_init();					//sets SR to default states - holds power up
-	accelerometer_init();					//
-	canbus_serial_routing(FTDI_ROUTING);	//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
+	power_control_init();					//sets SR to default states - holds power up
+	accelerometer_init();					//configures, but does not start sampling
+	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
+	udc_start();							//start stack and vbus monitoring
+
 }

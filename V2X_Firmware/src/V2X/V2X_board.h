@@ -9,8 +9,6 @@
 #ifndef V2X_BOARD_H
 #define V2X_BOARD_H
 
-#include <../asf.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -303,6 +301,16 @@ extern "C" {
 
 #define SR_SPI				&SPIC
 //! @}
+
+#define  USART               USARTC0					//USARTE0
+#define  USART_RX_Vect       USARTC0_RXC_vect			//USARTE0_RXC_vect
+#define  USART_DRE_Vect      USARTC0_DRE_vect			//USARTE0_DRE_vect
+#define  USART_SYSCLK        SYSCLK_USART0				//SYSCLK_USART0
+#define  USART_PORT          PORTC						//PORTE
+#define  USART_PORT_PIN_TX   (1<<3)  // PC3 (TXE0)		//(1<<3)  // PC3 (TXE0)
+#define  USART_PORT_PIN_RX   (1<<2)  // PC2 (RXE0)		//(1<<2)  // PC2 (RXE0)
+#define  USART_PORT_SYSCLK   SYSCLK_PORT_C				//SYSCLK_PORT_E
+
 
 #ifdef __cplusplus
 }
