@@ -57,6 +57,10 @@ enum ACL_command_tags {
 	ACL_RW_BIT				= 7
 	};
 
+enum ACL_message_length {
+	ACL_SINGLE,
+	ACL_MULTI
+	};
 /**
  * @def ACL_sample_rate
  * @brief sample rate register bit definitions.
@@ -130,7 +134,7 @@ uint8_t ACL_command_builder (uint8_t read_write, uint8_t multibyte, uint8_t addr
  * @param data is pointer to an array of size "length", write data is replaced with read data
  * @param length is 1 command + X data in length
  **/
-void ACL_send_recv_data(uint8_t* data, uint8_t length);
+void ACL_send_recv_data(uint8_t cmd, uint8_t* data, uint8_t length);
 
 /**
  * @def read_id

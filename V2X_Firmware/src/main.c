@@ -26,7 +26,9 @@ int main ()
 	while (1){
 		//sleepmgr_enter_sleep();
 		//copies status signals from around the board to the LEDs, purely test code
-		led_update();
- 		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
+		//led_update();
+		delay_ms(1);
+ 		report_accel_data();
+		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 	}
 }

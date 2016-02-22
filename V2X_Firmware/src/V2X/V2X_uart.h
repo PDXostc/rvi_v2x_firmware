@@ -44,4 +44,6 @@ void uart_open(uint8_t port);
  */
 void uart_close(uint8_t port);
 
+void report_accel_data(void);
+
 #endif /* V2X_UART_H_ */

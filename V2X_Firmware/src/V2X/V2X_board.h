@@ -311,6 +311,11 @@ extern "C" {
 #define  USART_PORT_PIN_RX   (1<<2)  // PC2 (RXE0)		//(1<<2)  // PC2 (RXE0)
 #define  USART_PORT_SYSCLK   SYSCLK_PORT_C				//SYSCLK_PORT_E
 
+enum usb_port_usage{
+	USB_CAN	= 0,
+	USB_CMD,
+	USB_ACL
+	};
 
 #ifdef __cplusplus
 }
