@@ -116,6 +116,9 @@ void uart_rx_notify(uint8_t port) //message received over USB
 				udi_cdc_multi_putc(port, msg_byte);		//push loop back
 			}
 			menu_add_to_command(msg_byte);
+			if (msg_byte == '\r') {
+				menu_parse_command();
+			}
 		}else if (port == USB_ACL) {
 		//should not see on accelerometer
 		}
