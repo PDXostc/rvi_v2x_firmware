@@ -113,35 +113,13 @@ void uart_rx_notify(uint8_t port) //message received over USB
 	}
 }
 
+char buffer[60] = "XYZT: ";  //create starting string
+
 void report_accel_data(void) {
 	uint8_t data[6];
 	ACL_sample(data); //collect sample data
-	
- 	uint16_t data16;
- 	char buffer[60] = "XYZT: ";  //create starting string
- 	char wbuffer[30];
- 	for (int k = 0; k < 3; k++){  //convert and add x,y,z data into buffer
- 		data16 = (data[2*k+1] << 8) | data[2*k];
- 		itoa(data16, wbuffer, 10);
- 		strcat(buffer, wbuffer);
- 		strcat(buffer, ", ");
- 	}
-	itoa(udd_get_frame_number(), wbuffer, 10); //add timestamp
-	strcat(buffer, wbuffer);
-	strcat(buffer, "\r\n");		//end line
-	
-	//send buffer
- 	int msg_l = strlen(buffer);
-	int i = 0;
-	while (i < msg_l) {									//buffer[i] != '\n'){
-		if (!udi_cdc_multi_is_tx_ready(USB_ACL)) {
-			int j = 1; //do something, Fifo full
-			udi_cdc_signal_overrun();
-		}else{
-			udi_cdc_multi_putc(USB_ACL, buffer[i]);
-			i++;
-		}
-	}
+	ACL_data_to_string(data, buffer);
+	usb_cdc_send_string(USB_ACL, buffer);
 }
 
 ISR(USART_RX_Vect)

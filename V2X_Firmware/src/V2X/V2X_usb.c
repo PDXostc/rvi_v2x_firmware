@@ -72,3 +72,19 @@ void usb_cdc_set_dtr(uint8_t port, bool b_enable)
 
 	}
 }
+
+void usb_cdc_send_string(uint8_t port, char * buffer) {
+	//send buffer
+	int msg_l = strlen(buffer);
+	int i = 0;
+	while (i < msg_l) {									//buffer[i] != '\n'){
+		if (!udi_cdc_multi_is_tx_ready(port)) {
+			//int j = 1; //do something, Fifo full
+			udi_cdc_multi_signal_overrun(port);
+			//udi_cdc_ctrl_state_change(port, true, CDC_SERIAL_STATE_OVERRUN)
+			}else{
+			udi_cdc_multi_putc(port, buffer[i]);
+			i++;
+		}
+	}
+}

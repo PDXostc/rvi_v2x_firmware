@@ -169,4 +169,12 @@ void ACL_sample (uint8_t* data);
  **/
 Bool ACL_sampling(void);
 
+/**
+ * @def ACL_data_to_string
+ * @brief converts the raw data from the accelerometer to a serial string for sending to host
+ * @param data 6 element buffer pulled from ADXL
+ * @param buffer the buffer for building the string in
+ **/
+void ACL_data_to_string(uint8_t * data, char * buffer);
+
 #endif /* V2X_ACCEL_H_ */

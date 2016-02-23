@@ -8,6 +8,7 @@
 #include "V2X.h"
 
 Bool ACL_is_sampling = false;
+char wbuffer[30];
 
 void accelerometer_init(void)
 {
@@ -66,4 +67,19 @@ void ACL_sample (uint8_t* data)
 
 Bool ACL_sampling(void) {
 	return 	ACL_is_sampling;
+}
+
+void ACL_data_to_string(uint8_t * data, char * buffer) {
+	uint16_t data16;
+	buffer[0] = '\0';
+	strcat(buffer, "XYZT: ");  //create starting string
+	for (int k = 0; k < 3; k++){  //convert and add x,y,z data, cat into buffer
+		data16 = (data[2*k+1] << 8) | data[2*k];
+		itoa(data16, wbuffer, 10);
+		strcat(buffer, wbuffer);
+		strcat(buffer, ", ");
+	}
+	itoa(udd_get_frame_number(), wbuffer, 10); //add timestamp
+	strcat(buffer, wbuffer);
+	strcat(buffer, "\r\n");		//end line
 }
