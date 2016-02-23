@@ -39,41 +39,35 @@ void usb_cdc_disable(uint8_t port)
 
 void usb_sof_action(void)  //causes led 0 to flash on USB activity
 {
-// 	if (!usb_cdc_enabled_bool[0] | !usb_cdc_enabled_bool[1] | !usb_cdc_enabled_bool[2]) {
-// 		led_0_off(); 
-// 		return;
-// 	}
-// 		
-// 	int framenumber = udd_get_frame_number();
-// 	if (0 == framenumber) {
-// 		led_0_on();
-// 	}
-// 	if (1000 == framenumber) {
-// 		led_0_off();
-// 	}
 }
 
 void usb_cdc_set_dtr(uint8_t port, bool b_enable)
 {
 	if (b_enable) {
 		// Host terminal has open COM
-		//possibly enable ELM or ACL
-		//change can from direct to pass through mode
-		if (port == 0) {
-			led_0_on();
-		}else if (port == 1) {
+		if (port == USB_CAN) {
+			led_0_on();		
+			//change can from direct to pass through mode
+		}else if (port == USB_CMD) {
 			led_1_on();
-		}else if (port == 2) {
+			//start Hayes interface 
+		}else if (port == USB_ACL) {
 			led_2_on();
+			//enable ACL
+			ACL_sample_on();
 		}
 	}else{
 		// Host terminal has close COM
-		if (port == 0) {
+		if (port == USB_CAN) {
 			led_0_off();
-		}else if (port == 1) {
+			//change can from pass through to direct mode
+		}else if (port == USB_CMD) {
 			led_1_off();
-		}else if (port == 2) {
+			//start Hayes interface
+		}else if (port == USB_ACL) {
 			led_2_off();
+			//disable ACL
+			ACL_sample_off();
 		}
 
 	}

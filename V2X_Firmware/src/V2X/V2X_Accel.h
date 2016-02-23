@@ -9,6 +9,8 @@
 #ifndef V2X_ACCEL_H_
 #define V2X_ACCEL_H_
 
+Bool ACL_is_sampling;
+
 /**
  * @def acl_register_map
  * @brief register address definitions.
@@ -57,6 +59,10 @@ enum ACL_command_tags {
 	ACL_RW_BIT				= 7
 	};
 
+enum ACL_message_length {
+	ACL_SINGLE,
+	ACL_MULTI
+	};
 /**
  * @def ACL_sample_rate
  * @brief sample rate register bit definitions.
@@ -130,7 +136,7 @@ uint8_t ACL_command_builder (uint8_t read_write, uint8_t multibyte, uint8_t addr
  * @param data is pointer to an array of size "length", write data is replaced with read data
  * @param length is 1 command + X data in length
  **/
-void ACL_send_recv_data(uint8_t* data, uint8_t length);
+void ACL_send_recv_data(uint8_t cmd, uint8_t* data, uint8_t length);
 
 /**
  * @def read_id
@@ -156,5 +162,11 @@ void ACL_sample_off (void);
  * @param data is a pointer to array uint8_t[7], pass by reference, {ZH, ZL, YH, YL, XH, XL, CMD}={6:0}
  **/
 void ACL_sample (uint8_t* data);
+
+/**
+ * @def ACL_sampling
+ * @brief reports true if the accelerometer has been enabled to sample and stream
+ **/
+Bool ACL_sampling(void);
 
 #endif /* V2X_ACCEL_H_ */

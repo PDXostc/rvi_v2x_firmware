@@ -36,7 +36,6 @@ void usb_cdc_disable(uint8_t port);
  */
 void usb_sof_action(void);
 
-
 /*! \brief Save new DTR state to change led behavior.
  * The DTR notify that the terminal have open or close the communication port.
  */

@@ -97,16 +97,52 @@ void uart_close(uint8_t port)
 	USART.CTRLB = 0;
 }
 
-void uart_rx_notify(uint8_t port)
+void uart_rx_notify(uint8_t port) //message received over USB
 {
-	// If UART is open
-	if (USART.CTRLA!=0) {
-		// Enable UART TX interrupt to send values
-		USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t)
-		USART_DREINTLVL_HI_gc;
+	if (port == USB_CAN) {
+		// If UART is open
+		if (USART.CTRLA!=0) {
+			// Enable UART TX interrupt to send values
+			USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t)
+			USART_DREINTLVL_HI_gc;
+		}
+		}else if (port == USB_CMD) {
+		//send message to Hayes interpreter
+		}else if (port == USB_ACL) {
+		//should not see on accelerometer
 	}
 }
 
+void report_accel_data(void) {
+	uint8_t data[6];
+	ACL_sample(data); //collect sample data
+	
+ 	uint16_t data16;
+ 	char buffer[60] = "XYZT: ";  //create starting string
+ 	char wbuffer[30];
+ 	for (int k = 0; k < 3; k++){  //convert and add x,y,z data into buffer
+ 		data16 = (data[2*k+1] << 8) | data[2*k];
+ 		itoa(data16, wbuffer, 10);
+ 		strcat(buffer, wbuffer);
+ 		strcat(buffer, ", ");
+ 	}
+	itoa(udd_get_frame_number(), wbuffer, 10); //add timestamp
+	strcat(buffer, wbuffer);
+	strcat(buffer, "\r\n");		//end line
+	
+	//send buffer
+ 	int msg_l = strlen(buffer);
+	int i = 0;
+	while (i < msg_l) {									//buffer[i] != '\n'){
+		if (!udi_cdc_multi_is_tx_ready(USB_ACL)) {
+			int j = 1; //do something, Fifo full
+			udi_cdc_signal_overrun();
+		}else{
+			udi_cdc_multi_putc(USB_ACL, buffer[i]);
+			i++;
+		}
+	}
+}
 
 ISR(USART_RX_Vect)
 {
