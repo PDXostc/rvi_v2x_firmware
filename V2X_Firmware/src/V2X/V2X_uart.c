@@ -105,13 +105,23 @@ void uart_rx_notify(uint8_t port) //message received over USB
 			// Enable UART TX interrupt to send values
 			USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t)
 			USART_DREINTLVL_HI_gc;
-		}
+			}
 		}else if (port == USB_CMD) {
 		//send message to Hayes interpreter
+		if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
+			char msg_byte = udi_cdc_multi_getc(port);	//get the data
+			if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
+				udi_cdc_multi_signal_overrun(port);		//no
+			}else{										//yes
+				udi_cdc_multi_putc(port, msg_byte);		//push loop back
+			}
+			menu_add_to_command(msg_byte);
 		}else if (port == USB_ACL) {
 		//should not see on accelerometer
+		}
 	}
 }
+		
 
 char buffer[60] = "XYZT: ";  //create starting string
 
@@ -125,23 +135,17 @@ void report_accel_data(void) {
 ISR(USART_RX_Vect)
 {
 	uint8_t value;
-
-	// Data received
-	//ui_com_tx_start();
-
 	if (0 != (USART.STATUS & (USART_FERR_bm | USART_BUFOVF_bm))) {
-		udi_cdc_signal_framing_error();
-		//ui_com_error();
+		udi_cdc_multi_signal_framing_error(USB_CAN);
 	}
-
 	// Transfer UART RX fifo to CDC TX
 	value = USART.DATA;
-	if (!udi_cdc_is_tx_ready()) {
+	if (!udi_cdc_multi_is_tx_ready(USB_CAN)) {
 		// Fifo full
-		udi_cdc_signal_overrun();
+		udi_cdc_multi_signal_overrun(USB_CAN);
 		//ui_com_overflow();
 		}else{
-		udi_cdc_putc(value);
+		udi_cdc_multi_putc(USB_CAN, value);
 	}
 	//ui_com_tx_stop();
 }

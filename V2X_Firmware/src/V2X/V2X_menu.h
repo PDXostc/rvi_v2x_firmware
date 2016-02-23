@@ -9,7 +9,7 @@
 #ifndef V2X_MENU_H_
 #define V2X_MENU_H_
 
-
+void menu_add_to_command(char value);
 
 
 
