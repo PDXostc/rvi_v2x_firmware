@@ -311,7 +311,7 @@ extern "C" {
 #define  USART_PORT_PIN_RX   (1<<2)  // PC2 (RXE0)		//(1<<2)  // PC2 (RXE0)
 #define  USART_PORT_SYSCLK   SYSCLK_PORT_C				//SYSCLK_PORT_E
 
-enum usb_port_usage{
+enum usb_port_usage{  //usually used in port variables for USB functions
 	USB_CAN	= 0,
 	USB_CMD,
 	USB_ACL

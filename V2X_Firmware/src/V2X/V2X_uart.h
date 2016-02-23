@@ -14,14 +14,14 @@
  * @brief The two states the serial buffer can have
  **/
 enum buffer_routing{
-	AVR_ROUTING,
+	AVR_ROUTING = 0,
 	FTDI_ROUTING
 	};
 
 /**
  * @def canbus_serial_routing
  * @brief Routing of serial data.
- * @param source = FTDI_ROUTING, AVR_ROUTING
+ * @param direction = FTDI_ROUTING, AVR_ROUTING
  */
 void canbus_serial_routing(uint8_t direction);
 
@@ -32,6 +32,7 @@ void uart_rx_notify(uint8_t port);
 
 /*! \brief Configures communication line
  *
+ * \param port     port definition
  * \param cfg      line configuration
  */
 void uart_config(uint8_t port, usb_cdc_line_coding_t * cfg);
@@ -44,6 +45,8 @@ void uart_open(uint8_t port);
  */
 void uart_close(uint8_t port);
 
+/*! \brief Samples Accelerometer, converts to string, sends to host 
+ */
 void report_accel_data(void);
 
 #endif /* V2X_UART_H_ */

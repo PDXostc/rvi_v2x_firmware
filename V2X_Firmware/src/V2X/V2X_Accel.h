@@ -9,6 +9,8 @@
 #ifndef V2X_ACCEL_H_
 #define V2X_ACCEL_H_
 
+Bool ACL_is_sampling;
+
 /**
  * @def acl_register_map
  * @brief register address definitions.
@@ -160,5 +162,11 @@ void ACL_sample_off (void);
  * @param data is a pointer to array uint8_t[7], pass by reference, {ZH, ZL, YH, YL, XH, XL, CMD}={6:0}
  **/
 void ACL_sample (uint8_t* data);
+
+/**
+ * @def ACL_sampling
+ * @brief reports true if the accelerometer has been enabled to sample and stream
+ **/
+Bool ACL_sampling(void);
 
 #endif /* V2X_ACCEL_H_ */

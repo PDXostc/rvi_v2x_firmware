@@ -7,10 +7,11 @@
 
 #include "V2X.h"
 
+Bool ACL_is_sampling = false;
+
 void accelerometer_init(void)
 {
 	if (read_id() == ADLX345_DEVID){
-		led_2_on();
 		uint8_t data = ACL_RATE_100;	//100hz
 		ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_BW_RATE), &data, 2);
 	
@@ -48,15 +49,21 @@ void ACL_sample_on (void)
 {
 	uint8_t data = (1<<ACL_MEASURE);
 	ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_POWER_CTL), &data, 2);
+	ACL_is_sampling = true;
 }
 
 void ACL_sample_off (void)
 {
 	uint8_t data = (1<<ACL_SLEEP);
 	ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_POWER_CTL), &data, 2);
+	ACL_is_sampling = false;
 }
 
 void ACL_sample (uint8_t* data)
 {
 	ACL_send_recv_data(ACL_command_builder(ACL_READ, ACL_MULTI, ACL_MAP_DATAX0), data, 7);
+}
+
+Bool ACL_sampling(void) {
+	return 	ACL_is_sampling;
 }
