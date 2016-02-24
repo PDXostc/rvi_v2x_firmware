@@ -70,7 +70,7 @@ void v2x_board_init(void)
 	pin_init();								//whole chip pin init, modes and initial conditions
 	spi_start();							//start SPI driver
 	power_control_init();					//sets SR to default states - holds power up
-	accelerometer_init();					//configures, but does not start sampling
+	ACL_init();					//configures, but does not start sampling
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 	udc_start();							//start stack and vbus monitoring
 }

@@ -10,7 +10,7 @@
 Bool ACL_is_sampling = false;
 char wbuffer[30];
 
-void accelerometer_init(void)
+void ACL_init(void)
 {
 	if (read_id() == ADLX345_DEVID){
 		uint8_t data = ACL_RATE_100;	//100hz

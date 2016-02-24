@@ -119,7 +119,7 @@ enum ACL_data_format_bits{
  * @def accelerometer_init
  * @brief initializes the accelerometer to default values, but does not start
  **/
-void accelerometer_init(void);
+void ACL_init(void);
 
 /**
  * @def ACL_command_builder

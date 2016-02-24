@@ -66,4 +66,8 @@ void power_control_turn_on(uint16_t pins_mask);
  **/
 void power_control_turn_off(uint16_t pins_mask);
 
+void power_sim_start(void);
+void power_sim_reset(void);
+bool power_query(uint16_t mask);
+
 #endif /* V2X_DRIVERS_H_ */
