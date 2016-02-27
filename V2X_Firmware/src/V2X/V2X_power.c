@@ -12,10 +12,9 @@ void power_control_init(void)
 {
 	power_control_clear();							// Clear shift register
 	power_control_latch();							// Latch all internal registers to output
-
-	power_control_turn_on((0<<ENABLE_4V1)|(1<<ENABLE_3V3)|(0<<ENABLE_SIM_RESET)|(0<<ENABLE_5V0)); // turn on GSM device power, allow out of reset
+	power_control_state = POWER_CONTROL_DEFAULT_VALUE;
 	power_control_push();		//update shift register state
-	delay_ms(200);				//allow power to stabilize
+	delay_ms(100);				//allow power to stabilize
 
 }
 
@@ -60,7 +59,7 @@ void power_sim_start(void) {
 	delay_ms(100);							//let power come up
 	power_control_turn_on((1<<ENABLE_SIM_PWR_ON));
 	power_control_push();
-	delay_ms(50);							//let chip detect
+	delay_ms(150);							//let chip detect
 	power_control_turn_off((1<<ENABLE_SIM_PWR_ON));
 	power_control_push();					//clear the start bit
 }

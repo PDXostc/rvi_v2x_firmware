@@ -46,5 +46,6 @@ void usb_cdc_set_dtr(uint8_t port, bool b_enable);
  *  \param *buffer the message to send over the USB
  */
 void usb_cdc_send_string(uint8_t port, char * buffer);
-
+void usb_cdc_send_byte(uint8_t port, int value);
+bool usb_cdc_is_active(uint8_t port);
 #endif /* V2X_USB_H_ */

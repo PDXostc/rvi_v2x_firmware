@@ -15,7 +15,7 @@
  * @def shift_register_state
  * @brief variable that holds the current power state.
  */
-static volatile uint16_t power_control_state;
+volatile uint16_t power_control_state;
 
 /**
  * @def STATE_DEFAULT_VALUE

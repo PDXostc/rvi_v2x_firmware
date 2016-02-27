@@ -7,6 +7,8 @@
 
 #include "V2X.h"
 
+char buffer[30] = "XYZT: ";  //create starting string
+
 void canbus_serial_routing(uint8_t source)
 {
 	gpio_set_pin_low(BUF0_PIN);
@@ -99,6 +101,7 @@ void uart_close(uint8_t port)
 
 void uart_rx_notify(uint8_t port) //message received over USB
 {
+	uint8_t data;
 	if (port == USB_CAN) {
 		// If UART is open
 		if (USART.CTRLA!=0) {
@@ -107,26 +110,39 @@ void uart_rx_notify(uint8_t port) //message received over USB
 			USART_DREINTLVL_HI_gc;
 			}
 		}else if (port == USB_CMD) {
-		//send message to Hayes interpreter
-		if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
-			char msg_byte = udi_cdc_multi_getc(port);	//get the data
+			if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
+ 				data = udi_cdc_multi_getc(port);	//get 1 char of data
+				if (data == '?'						//allow '?'
+				||  data == 0x7f					//backspace
+				||  data == '\r'					//return
+				|| (data >= '0' && data <= '9') 	//numbers
+				|| (data >= 'A' && data <= 'Z') 	//capitals
+				|| (data >= 'a' && data <= 'z')) {	//lower case
+					if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
+ 						udi_cdc_multi_signal_overrun(port);		//no
+ 					} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
+					if (data == '\r') { //if carage return, run the menu
+						menu_main();
+						return;
+					} else { //was a standard charecter that should be stored in the buffer
+						menu_add_to_command(data);
+					}
+				} else { //there was a special character
+					//run through the buffer until it is empty
+					while (udi_cdc_multi_is_rx_ready(port)) {  
+						data = udi_cdc_multi_getc(port);
+					}
+				}
+			}
+		}else if (port == USB_ACL) { //loop back
+		while (udi_cdc_multi_is_rx_ready(port)) {  //is there data
+			int data = udi_cdc_multi_getc(port);	//get all the data
 			if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
 				udi_cdc_multi_signal_overrun(port);		//no
-			}else{										//yes
-				udi_cdc_multi_putc(port, msg_byte);		//push loop back
-			}
-			menu_add_to_command(msg_byte);
-			if (msg_byte == '\r') {
-				menu_parse_command();
-			}
-		}else if (port == USB_ACL) {
-		//should not see on accelerometer
+			}else{udi_cdc_multi_putc(port, data);}
 		}
 	}
 }
-		
-
-char buffer[60] = "XYZT: ";  //create starting string
 
 void report_accel_data(void) {
 	uint8_t data[6];

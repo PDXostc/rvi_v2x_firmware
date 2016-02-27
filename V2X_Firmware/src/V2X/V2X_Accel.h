@@ -176,5 +176,6 @@ Bool ACL_sampling(void);
  * @param buffer the buffer for building the string in
  **/
 void ACL_data_to_string(uint8_t * data, char * buffer);
+void ACL_get_last_sample (uint8_t * data);
 
 #endif /* V2X_ACCEL_H_ */

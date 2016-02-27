@@ -9,6 +9,7 @@
 
 Bool ACL_is_sampling = false;
 char wbuffer[30];
+uint8_t last_sample[6];
 
 void ACL_init(void)
 {
@@ -16,7 +17,7 @@ void ACL_init(void)
 		uint8_t data = ACL_RATE_100;	//100hz
 		ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_BW_RATE), &data, 2);
 	
-		data = (1<<ACL_FULL_RES)|(1<<ACL_RANGE_L)|(1<<ACL_RANGE_H); //full resolution 16g mode
+		data = (1<<ACL_RANGE_L)|(1<<ACL_RANGE_H); //full resolution 16g mode
 		ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_DATA_FORMAT), &data, 2);
 	}
 	else{
@@ -63,8 +64,17 @@ void ACL_sample_off (void)
 void ACL_sample (uint8_t* data)
 {
 	ACL_send_recv_data(ACL_command_builder(ACL_READ, ACL_MULTI, ACL_MAP_DATAX0), data, 7);
+	for (int i = 0; i < 6; i++) {
+		last_sample[i] = data[i];
+	}
 }
 
+void ACL_get_last_sample (uint8_t * data) {
+// 	for (int i = 0; i < 6; i++) {
+// 		data[i] = last_sample[i];
+// 	}
+	data = last_sample;
+}
 Bool ACL_sampling(void) {
 	return 	ACL_is_sampling;
 }
