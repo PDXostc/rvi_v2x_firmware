@@ -21,7 +21,6 @@ void usb_resume_action(void)
 
 bool usb_cdc_enable(uint8_t port)
 {
-	usb_cdc_enabled_bool[port] = true;
 	if (port == 0) {
 		uart_open(port);	// Open communication
 	}
@@ -34,7 +33,6 @@ bool usb_cdc_is_active(uint8_t port) {
 
 void usb_cdc_disable(uint8_t port)
 {
-	usb_cdc_enabled_bool[port] = false;
 	// Close communication
 	if (port == 0) {
 		uart_close(port);	// Open communication
@@ -60,6 +58,7 @@ void usb_cdc_set_dtr(uint8_t port, bool b_enable)
 			//enable ACL
 			//ACL_sample_on();
 		}
+		usb_cdc_enabled_bool[port] = true;
 	}else{
 		// Host terminal has close COM
 		if (port == USB_CAN) {
@@ -73,7 +72,7 @@ void usb_cdc_set_dtr(uint8_t port, bool b_enable)
 			//disable ACL
 			//ACL_sample_off();
 		}
-
+		usb_cdc_enabled_bool[port] = false;
 	}
 }
 

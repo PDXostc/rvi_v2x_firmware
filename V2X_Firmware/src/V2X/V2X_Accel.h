@@ -9,7 +9,14 @@
 #ifndef V2X_ACCEL_H_
 #define V2X_ACCEL_H_
 
-Bool ACL_is_sampling;
+//Bool ACL_is_sampling;
+Bool new_config;
+char wbuffer[30];
+uint8_t last_sample[6];
+uint8_t last_rate;
+uint8_t last_data_format;
+uint8_t last_power;
+uint8_t offset[3];
 
 /**
  * @def acl_register_map
@@ -113,6 +120,19 @@ enum ACL_data_format_bits{
 	ACL_SELF_TEST
 	};
 	
+enum ACL_range_modes{
+	ACL_2G_RANGE = 0,
+	ACL_4G_RANGE,
+	ACL_8G_RANGE,
+	ACL_16G_RANGE
+};
+	
+enum ACL_offsets{
+	ACL_X_OFFSET = ACL_MAP_OFSX,
+	ACL_Y_OFFSET = ACL_MAP_OFSY,
+	ACL_Z_OFFSET = ACL_MAP_OFSZ
+};
+	
 #define ADLX345_DEVID 0xe5  //hardware specific device ID
 
 /**
@@ -145,23 +165,13 @@ void ACL_send_recv_data(uint8_t cmd, uint8_t* data, uint8_t length);
 uint8_t read_id (void);
 
 /**
- * @def ACL_sample_on
- * @brief Starts motion sampling, puts ADX into sample mode.
- **/
-void ACL_sample_on (void);
-
-/**
- * @def ACL_sample_off
- * @brief Stops motion sampling, puts ADX into sleep mode.
- **/
-void ACL_sample_off (void);
-
-/**
- * @def ACL_sample
+ * @def ACL_take_sample
  * @brief pulls all 6 samples from the accelerometer XH:XL, YH:YL, ZH:ZL
  * @param data is a pointer to array uint8_t[7], pass by reference, {ZH, ZL, YH, YL, XH, XL, CMD}={6:0}
  **/
-void ACL_sample (uint8_t* data);
+void ACL_take_sample (uint8_t * data);
+
+void ACL_get_last_sample (uint8_t * data);
 
 /**
  * @def ACL_sampling
@@ -170,12 +180,33 @@ void ACL_sample (uint8_t* data);
 Bool ACL_sampling(void);
 
 /**
+ * @def ACL_sample_on
+ * @brief Starts motion sampling, puts ADX into sample mode.
+ **/
+void ACL_set_sample_on (void);
+
+/**
+ * @def ACL_sample_off
+ * @brief Stops motion sampling, puts ADX into sleep mode.
+ **/
+void ACL_set_sample_off (void);
+
+/**
  * @def ACL_data_to_string
  * @brief converts the raw data from the accelerometer to a serial string for sending to host
  * @param data 6 element buffer pulled from ADXL
  * @param buffer the buffer for building the string in
  **/
 void ACL_data_to_string(uint8_t * data, char * buffer);
-void ACL_get_last_sample (uint8_t * data);
+
+void ACL_set_range(uint8_t range);
+void ACL_set_full_resolution(Bool full);
+void ACL_set_rate(uint8_t rate);
+void ACL_set_offset(uint8_t channel, uint8_t offset);
+void ACL_send_configuration(void);
+void ACL_send_power(void);
+void ACL_send_data_format(void);
+void ACL_send_rate(void);
+void ACL_send_offset (void);
 
 #endif /* V2X_ACCEL_H_ */

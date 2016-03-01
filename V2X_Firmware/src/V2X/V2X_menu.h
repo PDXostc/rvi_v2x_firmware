@@ -16,6 +16,8 @@ void menu_send_q (void);
 void menu_send_1(void);
 void menu_send_0(void);
 void menu_send_n(void);
+void menu_send_out_of_range(void);
+void menu_print_int(int value);
 void menu_status (void);
 void menu_accel (void);
 void menu_accel_status(void);

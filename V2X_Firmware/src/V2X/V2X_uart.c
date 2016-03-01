@@ -113,6 +113,7 @@ void uart_rx_notify(uint8_t port) //message received over USB
 			if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
  				data = udi_cdc_multi_getc(port);	//get 1 char of data
 				if (data == '?'						//allow '?'
+				||  data == '-'						//minus sign
 				||  data == 0x7f					//backspace
 				||  data == '\r'					//return
 				|| (data >= '0' && data <= '9') 	//numbers
@@ -146,9 +147,11 @@ void uart_rx_notify(uint8_t port) //message received over USB
 
 void report_accel_data(void) {
 	uint8_t data[6];
-	ACL_sample(data); //collect sample data
-	ACL_data_to_string(data, buffer);
-	usb_cdc_send_string(USB_ACL, buffer);
+	if (ACL_sampling()) {
+		ACL_take_sample(data); //collect sample data
+		ACL_data_to_string(data, buffer);
+		usb_cdc_send_string(USB_ACL, buffer);
+	}
 }
 
 ISR(USART_RX_Vect)

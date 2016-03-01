@@ -31,7 +31,7 @@ void menu_main(void) {
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
 		switch(CMD_buffer[2]) {
 			case 'i': //information
-				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node\rOpen source hardware and software\rHW Rev1.2 \rSW Rev0.1\r"));
+				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\rOpen source hardware and software\rHW Rev1.2 \rSW Rev0.1\r"));
 				break;
 			case 'j': //Jaguar
 				usb_tx_string_P(PSTR("   ,ggp@@@@mgg,,\r,$Q$(`S@@$;g$$$$$@$@@gg,\r;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r                                    *$@@L ```T$W~)%g,\r                                      *%@gg,,,,,    5/Sw,     ,\r                                          ```` ` `9g `9g,``*^|'\r                                                    `#g,`)h\r\r   Developed at Jaguar Land Rover OSCT. Portland OR 2016\r"));
@@ -66,7 +66,7 @@ void menu_main(void) {
 				break;
 			}
 	}else{
-			usb_tx_string_P(PSTR("All commands start VX, VX? for commands\r"));
+			usb_tx_string_P(PSTR("All commands start VX\r"));
 	}
 	clear_CMD_buffer(CMD_buffer);	//clear the buffer for next command	
 	usb_tx_string_P(PSTR("\r>"));  //prompt for user input
@@ -74,15 +74,13 @@ void menu_main(void) {
 
 void menu_accel (void) {
 	int speed, data16;
-	uint8_t data8, i;
-	char c_buf[6];
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable
-		ACL_sample_off();
+		ACL_set_sample_off();
 		usb_tx_string_P(PSTR("Accelerometer is off\r"));
 		break;
 	case 'e':  //enable
-		ACL_sample_on();
+		ACL_set_sample_on();
 		usb_tx_string_P(PSTR("Accelerometer has been started\r"));
 		break;
 	case 'i':
@@ -91,139 +89,129 @@ void menu_accel (void) {
 	case 'q':
 		menu_accel_status();
 		break;
-	case 'r':  //reset
-		ACL_sample_off();
-		ACL_init();
-		ACL_sample_on();
+	case 'r':  //restart
+		ACL_set_sample_off();
+		ACL_take_sample(sample); //pushes "off" command
+		ACL_init(); //
+		ACL_set_sample_on();
+		ACL_take_sample(sample); //pushes init
 		usb_tx_string_P(PSTR("Accelerometer has been restarted\r"));
-		menu_send_ok();
 		break;
 	case 's':  //sample rate
-		data8 = 0; //clear for no-change detection at end
-		speed = atoi(CMD_buffer+4);
+ 		//data8 = 0x10; //set for no-change detection at end
+ 		speed = atoi(CMD_buffer+4);
 		if (speed > 3199) {
-			data8 = ACL_RATE_3200;	
+			ACL_set_rate(ACL_RATE_3200);	
 			usb_tx_string_P(PSTR("Set to 3200Hz\r"));
 		}else if (speed > 1599) {
-			data8 = ACL_RATE_3200;	
+			ACL_set_rate(ACL_RATE_1600);
 			usb_tx_string_P(PSTR("Set to 1600Hz\r"));
 		}else if (speed > 799) {
-			data8 = ACL_RATE_1600;	
+			ACL_set_rate(ACL_RATE_800);
 			usb_tx_string_P(PSTR("Set to 800Hz\r"));
 		}else if (speed > 399) {
-			 data8 = ACL_RATE_400;	
+			ACL_set_rate(ACL_RATE_400);
 			usb_tx_string_P(PSTR("Set to 400Hz\r"));
 		}else if (speed > 199) {
-			 data8 = ACL_RATE_200;	
+			ACL_set_rate(ACL_RATE_200);
 			usb_tx_string_P(PSTR("Set to 200Hz\r"));
 		}else if (speed > 99) {
-			 data8 = ACL_RATE_100;	
+			ACL_set_rate(ACL_RATE_100);
 			usb_tx_string_P(PSTR("Set to 100Hz\r"));
 		}else if (speed > 49) {
-			 data8 = ACL_RATE_50;	
+			ACL_set_rate(ACL_RATE_50);
 			usb_tx_string_P(PSTR("Set to 50Hz\r"));
 		}else if (speed > 24) {
-			 data8 = ACL_RATE_25;	
+			ACL_set_rate(ACL_RATE_25);
 			usb_tx_string_P(PSTR("Set to 25Hz\r"));
 		}else if (speed > 11) {
-			 data8 = ACL_RATE_12;	
+			ACL_set_rate(ACL_RATE_12);
 			usb_tx_string_P(PSTR("Set to 12Hz\r"));
 		}else if (speed > 5) {
-			 data8 = ACL_RATE_6;		
+			ACL_set_rate(ACL_RATE_6);
 			usb_tx_string_P(PSTR("Set to 6Hz\r"));
 		}else if (speed > 2) {
-			 data8 = ACL_RATE_3;		
+			ACL_set_rate(ACL_RATE_3);
 			usb_tx_string_P(PSTR("Set to 3Hz\r"));
 		}else if (speed > 0) {
-			 data8 = ACL_RATE_1;		
+			ACL_set_rate(ACL_RATE_1);
 			usb_tx_string_P(PSTR("Set to 1Hz\r"));
-		}else {	usb_tx_string_P(PSTR("ERROR: Does not compute, try again\r"));	}
-		int ss_status = ioport_get_pin_level(ACL_MASTER_SS);
-		if (ss_status == 0) 	{usb_tx_string_P(PSTR("ERROR: setting interrupted, try again\r"));}
-		if (ss_status != 0 && data8 != 0) {
-			int hold_state = ACL_sampling();
-			ACL_sample_off();
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_BW_RATE), &data8, 2);
-			if (hold_state) 
-				{ACL_sample_on();}
-			menu_send_ok();
+ 		}else {	
+			usb_tx_string_P(PSTR("ERROR: Out of range, try again.\r"));	
 		}
 		break;
 	case 'w':
 		speed = atoi(CMD_buffer+4);
-		ACL_send_recv_data(ACL_command_builder(ACL_READ, ACL_SINGLE, ACL_MAP_DATA_FORMAT), &sample, 2);
-		sample[0] &= ~((1<<ACL_RANGE_L)|(1<<ACL_RANGE_H));
-		if (speed > 8 && speed < 17) {
-			sample[0] = (1<<ACL_RANGE_L)|(1<<ACL_RANGE_H); //full resolution 16g mode
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_DATA_FORMAT), &sample, 2);
+		//test code
+		menu_print_int(speed);
+		menu_send_n();
+		//
+		if (speed > 16) {speed = 0;}
+		if (speed > 8) {
+			ACL_set_range(ACL_16G_RANGE);
 			usb_tx_string_P(PSTR("+/-16G Range\r"));
 		}else if (speed > 4) {
-			sample[0] = (0<<ACL_RANGE_L)|(1<<ACL_RANGE_H); //full resolution 8g mode
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_DATA_FORMAT), &sample, 2);
+			ACL_set_range(ACL_8G_RANGE);
 			usb_tx_string_P(PSTR("+/-8G Range\r"));
 		}else if (speed > 2) {
-			sample[0] = (1<<ACL_RANGE_L)|(0<<ACL_RANGE_H); //full resolution 4g mode
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_DATA_FORMAT), &sample, 2);
+			ACL_set_range(ACL_4G_RANGE);
 			usb_tx_string_P(PSTR("+/-4G Range\r"));
 		}else if (speed > 0) {
-			sample[0] = (0<<ACL_RANGE_L)|(0<<ACL_RANGE_H); //full resolution 2g mode
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_DATA_FORMAT), &sample, 2);
+			ACL_set_range(ACL_2G_RANGE);
 			usb_tx_string_P(PSTR("+/-2G Range\r"));
-		}else {menu_send_q();}
+		}else {menu_send_out_of_range();}
 		break;
+		
 	case 'x':
-		data16 = atoi(CMD_buffer+4);
-		if (data16 < -127 || data16 > 127) {  //must be 16 to detect out of range
-			usb_tx_string_P(PSTR("ERROR: out of range, +-127\r"));
-		} else {
-			data8 = (uint8_t)data16;  //reduce to 8 bits of data
-			usb_tx_string_P(PSTR("X Offset: "));
-			itoa(data16, c_buf, 10);
-			i = 0;  //clear the pointer
-			while (c_buf[i] != 0)
-				{usb_cdc_send_byte(USB_CMD, c_buf[i++]);}
-			menu_send_n();
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_OFSX), &data8, 2);
-		}
-		break;
 	case 'y':
-		data16 = atoi(CMD_buffer+4);
-		if (data16 < -127 || data16 > 127) {  //must be 16 to detect out of range
-			usb_tx_string_P(PSTR("ERROR: out of range, +-127\r"));
-			} else {
-			data8 = (uint8_t)data16;  //reduce to 8 bits of data
-			usb_tx_string_P(PSTR("Y Offset: "));
-			itoa(data16, c_buf, 10);
-			i = 0;  //clear the pointer
-			while (c_buf[i] != 0)
-			{usb_cdc_send_byte(USB_CMD, c_buf[i++]);}
-			menu_send_n();
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_OFSY), &data8, 2);
-		}
-		break;
 	case 'z':
-		data16 = atoi(CMD_buffer+4);
+		data16 = atoi(CMD_buffer+4);  //convert input chars to int
+		if (data16 == 0){ //conversion resulted in 0
+			if (CMD_buffer[4] != '0'){ //check if it is really a '0' of an invalad conversion
+				menu_send_out_of_range(); //invalid result
+				break; //exit offset menu
+			}
+		}
 		if (data16 < -127 || data16 > 127) {  //must be 16 to detect out of range
-			usb_tx_string_P(PSTR("ERROR: out of range, +-127\r"));
-			} else {
-			data8 = (uint8_t)data16;  //reduce to 8 bits of data
-			usb_tx_string_P(PSTR("Z Offset: "));
-			itoa(data16, c_buf, 10);
-			i = 0;  //clear the pointer
-			while (c_buf[i] != 0)
-			{usb_cdc_send_byte(USB_CMD, c_buf[i++]);}
+			menu_send_out_of_range();
+		} else {
+			uint8_t data8 = (uint8_t)data16;  //reduce to 8 bits of data
+			switch (CMD_buffer[3]) {
+				case 'x':
+					usb_tx_string_P(PSTR("X"));
+					ACL_set_offset(ACL_X_OFFSET, data8);
+					break;
+				case 'y':
+					usb_tx_string_P(PSTR("Y"));
+					ACL_set_offset(ACL_Y_OFFSET, data8);
+					break;
+				case 'z':
+					usb_tx_string_P(PSTR("Z"));
+					ACL_set_offset(ACL_Z_OFFSET, data8);
+					break;
+				default:
+					menu_send_q();
+					break;
+			}
+			usb_tx_string_P(PSTR(" Offset: "));
+			menu_print_int(data16);
 			menu_send_n();
-			ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_OFSZ), &data8, 2);
 		}
 		break;
 	case 'g':
-		if (ACL_sampling() && usb_cdc_is_active(USB_ACL)) {
-			ACL_get_last_sample(sample);
+		if (ACL_sampling()){
+			if (usb_cdc_is_active(USB_ACL)) {
+				usb_tx_string_P(PSTR("Streaming, get last\r"));
+				ACL_get_last_sample(sample);
+			} else {
+				usb_tx_string_P(PSTR("Not streaming, get single\r"));
+				ACL_take_sample(sample);
+			}
 			ACL_data_to_string(sample, CMD_buffer); 
 			for (int i = 0; i < strlen(CMD_buffer); i++)
 				{usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);}
 		} else {
-			usb_tx_string_P(PSTR("ERROR: Not currently sampling\r"));}
+			usb_tx_string_P(PSTR("ERROR: Not currently sampling, use VXAE\r"));}
 		
 		break;
 	case '?':  
@@ -383,6 +371,15 @@ void menu_send_0(void) {usb_tx_string_P(PSTR("0\r"));
 }
 void menu_send_n(void) {usb_tx_string_P(PSTR("\r"));
 }			
+void menu_send_out_of_range(void) {	usb_tx_string_P(PSTR("ERROR: out of range\r"));
+}
+void menu_print_int(int value) {
+	char c_buf[10];
+	itoa(value, c_buf, 10);
+	int i = 0;  //clear the pointer
+	while (c_buf[i] != 0)
+		{usb_cdc_send_byte(USB_CMD, c_buf[i++]);}
+}
 
 void usb_tx_string_P(const char *data) {
 	while (pgm_read_byte(data))
