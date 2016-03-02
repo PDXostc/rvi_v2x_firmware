@@ -33,13 +33,13 @@ void pin_init(void)
 		ioport_configure_pin(EXT1_PIN_ACL_RXD				, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_ACL_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 
-		ioport_configure_pin(EXT1_PIN_SIM_WAKE				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
-		ioport_configure_pin(EXT1_PIN_SIM_NETWORK			, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+		ioport_configure_pin(EXT1_PIN_SIM_WAKE				, IOPORT_DIR_INPUT	  					);
+		ioport_configure_pin(EXT1_PIN_SIM_NETWORK			, IOPORT_DIR_INPUT	  					);
 
 		ioport_configure_pin(EXT1_PIN_SIM_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 		ioport_configure_pin(EXT1_PIN_SIM_RXD				, IOPORT_DIR_INPUT						);
 
-		ioport_configure_pin(EXT1_PIN_SIM_PWR				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+		ioport_configure_pin(EXT1_PIN_SIM_PWR				, IOPORT_DIR_INPUT	  					);
 		ioport_configure_pin(EXT1_PIN_SEQ_RXD				, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_SEQ_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 
@@ -70,7 +70,7 @@ void v2x_board_init(void)
 	pin_init();								//whole chip pin init, modes and initial conditions
 	spi_start();							//start SPI driver
 	power_control_init();					//sets SR to default states - holds power up
-	accelerometer_init();					//configures, but does not start sampling
+	ACL_init();					//configures, but does not start sampling
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 	udc_start();							//start stack and vbus monitoring
 }

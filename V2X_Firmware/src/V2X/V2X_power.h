@@ -15,7 +15,7 @@
  * @def shift_register_state
  * @brief variable that holds the current power state.
  */
-static volatile uint16_t power_control_state;
+volatile uint16_t power_control_state;
 
 /**
  * @def STATE_DEFAULT_VALUE
@@ -65,5 +65,9 @@ void power_control_turn_on(uint16_t pins_mask);
  * @param pins_mask bit wise mask of enable/power pins
  **/
 void power_control_turn_off(uint16_t pins_mask);
+
+void power_sim_start(void);
+void power_sim_reset(void);
+bool power_query(uint16_t mask);
 
 #endif /* V2X_DRIVERS_H_ */

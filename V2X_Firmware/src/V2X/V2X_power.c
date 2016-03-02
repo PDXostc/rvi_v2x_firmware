@@ -12,21 +12,9 @@ void power_control_init(void)
 {
 	power_control_clear();							// Clear shift register
 	power_control_latch();							// Latch all internal registers to output
-// 	power_control_state = POWER_CONTROL_DEFAULT_VALUE;		// set power state to default
-// 	power_control_push();						// cause shift register to update
-// 	delay_ms(200);		//allow power to stabilize
- 		
-	power_control_turn_on((1<<ENABLE_4V1)|(1<<ENABLE_3V3)|(1<<ENABLE_SIM_RESET)|(1<<ENABLE_5V0)); // turn on GSM device power, allow out of reset
-	power_control_push();  //update shift register state
-	delay_ms(200);				//allow power to stabilize
-		
-	power_control_turn_on((1<<ENABLE_SIM_PWR_ON)|(1<<ENABLE_SIM_RF_OFF)|(1<<ENABLE_CAN_RESET)|(1<<ENABLE_CAN_SLEEP)); //beginning of power on pulse
-	power_control_push();  //update shift register state
+	power_control_state = POWER_CONTROL_DEFAULT_VALUE;
+	power_control_push();		//update shift register state
 	delay_ms(100);				//allow power to stabilize
-		
-	power_control_turn_off((1<<ENABLE_SIM_PWR_ON)); //end of "on power" on pulse to gsm device
-	power_control_push();  //update shift register state
-
 }
 
 void power_control_latch(void)
@@ -57,4 +45,25 @@ void power_control_turn_on (uint16_t pins_mask) {  //updates teh power state var
 
 void power_control_turn_off(uint16_t pins_mask) {  //updates teh power state variable but does not update shift register
 	power_control_state &= ~(pins_mask);
+}
+void power_sim_reset(void) {
+	power_control_turn_off((1<<ENABLE_SIM_RESET));
+	power_control_push();
+}
+
+void power_sim_start(void) {
+	delay_ms(10);							//let power come up
+	power_control_turn_on((1<<ENABLE_SIM_RESET));  //release the reset
+	power_control_push();
+	delay_ms(100);							//let power come up
+	power_control_turn_on((1<<ENABLE_SIM_PWR_ON));
+	power_control_push();
+	delay_ms(150);							//let chip detect
+	power_control_turn_off((1<<ENABLE_SIM_PWR_ON));
+	power_control_push();					//clear the start bit
+}
+
+bool power_query(uint16_t mask) {
+	if ((power_control_state & mask) != 0) {return true;}
+	else {return false;}
 }

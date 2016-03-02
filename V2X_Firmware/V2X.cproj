@@ -500,6 +500,12 @@
     <Compile Include="src\V2X\V2X_led.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\V2X\V2X_menu.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_menu.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\V2X\V2X_power.c">
       <SubType>compile</SubType>
     </Compile>

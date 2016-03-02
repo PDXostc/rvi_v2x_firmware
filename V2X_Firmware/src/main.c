@@ -26,7 +26,7 @@ int main ()
 	while (1){
 		sleepmgr_enter_sleep();
 		//led_update();
-		if (ACL_sampling()) {report_accel_data();}
+		if (usb_cdc_is_active(USB_ACL)) {report_accel_data();}
 		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 	}
 }
