@@ -9,15 +9,6 @@
 #ifndef V2X_ACCEL_H_
 #define V2X_ACCEL_H_
 
-//Bool ACL_is_sampling;
-Bool new_config;
-char wbuffer[30];
-uint8_t last_sample[6];
-uint8_t last_rate;
-uint8_t last_data_format;
-uint8_t last_power;
-uint8_t offset[3];
-
 /**
  * @def acl_register_map
  * @brief register address definitions.
@@ -66,15 +57,20 @@ enum ACL_command_tags {
 	ACL_RW_BIT				= 7
 	};
 
+/**
+ * @def ACL_command_tags
+ * @brief command builder definitions.
+ **/	
 enum ACL_message_length {
 	ACL_SINGLE,
 	ACL_MULTI
 	};
+	
 /**
  * @def ACL_sample_rate
  * @brief sample rate register bit definitions.
  **/	
-enum ACL_sample_rate{
+enum  {
 	ACL_RATE_3200 = 0x0F,
 	ACL_RATE_1600 = 0x0E,
 	ACL_RATE_800 = 0x0D,
@@ -120,6 +116,10 @@ enum ACL_data_format_bits{
 	ACL_SELF_TEST
 	};
 	
+/**
+ * @def ACL_range_modes
+ * @brief G range definitions.
+ **/	
 enum ACL_range_modes{
 	ACL_2G_RANGE = 0,
 	ACL_4G_RANGE,
@@ -127,13 +127,21 @@ enum ACL_range_modes{
 	ACL_16G_RANGE
 };
 	
+/**
+ * @def ACL_offsets
+ * @brief offset definitions.
+ **/	
 enum ACL_offsets{
 	ACL_X_OFFSET = ACL_MAP_OFSX,
 	ACL_Y_OFFSET = ACL_MAP_OFSY,
 	ACL_Z_OFFSET = ACL_MAP_OFSZ
 };
 	
-#define ADLX345_DEVID 0xe5  //hardware specific device ID
+/**
+ * @def ADLX345_DEVID
+ * @brief hardware specific device ID
+ **/	
+#define ADLX345_DEVID 0xe5 
 
 /**
  * @def accelerometer_init
@@ -154,7 +162,7 @@ uint8_t ACL_command_builder (uint8_t read_write, uint8_t multibyte, uint8_t addr
  * @def ACL_send_recv_data
  * @brief send or receive data from ACL device.
  * @param data is pointer to an array of size "length", write data is replaced with read data
- * @param length is 1 command + X data in length
+ * @param length total communication length = 1 command + X data
  **/
 void ACL_send_recv_data(uint8_t cmd, uint8_t* data, uint8_t length);
 
@@ -166,16 +174,21 @@ uint8_t read_id (void);
 
 /**
  * @def ACL_take_sample
- * @brief pulls all 6 samples from the accelerometer XH:XL, YH:YL, ZH:ZL
+ * @brief reads all 6 samples from the accelerometer XH:XL, YH:YL, ZH:ZL
  * @param data is a pointer to array uint8_t[7], pass by reference, {ZH, ZL, YH, YL, XH, XL, CMD}={6:0}
  **/
 void ACL_take_sample (uint8_t * data);
 
+/**
+ * @def ACL_get_last_sample
+ * @brief pulls samples from stored location, most recent capture
+ * @param data is a pointer to array uint8_t[6], pass by reference, {ZH, ZL, YH, YL, XH, XL}={5:0}
+ **/
 void ACL_get_last_sample (uint8_t * data);
 
 /**
  * @def ACL_sampling
- * @brief reports true if the accelerometer has been enabled to sample and stream
+ * @brief reports true if the accelerometer has been enabled to sample
  **/
 Bool ACL_sampling(void);
 
@@ -199,14 +212,64 @@ void ACL_set_sample_off (void);
  **/
 void ACL_data_to_string(uint8_t * data, char * buffer);
 
+/**
+ * @def ACL_set_range
+ * @brief changes the state of a local setting variable "G range"
+ * @param range uses enum ACL_range_modes values
+ * @param
+ **/
 void ACL_set_range(uint8_t range);
+
+/**
+ * @def ACL_set_full_resolution
+ * @brief changes the state of a local setting variable "full resolution"
+ * @param full specifies if using full range (1:yes 0:no)
+ **/
 void ACL_set_full_resolution(Bool full);
+
+/**
+ * @def ACL_set_rate
+ * @brief changes the state of a local setting variable
+ * @param rate acceptable values in enum ACL_sample_rate
+ **/
 void ACL_set_rate(uint8_t rate);
+
+/**
+ * @def ACL_set_offset
+ * @brief changes the state of a local setting variable
+ * @param channel uses enum ACL_offsets values
+ * @param offset signed 8bit int = offset;
+ **/
 void ACL_set_offset(uint8_t channel, uint8_t offset);
+
+/**
+ * @def ACL_send_configuration
+ * @brief programs the ACL all configurations
+ **/
 void ACL_send_configuration(void);
+
+/**
+ * @def ACL_send_power
+ * @brief programs the ACL with the power configuration
+ **/
 void ACL_send_power(void);
+
+/**
+ * @def ACL_send_data_format
+ * @brief programs the ACL with the sample data formatting 
+ **/
 void ACL_send_data_format(void);
+
+/**
+ * @def ACL_send_rate
+ * @brief programs the ACL with the sample rate
+ **/
 void ACL_send_rate(void);
+
+/**
+ * @def ACL_send_offset
+ * @brief sends all (x,y,z) offsets to the accelerometer
+ **/
 void ACL_send_offset (void);
 
 #endif /* V2X_ACCEL_H_ */

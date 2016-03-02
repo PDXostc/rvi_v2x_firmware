@@ -62,7 +62,7 @@ void menu_main(void) {
 				break;
 			case '?':  //timer functions
 			default:
-				usb_tx_string_P(PSTR("*** Main commands ***\rI: Device information\rA: Accelerometer\rC: CANbus\rM: Modem\rP: Power\rT: Timer\rQ: Query system status\rS: Simcard status\rR: Reboot\r"));
+				usb_tx_string_P(PSTR("*** Main Menu ***\rI: Device information\rA: Accelerometer\rC: CANbus\rM: Modem\rP: Power\rT: Timer\rQ: Query system status\rS: Simcard status\rR: Reboot\r"));
 				break;
 			}
 	}else{
@@ -201,10 +201,10 @@ void menu_accel (void) {
 	case 'g':
 		if (ACL_sampling()){
 			if (usb_cdc_is_active(USB_ACL)) {
-				usb_tx_string_P(PSTR("Streaming, get last\r"));
+//				usb_tx_string_P(PSTR("Streaming, get last\r"));
 				ACL_get_last_sample(sample);
 			} else {
-				usb_tx_string_P(PSTR("Not streaming, get single\r"));
+//				usb_tx_string_P(PSTR("Not streaming, get single\r"));
 				ACL_take_sample(sample);
 			}
 			ACL_data_to_string(sample, CMD_buffer); 
@@ -214,9 +214,20 @@ void menu_accel (void) {
 			usb_tx_string_P(PSTR("ERROR: Not currently sampling, use VXAE\r"));}
 		
 		break;
+	case 'f':
+		if (CMD_buffer[4] == '0') {
+			ACL_set_full_resolution(0);
+			usb_tx_string_P(PSTR("10bit resolution, scale changes with 'G' range\r"));
+		}
+		else if (CMD_buffer[4] == '1') {
+			ACL_set_full_resolution(1);
+			usb_tx_string_P(PSTR("Full resolution, 4mg/bit\r"));
+		}
+		else {menu_send_q();}
+		break;
 	case '?':  
 	default:
-		usb_tx_string_P(PSTR("*** Accelerometer Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rG: Get last Sample\rSn: Set sample rate in HZ (1, 3, 6, 12, 25, 50, 100, 200, 400, 800)\rWn: Set \"G\" Range (2, 4, 8, 16)\rXn: Set X offset (+/-127)\rYn: Set Y offset\rZn: Set Z offset\r"));
+		usb_tx_string_P(PSTR("*** Accelerometer Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rG: Get last Sample\rSn: Set sample rate in HZ (1, 3, 6, 12, 25, 50, 100, 200, 400, 800)\rWn: Set \"G\" Range (2, 4, 8, 16)\rF: Full range (1: full 0: 10bit)\rXn: Set X offset (+/-127)\rYn: Set Y offset\rZn: Set Z offset\r"));
 		break;
 	}
 }
@@ -245,7 +256,7 @@ void menu_modem (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Commands ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\r"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\r"));
 		break;
 	}
 }
@@ -288,9 +299,11 @@ void menu_power (void) {
 	case 'd':  //disable power
 		switch (CMD_buffer[4]) {
 		case '3':  //3v
+			menu_send_ok();
+			usb_tx_string_P(PSTR("Shutting down V2X in 30 seconds\r"));
+			delay_s(30);
 			power_control_turn_off((1<<ENABLE_3V3));
 			power_control_push();
-			menu_send_ok();
 			break;
 		case '4':  //4v
 			power_control_turn_off((1<<ENABLE_4V1));

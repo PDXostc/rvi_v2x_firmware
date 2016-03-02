@@ -7,7 +7,6 @@
 
 #include "V2X.h"
 
-// Bool ACL_is_sampling = false; 
 Bool new_config = true;
 Bool new_offset = false;
 char wbuffer[30];
