@@ -9,7 +9,6 @@
 #include "ctype.h"
 
 char CMD_buffer [30] = "\0";
-// const char JAG_JUMP1[] PROGMEM = "   ,ggp@@@@mgg,,\r,$Q$(`S@@$;g$$$$$@$@@gg,\r;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r                                    *$@@L ```T$W~)%g,\r                                      *%@gg,,,,,    5/Sw,     ,\r                                          ```` ` `9g `9g,``*^|'\r                                                    `#g,`)h\r\r   Developed at Jaguar Land Rover OSCT. Portland OR 2016\r";
 uint8_t sample[6] = {0,0,0,0,0,0};
 
 void menu_add_to_command(char value) {
@@ -18,9 +17,6 @@ void menu_add_to_command(char value) {
 	} else if (value > 0x20 && value < 0x7f) {		//if in ascii set
 		strcat(CMD_buffer, &value);					//store to buffer
 	}
-// 	for (int i = 0; i < strlen(CMD_buffer); i++)
-// 	{usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);}
-// 	menu_send_n();
 }
 
 void menu_main(void) {
@@ -98,7 +94,6 @@ void menu_accel (void) {
 		usb_tx_string_P(PSTR("Accelerometer has been restarted\r"));
 		break;
 	case 's':  //sample rate
- 		//data8 = 0x10; //set for no-change detection at end
  		speed = atoi(CMD_buffer+4);
 		if (speed > 3199) {
 			ACL_set_rate(ACL_RATE_3200);	
@@ -142,10 +137,6 @@ void menu_accel (void) {
 		break;
 	case 'w':
 		speed = atoi(CMD_buffer+4);
-		//test code
-		menu_print_int(speed);
-		menu_send_n();
-		//
 		if (speed > 16) {speed = 0;}
 		if (speed > 8) {
 			ACL_set_range(ACL_16G_RANGE);

@@ -15,7 +15,6 @@ void power_control_init(void)
 	power_control_state = POWER_CONTROL_DEFAULT_VALUE;
 	power_control_push();		//update shift register state
 	delay_ms(100);				//allow power to stabilize
-
 }
 
 void power_control_latch(void)
