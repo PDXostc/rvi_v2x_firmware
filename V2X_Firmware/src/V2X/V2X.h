@@ -20,6 +20,7 @@
 #include "V2X_spi.h"
 #include "V2X_uart.h"
 #include "V2X_menu.h"
+#include "V2X_time.h"
 //#include "V2X_"
 
 #endif /* V2X_H_ */

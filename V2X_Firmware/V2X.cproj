@@ -518,6 +518,12 @@
     <Compile Include="src\V2X\V2X_spi.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\V2X\V2X_time.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_time.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\V2X\V2X_uart.c">
       <SubType>compile</SubType>
     </Compile>
