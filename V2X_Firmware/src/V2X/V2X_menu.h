@@ -60,10 +60,18 @@ void menu_send_out_of_range(void);
 
 /**
  * @def menu_print_int
- * @brief oncerts an int to char then sends over ACL usb
+ * @brief coverts an int to char then sends over ACL usb
  * @param value the number to send over USB
  **/
-void menu_print_int(int value);
+void menu_print_int(long value);
+
+/**
+ * @def menu_sample_number
+ * @brief converts a string starting with anumber into a long
+ * @param input pointer to a string starting with - or number
+ * @retval the number sent in char form
+ **/
+long menu_sample_number(char * input);
 
 /**
  * @def menu_status
@@ -118,6 +126,18 @@ void menu_power (void);
  * @brief Reports power system status
  **/
 void menu_power_status (void);
+
+/**
+ * @def menu_timer
+ * @brief timer menu content and conditional branching
+ **/
+void menu_timer(void);
+
+/**
+ * @def menu_timer_status
+ * @brief Reports clock system status
+ **/
+void menu_timer_status(void);
 
 /**
  * @def usb_tx_string_P

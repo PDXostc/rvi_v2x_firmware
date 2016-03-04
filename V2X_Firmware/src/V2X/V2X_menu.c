@@ -54,7 +54,7 @@ void menu_main(void) {
 				menu_power();
 				break;
 			case 't':  //timer functions
-				usb_tx_string_P(PSTR("Timer functions not implemented yet.\r"));
+				menu_timer();
 				break;
 			case '?':  //timer functions
 			default:
@@ -360,6 +360,45 @@ void menu_power (void) {
 	}
 }
 
+void menu_timer(void) {
+	long data32;
+	switch (CMD_buffer[3]) {
+	case 's':  //set V2X time
+		time_set(menu_sample_number(CMD_buffer+4));
+		usb_tx_string_P(PSTR("Time has been set\r"));
+		break;
+	case 'g':  //get V2X time
+		usb_tx_string_P(PSTR("UET: "));
+		menu_print_int(time_get());
+		usb_tx_string_P(PSTR("\rTime: "));
+		print_human_time();
+		menu_send_n();
+		break;
+	case 'a':  //absolute alarm
+		time_alarm_set(menu_sample_number(CMD_buffer+4));
+		usb_tx_string_P(PSTR("Alarm has been set"));
+		break;
+	case 'r':  //relative alarm
+		time_alarm_set_relative(menu_sample_number(CMD_buffer+4));
+		usb_tx_string_P(PSTR("Alarm has been set"));
+		break;
+	case 'z':  //set time zone
+		time_zone_set(menu_sample_number(CMD_buffer+4));
+		usb_tx_string_P(PSTR("Time Zone has been set"));
+		break;
+	case 'i':  //timer system information
+		usb_tx_string_P(PSTR("The timer module uses Unix Epoch timestamps (UET) \rH24: clock has been set/sync within 24hrs\rALM: alarm is set for the future\r"));
+		break;
+	case 'q':  //timer inquery
+		menu_timer_status();
+		break;
+	case '?':  //Menu options
+	default:
+		usb_tx_string_P(PSTR("*** Timer Menu ***\rSn: Set V2X time (UET)\rG: Get V2X time\rAn: Set absolute alarm (UET) \rRn: Set relative alarm (Seconds)\rI: timer information\rQ: Timer inquery\r"));
+		break;
+	}
+}
+
 void clear_CMD_buffer(char * CMD_buffer) {
 	int cnt = strlen(CMD_buffer);
 	for(int i = 0; i < cnt; i++)
@@ -377,12 +416,16 @@ void menu_send_n(void) {usb_tx_string_P(PSTR("\r"));
 }			
 void menu_send_out_of_range(void) {	usb_tx_string_P(PSTR("ERROR: out of range\r"));
 }
-void menu_print_int(int value) {
-	char c_buf[10];
-	itoa(value, c_buf, 10);
+void menu_print_int(long value) {	
+	char c_buf[13];
+	ltoa(value, c_buf, 10);
 	int i = 0;  //clear the pointer
 	while (c_buf[i] != 0)
 		{usb_cdc_send_byte(USB_CMD, c_buf[i++]);}
+}
+
+long menu_sample_number(char * input) {
+	return atol(input);  //convert input chars to int
 }
 
 void usb_tx_string_P(const char *data) {
@@ -395,6 +438,7 @@ void menu_status (void) {
 	menu_accel_status();
 	menu_can_status();
 	menu_modem_status();
+	menu_timer_status();
 }
 void menu_accel_status(void) {
 	usb_tx_string_P(PSTR("ACL="));
@@ -440,9 +484,25 @@ void menu_power_status(void) {
 	if (power_query((1<<ENABLE_5V0)))
 			{menu_send_1();}
 	else	{menu_send_0();}
-	usb_tx_string_P(PSTR("HOST="));
+	usb_tx_string_P(PSTR("USB="));
 	if (power_query((1<<ENABLE_5V0B)))
 			{menu_send_1();}
 	else	{menu_send_0();}
+}
 
+void menu_timer_status (void) {
+	usb_tx_string_P(PSTR("H24="));
+	if (time_is_current())
+			{menu_send_1();}
+	else	{menu_send_0();}
+	usb_tx_string_P(PSTR("ALM="));
+	if (time_alarm_active())
+			{menu_send_1();}
+	else	{menu_send_0();}
+	usb_tx_string_P(PSTR("TZN="));
+	menu_print_int(time_zone_get());
+	menu_send_n();
+	usb_tx_string_P(PSTR("UET="));
+	menu_print_int(time_get());		
+	menu_send_n();
 }
