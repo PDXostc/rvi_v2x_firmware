@@ -302,14 +302,28 @@ extern "C" {
 #define SR_SPI				&SPIC
 //! @}
 
-#define  USART               USARTC0					//USARTE0
-#define  USART_RX_Vect       USARTC0_RXC_vect			//USARTE0_RXC_vect
-#define  USART_DRE_Vect      USARTC0_DRE_vect			//USARTE0_DRE_vect
-#define  USART_SYSCLK        SYSCLK_USART0				//SYSCLK_USART0
-#define  USART_PORT          PORTC						//PORTE
-#define  USART_PORT_PIN_TX   (1<<3)  // PC3 (TXE0)		//(1<<3)  // PC3 (TXE0)
-#define  USART_PORT_PIN_RX   (1<<2)  // PC2 (RXE0)		//(1<<2)  // PC2 (RXE0)
-#define  USART_PORT_SYSCLK   SYSCLK_PORT_C				//SYSCLK_PORT_E
+#define  USART					USARTC0						
+#define  USART_RX_Vect			USARTC0_RXC_vect			
+#define  USART_DRE_Vect			USARTC0_DRE_vect			
+#define  USART_SYSCLK			SYSCLK_USART0				
+#define  USART_PORT				PORTC						
+#define  USART_PORT_PIN_TX		(1<<3)  // PC3 (TXE0)		
+#define  USART_PORT_PIN_RX		(1<<2)  // PC2 (RXE0)		
+#define  USART_PORT_SYSCLK		SYSCLK_PORT_C				
+
+#define  USART_SIM              USARTD0						
+#define  USART_SIM_RX_Vect      USARTD0_RXC_vect			
+#define  USART_SIM_DRE_Vect     USARTD0_DRE_vect			
+#define  USART_SIM_SYSCLK       SYSCLK_USART0				
+#define  USART_SIM_PORT         PORTD						
+#define  USART_SIM_PORT_PIN_TX  (1<<3)  // PC3 (TXE0)		
+#define  USART_SIM_PORT_PIN_RX  (1<<2)  // PC2 (RXE0)		
+#define  USART_SIM_PORT_SYSCLK  SYSCLK_PORT_D
+				
+#define  USART_SIM_BAUDRATE		115200
+#define  USART_SIM_CHAR_LENGTH  USART_CHSIZE_8BIT_gc
+#define  USART_SIM_PARITY       USART_PMODE_DISABLED_gc
+#define  USART_SIM_STOP_BIT     false
 
 enum usb_port_usage{  //usually used in port variables for USB functions
 	USB_CAN	= 0,

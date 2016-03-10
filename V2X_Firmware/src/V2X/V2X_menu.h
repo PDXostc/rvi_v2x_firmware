@@ -151,6 +151,6 @@ void usb_tx_string_P(const char *data);
  * @brief resets the command buffer to '\0'
  * @param CMD_buffer pointer to the beginning of the buffer
  **/
-void clear_CMD_buffer(char * CMD_buffer);
+void clear_buffer(char * CMD_buffer);
 
 #endif /* V2X_MENU_H_ */

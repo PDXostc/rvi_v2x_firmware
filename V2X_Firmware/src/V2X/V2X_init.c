@@ -36,8 +36,8 @@ void pin_init(void)
 		ioport_configure_pin(EXT1_PIN_SIM_WAKE				, IOPORT_DIR_INPUT	  					);
 		ioport_configure_pin(EXT1_PIN_SIM_NETWORK			, IOPORT_DIR_INPUT	  					);
 
-		ioport_configure_pin(EXT1_PIN_SIM_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
-		ioport_configure_pin(EXT1_PIN_SIM_RXD				, IOPORT_DIR_INPUT						);
+		//ioport_configure_pin(EXT1_PIN_SIM_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+		//ioport_configure_pin(EXT1_PIN_SIM_RXD				, IOPORT_DIR_INPUT						);
 
 		ioport_configure_pin(EXT1_PIN_SIM_PWR				, IOPORT_DIR_INPUT	  					);
 		ioport_configure_pin(EXT1_PIN_SEQ_RXD				, IOPORT_DIR_INPUT						);
@@ -73,6 +73,7 @@ void v2x_board_init(void)
 	power_control_init();					//sets SR to default states - holds power up
 	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling
+	usart_GSM_init();
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 	cpu_irq_enable();
 	udc_start();							//start stack and vbus monitoring

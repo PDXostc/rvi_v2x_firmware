@@ -9,6 +9,55 @@
 
 char buffer[30] = "XYZT: ";  //create starting string
 
+void usart_GSM_init (void) {
+	sysclk_enable_module(USART_SIM_PORT_SYSCLK, USART_SIM_SYSCLK);
+	USART_SIM.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_SIM_CHAR_LENGTH | USART_SIM_PARITY | USART_SIM_STOP_BIT;
+	uint16_t b_sel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 1) / ((uint32_t) USART_SIM_BAUDRATE * 8)) + 1) >> 1) - 1);
+	menu_print_int(b_sel);
+	USART_SIM.BAUDCTRLA = b_sel & 0xFF;
+	USART_SIM.BAUDCTRLB = b_sel >> 8;
+	USART_SIM_PORT.DIRSET = USART_PORT_PIN_TX; // TX as output.
+	USART_SIM_PORT.DIRCLR = USART_PORT_PIN_RX; // RX as input.
+ 	GSM_clear_tx_int();
+}
+
+void GSM_set_tx_int(void) {
+	USART_SIM.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_CLK2X_bm;
+	USART_SIM.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_HI_gc;
+}
+
+void GSM_clear_tx_int(void) {
+	//USART_SIM.CTRLB = USART_RXEN_bm | USART_CLK2X_bm;
+	USART_SIM.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_OFF_gc;
+}
+
+ISR(USART_SIM_RX_Vect)
+{	// Transfer UART RX fifo to buffer
+	char value = USART_SIM.DATA;
+	//usb_cdc_send_byte(USB_CMD, value);
+	if (value == '\n') {
+		GSM_purge_buffer(BUFFER_IN);
+	} else {
+		GSM_add_to_buffer(BUFFER_IN, value);
+	}
+}
+
+ISR(USART_SIM_DRE_Vect)
+{
+	if (GSM_bytes_to_send(BUFFER_OUT)) {
+		// Transmit next data
+// 		usb_cdc_send_byte(USB_CMD, '*');
+// 		USART_SIM.DATA = GSM_next_byte(BUFFER_OUT);
+		uint8_t value = GSM_next_byte(BUFFER_OUT);
+		//usb_cdc_send_byte(USB_CMD, value);
+ 		USART_SIM.DATA = value;
+	} else {
+		//usb_cdc_send_byte(USB_CMD, '%');
+		GSM_purge_buffer(BUFFER_OUT);
+		GSM_clear_tx_int();
+	}
+}
+
 void canbus_serial_routing(uint8_t source)
 {
 	gpio_set_pin_low(BUF0_PIN);
@@ -70,8 +119,7 @@ void uart_config(uint8_t port, usb_cdc_line_coding_t * cfg)
 	// Set configuration
 	USART.CTRLC = reg_ctrlc;
 	// Update baudrate
-	bsel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 1) / ((uint32_t)
-	le32_to_cpu(cfg->dwDTERate) * 8)) + 1) >> 1) - 1);
+	bsel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 1) / ((uint32_t) le32_to_cpu(cfg->dwDTERate) * 8)) + 1) >> 1) - 1);
 	USART.BAUDCTRLA = bsel & 0xFF;
 	USART.BAUDCTRLB = bsel >> 8;
 }
@@ -108,39 +156,41 @@ void uart_rx_notify(uint8_t port) //message received over USB
 			// Enable UART TX interrupt to send values
 			USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t)
 			USART_DREINTLVL_HI_gc;
-			}
-		}else if (port == USB_CMD) {
-			if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
- 				data = udi_cdc_multi_getc(port);	//get 1 char of data
-				if (data == '?'						//allow '?'
-				||  data == '-'						//minus sign
-				||  data == 0x7f					//backspace
-				||  data == '\r'					//return
-				|| (data >= '0' && data <= '9') 	//numbers
-				|| (data >= 'A' && data <= 'Z') 	//capitals
-				|| (data >= 'a' && data <= 'z')) {	//lower case
-					if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
- 						udi_cdc_multi_signal_overrun(port);		//no
- 					} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
-					if (data == '\r') { //if carage return, run the menu
-						menu_main();
-						return;
-					} else { //was a standard charecter that should be stored in the buffer
-						menu_add_to_command(data);
-					}
-				} else { //there was a special character
-					//run through the buffer until it is empty
-					while (udi_cdc_multi_is_rx_ready(port)) {  
-						data = udi_cdc_multi_getc(port);
-					}
+		}
+	}else if (port == USB_CMD) {
+		if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
+ 			data = udi_cdc_multi_getc(port);	//get 1 char of data
+			if (data == '?'						//allow '?'
+			||  data == '-'						//minus sign
+			||  data == '+'						//plus
+			||  data == '='						//plus
+			||  data == 0x7f					//backspace
+			||  data == '\r'					//return
+			|| (data >= '0' && data <= '9') 	//numbers
+			|| (data >= 'A' && data <= 'Z') 	//capitals
+			|| (data >= 'a' && data <= 'z')) {	//lower case
+				if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
+ 					udi_cdc_multi_signal_overrun(port);		//no
+ 				} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
+				if (data == '\r') { //if carage return, run the menu
+					menu_main();
+					return;
+				} else { //was a standard charecter that should be stored in the buffer
+					menu_add_to_command(data);
+				}
+			} else { //there was a special character
+				//run through the buffer until it is empty
+				while (udi_cdc_multi_is_rx_ready(port)) {  
+					data = udi_cdc_multi_getc(port);
 				}
 			}
-		}else if (port == USB_ACL) { //loop back
-		while (udi_cdc_multi_is_rx_ready(port)) {  //is there data
-			int data = udi_cdc_multi_getc(port);	//get all the data
-			if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
-				udi_cdc_multi_signal_overrun(port);		//no
-			}else{udi_cdc_multi_putc(port, data);}
+		}
+	}else if (port == USB_ACL) { //loop back
+	while (udi_cdc_multi_is_rx_ready(port)) {  //is there data
+		int data = udi_cdc_multi_getc(port);	//get all the data
+		if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
+			udi_cdc_multi_signal_overrun(port);		//no
+		}else{udi_cdc_multi_putc(port, data);}
 		}
 	}
 }
