@@ -248,15 +248,13 @@ void menu_modem (void) {
 		break;
 	case 'x':
 		i = 4; //vxmx....
-		usb_tx_string_P(PSTR("Sending \""));
+		usb_tx_string_P(PSTR(">>>GSM:"));
 		usb_cdc_send_string(USB_CMD, CMD_buffer+4);
-		usb_tx_string_P(PSTR("\" to the GSM\r"));
-		
 		while (CMD_buffer [i] != '\0') { //copy to output buffer
 			GSM_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
 		}
-		GSM_add_to_buffer(BUFFER_OUT, 0x0D);
-		GSM_add_to_buffer(BUFFER_OUT, 0x0A);
+ 		GSM_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
+ 		GSM_add_to_buffer(BUFFER_OUT, '\n');//0x0A);
 		GSM_process_buffer(BUFFER_OUT);
 		break;
 	case '?':

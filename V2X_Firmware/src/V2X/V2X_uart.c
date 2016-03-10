@@ -19,6 +19,11 @@ void usart_GSM_init (void) {
 	USART_SIM_PORT.DIRSET = USART_PORT_PIN_TX; // TX as output.
 	USART_SIM_PORT.DIRCLR = USART_PORT_PIN_RX; // RX as input.
  	GSM_clear_tx_int();
+	GSM_add_to_buffer(BUFFER_IN, '\n');
+	GSM_purge_buffer(BUFFER_IN);
+	GSM_add_to_buffer(BUFFER_OUT, '\n');
+	GSM_process_buffer(BUFFER_OUT);
+	GSM_purge_buffer(BUFFER_OUT);
 }
 
 void GSM_set_tx_int(void) {
@@ -34,9 +39,8 @@ void GSM_clear_tx_int(void) {
 ISR(USART_SIM_RX_Vect)
 {	// Transfer UART RX fifo to buffer
 	char value = USART_SIM.DATA;
-	//usb_cdc_send_byte(USB_CMD, value);
 	if (value == '\n') {
-		GSM_purge_buffer(BUFFER_IN);
+		GSM_process_buffer(BUFFER_IN);
 	} else {
 		GSM_add_to_buffer(BUFFER_IN, value);
 	}
@@ -45,14 +49,9 @@ ISR(USART_SIM_RX_Vect)
 ISR(USART_SIM_DRE_Vect)
 {
 	if (GSM_bytes_to_send(BUFFER_OUT)) {
-		// Transmit next data
-// 		usb_cdc_send_byte(USB_CMD, '*');
-// 		USART_SIM.DATA = GSM_next_byte(BUFFER_OUT);
 		uint8_t value = GSM_next_byte(BUFFER_OUT);
-		//usb_cdc_send_byte(USB_CMD, value);
  		USART_SIM.DATA = value;
 	} else {
-		//usb_cdc_send_byte(USB_CMD, '%');
 		GSM_purge_buffer(BUFFER_OUT);
 		GSM_clear_tx_int();
 	}

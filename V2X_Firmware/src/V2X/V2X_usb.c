@@ -52,6 +52,7 @@ void usb_cdc_set_dtr(uint8_t port, bool b_enable)
 			//change can from direct to pass through mode
 		}else if (port == USB_CMD) {
 			led_1_on();
+			usb_tx_string_P(PSTR("\r>"));
 			//start Hayes interface 
 		}else if (port == USB_ACL) {
 			led_2_on();
