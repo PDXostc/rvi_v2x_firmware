@@ -182,3 +182,13 @@ void ACL_send_offset (void) {
 	ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_Z_OFFSET), &temp, 2);
 	new_offset = false;
 }
+
+void report_accel_data(void) {
+	char buffer[30];  //create starting string
+	uint8_t data[6];
+	if (ACL_sampling()) {
+		ACL_take_sample(data); //collect sample data
+		ACL_data_to_string(data, buffer);
+		usb_cdc_send_string(USB_ACL, buffer);
+	}
+}

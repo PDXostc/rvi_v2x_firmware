@@ -265,6 +265,7 @@ void menu_modem (void) {
 }
 
 void menu_can (void) {
+	int i;
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable
 		power_control_turn_off((1<<ENABLE_CAN_RESET));
@@ -290,6 +291,18 @@ void menu_can (void) {
 		break;
 	case 'i':
 		usb_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\r"));
+		usb_tx_string_P(PSTR("The STN1110 is compliant with the ELM327 V1.3\r"));
+		break;
+	case 'x':
+		i = 4; //vxmx....
+		usb_tx_string_P(PSTR(">>>CAN:"));
+		usb_cdc_send_string(USB_CMD, CMD_buffer+4);
+		while (CMD_buffer [i] != '\0') { //copy to output buffer
+			CAN_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
+		}
+		CAN_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
+//		CAN_add_to_buffer(BUFFER_OUT, '\n');//0x0A);
+		CAN_process_buffer(BUFFER_OUT);
 		break;
 	case '?':
 	default:

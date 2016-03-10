@@ -272,4 +272,10 @@ void ACL_send_rate(void);
  **/
 void ACL_send_offset (void);
 
+/*
+ * @def ACL_send_offset
+ * @brief Samples Accelerometer, converts to string, sends to host 
+ */
+void report_accel_data(void);
+
 #endif /* V2X_ACCEL_H_ */

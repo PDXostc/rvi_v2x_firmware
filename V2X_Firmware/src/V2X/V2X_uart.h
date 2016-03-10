@@ -45,11 +45,5 @@ void uart_open(uint8_t port);
  */
 void uart_close(uint8_t port);
 
-/*! \brief Samples Accelerometer, converts to string, sends to host 
- */
-void report_accel_data(void);
-void usart_GSM_init (void);
-void GSM_set_tx_int(void);
-void GSM_clear_tx_int(void);
 
 #endif /* V2X_UART_H_ */

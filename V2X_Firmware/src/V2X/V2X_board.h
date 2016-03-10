@@ -309,7 +309,13 @@ extern "C" {
 #define  USART_PORT				PORTC						
 #define  USART_PORT_PIN_TX		(1<<3)  // PC3 (TXE0)		
 #define  USART_PORT_PIN_RX		(1<<2)  // PC2 (RXE0)		
-#define  USART_PORT_SYSCLK		SYSCLK_PORT_C				
+#define  USART_PORT_SYSCLK		SYSCLK_PORT_C	
+
+#define  USART_BAUDRATE			9600
+#define  USART_CHAR_LENGTH		USART_CHSIZE_8BIT_gc
+#define  USART_PARITY			USART_PMODE_DISABLED_gc
+#define  USART_STOP_BIT			false
+		
 
 #define  USART_SIM              USARTD0						
 #define  USART_SIM_RX_Vect      USARTD0_RXC_vect			

@@ -7,56 +7,6 @@
 
 #include "V2X.h"
 
-char buffer[30] = "XYZT: ";  //create starting string
-
-void usart_GSM_init (void) {
-	sysclk_enable_module(USART_SIM_PORT_SYSCLK, USART_SIM_SYSCLK);
-	USART_SIM.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_SIM_CHAR_LENGTH | USART_SIM_PARITY | USART_SIM_STOP_BIT;
-	uint16_t b_sel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 1) / ((uint32_t) USART_SIM_BAUDRATE * 8)) + 1) >> 1) - 1);
-	menu_print_int(b_sel);
-	USART_SIM.BAUDCTRLA = b_sel & 0xFF;
-	USART_SIM.BAUDCTRLB = b_sel >> 8;
-	USART_SIM_PORT.DIRSET = USART_PORT_PIN_TX; // TX as output.
-	USART_SIM_PORT.DIRCLR = USART_PORT_PIN_RX; // RX as input.
- 	GSM_clear_tx_int();
-	GSM_add_to_buffer(BUFFER_IN, '\n');
-	GSM_purge_buffer(BUFFER_IN);
-	GSM_add_to_buffer(BUFFER_OUT, '\n');
-	GSM_process_buffer(BUFFER_OUT);
-	GSM_purge_buffer(BUFFER_OUT);
-}
-
-void GSM_set_tx_int(void) {
-	USART_SIM.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_CLK2X_bm;
-	USART_SIM.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_HI_gc;
-}
-
-void GSM_clear_tx_int(void) {
-	//USART_SIM.CTRLB = USART_RXEN_bm | USART_CLK2X_bm;
-	USART_SIM.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_OFF_gc;
-}
-
-ISR(USART_SIM_RX_Vect)
-{	// Transfer UART RX fifo to buffer
-	char value = USART_SIM.DATA;
-	if (value == '\n') {
-		GSM_process_buffer(BUFFER_IN);
-	} else {
-		GSM_add_to_buffer(BUFFER_IN, value);
-	}
-}
-
-ISR(USART_SIM_DRE_Vect)
-{
-	if (GSM_bytes_to_send(BUFFER_OUT)) {
-		uint8_t value = GSM_next_byte(BUFFER_OUT);
- 		USART_SIM.DATA = value;
-	} else {
-		GSM_purge_buffer(BUFFER_OUT);
-		GSM_clear_tx_int();
-	}
-}
-
 void canbus_serial_routing(uint8_t source)
 {
 	gpio_set_pin_low(BUF0_PIN);
@@ -194,44 +144,59 @@ void uart_rx_notify(uint8_t port) //message received over USB
 	}
 }
 
-void report_accel_data(void) {
-	uint8_t data[6];
-	if (ACL_sampling()) {
-		ACL_take_sample(data); //collect sample data
-		ACL_data_to_string(data, buffer);
-		usb_cdc_send_string(USB_ACL, buffer);
-	}
-}
-
 ISR(USART_RX_Vect)
 {
 	uint8_t value;
-	if (0 != (USART.STATUS & (USART_FERR_bm | USART_BUFOVF_bm))) {
-		udi_cdc_multi_signal_framing_error(USB_CAN);
-	}
-	// Transfer UART RX fifo to CDC TX
-	value = USART.DATA;
-	if (!udi_cdc_multi_is_tx_ready(USB_CAN)) {
-		// Fifo full
-		udi_cdc_multi_signal_overrun(USB_CAN);
-		//ui_com_overflow();
+	switch (usb_cdc_is_active(USB_CAN)){
+	case true:
+		//host is on, send over USB
+		if (0 != (USART.STATUS & (USART_FERR_bm | USART_BUFOVF_bm))) {
+			udi_cdc_multi_signal_framing_error(USB_CAN);
+		}
+		// Transfer UART RX fifo to CDC TX
+		value = USART.DATA;
+		if (!udi_cdc_multi_is_tx_ready(USB_CAN)) {
+			// Fifo full
+			udi_cdc_multi_signal_overrun(USB_CAN);
 		}else{
-		udi_cdc_multi_putc(USB_CAN, value);
+			udi_cdc_multi_putc(USB_CAN, value);
+		}
+		break;
+	case false:
+	default:
+		//host is off, capture message for processing
+		value = USART.DATA;
+		if (value == '>' || value == '\r' ) {
+			CAN_process_buffer(BUFFER_IN);
+		} else {
+			CAN_add_to_buffer(BUFFER_IN, value);
+		}
+		break;
 	}
-	//ui_com_tx_stop();
 }
 
 ISR(USART_DRE_Vect)
 {
-	// Data send
-	if (udi_cdc_is_rx_ready()) {
-		// Transmit next data
-		//ui_com_rx_start();
-		USART.DATA = udi_cdc_getc();
+	uint8_t value;
+	switch (usb_cdc_is_active(USB_CAN)){
+	case true:
+		// Data from USB
+		if (udi_cdc_is_rx_ready()) {
+			// Transmit next data
+			USART.DATA = udi_cdc_getc();
 		} else {
-		// Fifo empty then Stop UART transmission
-		USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc |
-		(register8_t) USART_DREINTLVL_OFF_gc;
-		//ui_com_rx_stop();
+			// Fifo empty then Stop UART transmission
+			CAN_clear_tx_int();
+		}
+		break;
+	case false:
+	default:
+		if (CAN_bytes_to_send(BUFFER_OUT)) {
+			USART.DATA = CAN_next_byte(BUFFER_OUT);
+		} else {
+			CAN_purge_buffer(BUFFER_OUT);
+			CAN_clear_tx_int();
+		}
+		break;
 	}
 }

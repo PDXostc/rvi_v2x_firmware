@@ -31,10 +31,13 @@ inline static bool sim_net_status(void) {return ioport_get_pin_level(EXT1_PIN_SI
 void GSM_set_tx_int(void);
 void GSM_clear_tx_int(void);
 void GSM_add_to_buffer(uint8_t buffer_select, char value);
-int GSM_bytes_to_send (uint8_t buffer_select);
+int  GSM_bytes_to_send (uint8_t buffer_select);
 char GSM_next_byte (uint8_t buffer_select);
 void GSM_process_buffer (uint8_t buffer_select);
 void GSM_purge_buffer(uint8_t buffer_select);
+void GSM_usart_init (void);
+void GSM_set_tx_int(void);
+void GSM_clear_tx_int(void);
 
 enum buffer_selection {
 	BUFFER_IN = 0,

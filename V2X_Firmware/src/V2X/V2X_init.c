@@ -73,7 +73,8 @@ void v2x_board_init(void)
 	power_control_init();					//sets SR to default states - holds power up
 	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling
-	usart_GSM_init();
+	GSM_usart_init();
+	CAN_uart_start();
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 	cpu_irq_enable();
 	udc_start();							//start stack and vbus monitoring
