@@ -46,7 +46,7 @@ void power_control_turn_on (uint16_t pins_mask) {  //updates teh power state var
 void power_control_turn_off(uint16_t pins_mask) {  //updates teh power state variable but does not update shift register
 	power_control_state &= ~(pins_mask);
 }
-void power_sim_reset(void) {
+void power_sim_stop(void) {
 	power_control_turn_off((1<<ENABLE_SIM_RESET));
 	power_control_push();
 }

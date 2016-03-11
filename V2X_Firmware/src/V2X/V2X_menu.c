@@ -14,14 +14,14 @@ uint8_t sample[6] = {0,0,0,0,0,0};
 void menu_add_to_command(char value) {
 	if (value == 8 | value == 0x7f) {				//if backspace or delete
 		CMD_buffer[strlen(CMD_buffer)-1] = '\0';	//null out the deleted char
-	} else if (value > 0x20 && value < 0x7f) {		//if in ascii set
+	} else if (value > 0x20 && value < 0x7f || value == '+') {		//if in ascii set
 		strcat(CMD_buffer, &value);					//store to buffer
 	}
 }
 
 void menu_main(void) {
-	int cnt = strlen(CMD_buffer);
-	for(int i = 0; i < cnt; i++){
+	//int cnt = strlen(CMD_buffer);
+	for(int i = 0; i < 4; i++){
 		CMD_buffer[i] = tolower(CMD_buffer[i]);
 	}
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
@@ -64,7 +64,7 @@ void menu_main(void) {
 	}else{
 			usb_tx_string_P(PSTR("All commands start VX\r"));
 	}
-	clear_CMD_buffer(CMD_buffer);	//clear the buffer for next command	
+	clear_buffer(CMD_buffer);	//clear the buffer for next command	
 	usb_tx_string_P(PSTR("\r>"));  //prompt for user input
 }
 
@@ -224,9 +224,10 @@ void menu_accel (void) {
 }
 
 void menu_modem (void) {
+	int i; 
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable
-		power_sim_reset();
+		power_sim_stop();
 		usb_tx_string_P(PSTR("Modem is off\r"));
 		break;
 	case 'e':  //enable modem
@@ -234,7 +235,7 @@ void menu_modem (void) {
 		usb_tx_string_P(PSTR("Modem has been started\r"));
 		break;
 	case 'r':  //reset
-		power_sim_reset();
+		power_sim_stop();
 		power_sim_start();
 		usb_tx_string_P(PSTR("Modem has been restarted\r"));
 		break;
@@ -245,14 +246,24 @@ void menu_modem (void) {
 	case 'i':
 		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G GSM modem + GPS receiver by SIMCOM\r"));
 		break;
+	case 'x':
+		i = 4; //vxmx....
+		while (CMD_buffer [i] != '\0') { //copy to output buffer
+			GSM_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
+		}
+ 		GSM_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
+ 		GSM_add_to_buffer(BUFFER_OUT, '\n');//0x0A);
+		GSM_process_buffer(BUFFER_OUT);
+		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\r"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rX: AT Command Pass through\r"));
 		break;
 	}
 }
 
 void menu_can (void) {
+	int i;
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable
 		power_control_turn_off((1<<ENABLE_CAN_RESET));
@@ -278,6 +289,15 @@ void menu_can (void) {
 		break;
 	case 'i':
 		usb_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\r"));
+		usb_tx_string_P(PSTR("The STN1110 is compliant with the ELM327 V1.3\r"));
+		break;
+	case 'x':
+		i = 4; //vxmx....
+		while (CMD_buffer [i] != '\0') { //copy to output buffer
+			CAN_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
+		}
+		CAN_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
+		CAN_process_buffer(BUFFER_OUT);
 		break;
 	case '?':
 	default:
@@ -399,10 +419,10 @@ void menu_timer(void) {
 	}
 }
 
-void clear_CMD_buffer(char * CMD_buffer) {
-	int cnt = strlen(CMD_buffer);
+void clear_buffer(char * buffer) {
+	int cnt = strlen(buffer);
 	for(int i = 0; i < cnt; i++)
-		{CMD_buffer[i] = '\0';}
+		{buffer[i] = '\0';}
 }
 void menu_send_ok(void) {usb_tx_string_P(PSTR("OK\r"));
 }
