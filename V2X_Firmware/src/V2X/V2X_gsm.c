@@ -65,10 +65,12 @@ void GSM_purge_buffer(uint8_t buffer_select) {
 void GSM_process_buffer (uint8_t buffer_select) {
 	switch (buffer_select) {
 		case BUFFER_IN:
-			usb_tx_string_P(PSTR("GSM>>>:"));
-			usb_cdc_send_string(USB_CMD, GSM_input_buffer);
-			usb_tx_string_P(PSTR("\r>"));
-			GSM_purge_buffer(BUFFER_IN);
+			if (GSM_bytes_to_send(BUFFER_IN)) {
+				usb_tx_string_P(PSTR("GSM>>>:"));
+				usb_cdc_send_string(USB_CMD, GSM_input_buffer);
+				usb_tx_string_P(PSTR("\r>"));
+				GSM_purge_buffer(BUFFER_IN);
+			}
 			break;
 		case BUFFER_OUT:
 			if (GSM_bytes_to_send(BUFFER_OUT)) {
@@ -106,7 +108,7 @@ void GSM_clear_tx_int(void) {
 ISR(USART_SIM_RX_Vect)
 {	// Transfer UART RX fifo to buffer
 	char value = USART_SIM.DATA;
-	if (value == '\n') {
+	if (value == '\n' || value == '\r' ) {
 		GSM_process_buffer(BUFFER_IN);
 		} else {
 		GSM_add_to_buffer(BUFFER_IN, value);

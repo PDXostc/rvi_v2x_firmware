@@ -66,8 +66,24 @@ void power_control_turn_on(uint16_t pins_mask);
  **/
 void power_control_turn_off(uint16_t pins_mask);
 
+/**
+ * @def power_sim_start
+ * @brief sends a sequence to enable the SIM5320 module
+ */
 void power_sim_start(void);
-void power_sim_reset(void);
+
+/**
+ * @def power_sim_reset
+ * @brief sends a sequence to disable the SIM5320 module
+ */
+void power_sim_stop(void);
+
+/**
+ * @def power_query
+ * @brief returns if the  
+ * @param mask bitwise mask use with power_sequence_outputs
+ * @retval if power_status_mask & var_mask != 0 returns true
+ */
 bool power_query(uint16_t mask);
 
 #endif /* V2X_DRIVERS_H_ */

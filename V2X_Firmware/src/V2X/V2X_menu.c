@@ -227,7 +227,7 @@ void menu_modem (void) {
 	int i; 
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable
-		power_sim_reset();
+		power_sim_stop();
 		usb_tx_string_P(PSTR("Modem is off\r"));
 		break;
 	case 'e':  //enable modem
@@ -235,7 +235,7 @@ void menu_modem (void) {
 		usb_tx_string_P(PSTR("Modem has been started\r"));
 		break;
 	case 'r':  //reset
-		power_sim_reset();
+		power_sim_stop();
 		power_sim_start();
 		usb_tx_string_P(PSTR("Modem has been restarted\r"));
 		break;
@@ -248,8 +248,6 @@ void menu_modem (void) {
 		break;
 	case 'x':
 		i = 4; //vxmx....
-		usb_tx_string_P(PSTR(">>>GSM:"));
-		usb_cdc_send_string(USB_CMD, CMD_buffer+4);
 		while (CMD_buffer [i] != '\0') { //copy to output buffer
 			GSM_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
 		}
@@ -295,13 +293,10 @@ void menu_can (void) {
 		break;
 	case 'x':
 		i = 4; //vxmx....
-		usb_tx_string_P(PSTR(">>>CAN:"));
-		usb_cdc_send_string(USB_CMD, CMD_buffer+4);
 		while (CMD_buffer [i] != '\0') { //copy to output buffer
 			CAN_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
 		}
 		CAN_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
-//		CAN_add_to_buffer(BUFFER_OUT, '\n');//0x0A);
 		CAN_process_buffer(BUFFER_OUT);
 		break;
 	case '?':

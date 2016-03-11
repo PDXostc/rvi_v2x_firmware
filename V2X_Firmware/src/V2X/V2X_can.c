@@ -93,10 +93,12 @@ void CAN_clear_tx_int(void) {
 void CAN_process_buffer (uint8_t buffer_select) {
 	switch (buffer_select) {
 	case BUFFER_IN:
-		usb_tx_string_P(PSTR("CAN>>>:"));
-		usb_cdc_send_string(USB_CMD, CAN_input_buffer);
-		usb_tx_string_P(PSTR("\r>"));
-		CAN_purge_buffer(BUFFER_IN);
+		if (CAN_bytes_to_send(BUFFER_IN)) {
+			usb_tx_string_P(PSTR("CAN>>>:"));
+			usb_cdc_send_string(USB_CMD, CAN_input_buffer);
+			usb_tx_string_P(PSTR("\r>"));
+			CAN_purge_buffer(BUFFER_IN);
+		}
 		break;
 	case BUFFER_OUT:
 		if (CAN_bytes_to_send(BUFFER_OUT)) {

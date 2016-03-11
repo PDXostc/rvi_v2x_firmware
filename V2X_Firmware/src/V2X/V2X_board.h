@@ -281,23 +281,24 @@ extern "C" {
  * This is used for power and reset sequencing
  *
  */
-
-#define ENABLE_3V3			0
-#define ENABLE_3V3B			1
-#define ENABLE_3V3C			2
-#define ENABLE_3V3D			3
-#define ENABLE_4V1			4
-#define ENABLE_5V0			5
-#define ENABLE_5V0B			6
-#define ENABLE_SIM_WAKE		7
-#define ENABLE_HUB			8
-#define ENABLE_CAN_SLEEP	9
-#define ENABLE_CAN_RESET	10
-#define ENABLE_SIM_PWR_ON	11
-#define ENABLE_SIM_RESET	12
-#define ENABLE_SIM_RF_OFF	13
-#define ENABLE_SIM_VBUS		14
-#define ENABLE_FTDI_RESET	15
+enum power_sequence_outputs {
+	ENABLE_3V3			= 0,
+	ENABLE_3V3B			,
+	ENABLE_3V3C			,
+	ENABLE_3V3D			,
+	ENABLE_4V1			,
+	ENABLE_5V0			,
+	ENABLE_5V0B			,
+	ENABLE_SIM_WAKE		,
+	ENABLE_HUB			,
+	ENABLE_CAN_SLEEP	,
+	ENABLE_CAN_RESET	,
+	ENABLE_SIM_PWR_ON	,
+	ENABLE_SIM_RESET	,
+	ENABLE_SIM_RF_OFF	,
+	ENABLE_SIM_VBUS		,
+	ENABLE_FTDI_RESET	
+};
 
 #define SR_SPI				&SPIC
 //! @}
@@ -315,7 +316,6 @@ extern "C" {
 #define  USART_CHAR_LENGTH		USART_CHSIZE_8BIT_gc
 #define  USART_PARITY			USART_PMODE_DISABLED_gc
 #define  USART_STOP_BIT			false
-		
 
 #define  USART_SIM              USARTD0						
 #define  USART_SIM_RX_Vect      USARTD0_RXC_vect			
