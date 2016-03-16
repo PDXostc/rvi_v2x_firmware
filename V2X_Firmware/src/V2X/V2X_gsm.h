@@ -46,15 +46,15 @@ void GSM_clear_tx_int(void);
  * @param buffer_select (0,1) input/output
  * @param value what to add to the buffer
  */
-void GSM_add_to_buffer(uint8_t buffer_select, char value);
-
+//void GSM_add_to_buffer(uint8_t buffer_select, char value);
+//void GSM_add_string_to_buffer_P(uint8_t buffer_select, char * to_add);
 /**
  * @def GSM_bytes_to_send
  * @brief querys the number of bytes remaining to be sent
  * @param buffer_select (0,1) input/output
  * @retval bytes remaining to be sent
  */
-int  GSM_bytes_to_send (uint8_t buffer_select);
+//int  GSM_bytes_to_send (uint8_t buffer_select);
 
 /**
  * @def GSM_next_byte
@@ -62,15 +62,16 @@ int  GSM_bytes_to_send (uint8_t buffer_select);
  * @param buffer_select (0,1) input/output
  * @retval next char in the buffer
  */
-char GSM_next_byte (uint8_t buffer_select);
+//char GSM_next_byte (uint8_t buffer_select);
 
 /**
  * @def GSM_process_buffer
  * @brief if the buffer has data it set sending in motion
  * @param buffer_select (0,1) input/output
  */
-void GSM_process_buffer (uint8_t buffer_select);
-
+void GSM_process_buffer (void);
+void GSM_add_string_to_buffer(Bool in_out, char * to_add);
+void GSM_mark_for_processing(Bool in_out);
 /**
  * @def GSM_purge_buffer
  * @brief empties the buffer to 0 and resets pointers
@@ -88,9 +89,34 @@ void GSM_usart_init (void);
  * @def buffer_selection
  * @brief switch for selecting in and out buffers
  */
-enum buffer_selection {
-	BUFFER_IN = 0,
-	BUFFER_OUT
+
+	
+enum GSM_sequence_states {
+	GSM_state_idle = 0,
+	GSM_state_start,
+	GSM_state_init_SMS,
+	GSM_state_time_get,
+	GSM_state_wake_host
 	};
 	
+enum GSM_subsequence_states {
+	GSM_subssequence_1 = 0,
+	GSM_subssequence_2,
+	GSM_subssequence_3,
+	GSM_subssequence_4,
+	GSM_subssequence_5,
+	GSM_subssequence_6,
+	GSM_subssequence_7,
+	GSM_subssequence_8,
+	GSM_subssequence_9,
+	GSM_subssequence_10,
+	GSM_subssequence_FAIL
+	};
+	
+void GSM_control(char * responce_buffer);
+void GSM_control_start(char * responce_buffer);
+void GSM_start_sleep (void);
+void show_buffer(char * buffer);
+
+
 #endif /* V2X_GSM_H_ */

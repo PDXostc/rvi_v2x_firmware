@@ -139,7 +139,13 @@ void uart_rx_notify(uint8_t port) //message received over USB
 		int data = udi_cdc_multi_getc(port);	//get all the data
 		if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
 			udi_cdc_multi_signal_overrun(port);		//no
-		}else{udi_cdc_multi_putc(port, data);}
+		}else{
+			if (data == 'r') {
+				menu_lockup();
+			}
+			udi_cdc_multi_putc(port, data);
+			
+		}
 		}
 	}
 }
@@ -167,7 +173,8 @@ ISR(USART_RX_Vect)
 		//host is off, capture message for processing
 		value = USART.DATA;
 		if (value == '>' || value == '\r' ) {
-			CAN_process_buffer(BUFFER_IN);
+			//CAN_process_buffer(BUFFER_IN);
+			CAN_mark_for_processing(BUFFER_IN);
 		} else {
 			CAN_add_to_buffer(BUFFER_IN, value);
 		}
@@ -192,7 +199,9 @@ ISR(USART_DRE_Vect)
 	case false:
 	default:
 		if (CAN_bytes_to_send(BUFFER_OUT)) {
-			USART.DATA = CAN_next_byte(BUFFER_OUT);
+			value = CAN_next_byte(BUFFER_OUT);
+			usb_cdc_send_byte(USB_CMD, value);
+			USART.DATA = value;
 		} else {
 			CAN_purge_buffer(BUFFER_OUT);
 			CAN_clear_tx_int();

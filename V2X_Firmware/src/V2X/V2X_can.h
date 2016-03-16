@@ -63,7 +63,7 @@ char CAN_next_byte (uint8_t buffer_select);
  * @brief if the buffer has data it set sending in motion
  * @param buffer_select (0,1) input/output
  */
-void CAN_process_buffer (uint8_t buffer_select);
+void CAN_process_buffer ();
 
 /**
  * @def CAN_purge_buffer
@@ -72,4 +72,6 @@ void CAN_process_buffer (uint8_t buffer_select);
 */
 void CAN_purge_buffer(uint8_t buffer_select);
 
+void CAN_mark_for_processing (Bool in_out);
+void CAN_add_string_to_buffer(Bool in_out, char * to_add);
 #endif /* V2X_CAN_H_ */

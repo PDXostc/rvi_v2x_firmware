@@ -146,11 +146,6 @@ void menu_timer_status(void);
  **/
 void usb_tx_string_P(const char *data);
 
-/**
- * @def clear_CMD_buffer
- * @brief resets the command buffer to '\0'
- * @param CMD_buffer pointer to the beginning of the buffer
- **/
-void clear_buffer(char * CMD_buffer);
+void menu_lockup (void);
 
 #endif /* V2X_MENU_H_ */

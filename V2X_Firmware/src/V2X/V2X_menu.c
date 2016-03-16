@@ -44,8 +44,8 @@ void menu_main(void) {
 			case 'c':  //CAN interface
 				menu_can();
 				break;
-			case 's':  //CAN interface
-				simcard_status();
+			case 's':  //sleep
+				GSM_start_sleep();
 				break;
 			case 'm':  //modem
 				menu_modem();
@@ -247,17 +247,20 @@ void menu_modem (void) {
 		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G GSM modem + GPS receiver by SIMCOM\r"));
 		break;
 	case 'x':
-		i = 4; //vxmx....
-		while (CMD_buffer [i] != '\0') { //copy to output buffer
-			GSM_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
-		}
- 		GSM_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
- 		GSM_add_to_buffer(BUFFER_OUT, '\n');//0x0A);
-		GSM_process_buffer(BUFFER_OUT);
+// 		i = 4; //vxmx....
+// 		while (CMD_buffer [i] != '\0') { //copy to output buffer
+// 			CTL_add_char_to_buffer(&GSM, BUFFER_OUT, CMD_buffer[i++]);
+// 		}
+		strcat_P(CMD_buffer, PSTR("\r\n"));
+		GSM_add_string_to_buffer(BUFFER_OUT, &CMD_buffer[4]);
+		GSM_mark_for_processing(BUFFER_OUT);
+ 		break;
+	case 's':  
+		simcard_status();
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rX: AT Command Pass through\r"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rS: SIMCARD Status\rX: AT Command Pass through\r"));
 		break;
 	}
 }
@@ -292,12 +295,19 @@ void menu_can (void) {
 		usb_tx_string_P(PSTR("The STN1110 is compliant with the ELM327 V1.3\r"));
 		break;
 	case 'x':
-		i = 4; //vxmx....
-		while (CMD_buffer [i] != '\0') { //copy to output buffer
-			CAN_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
-		}
-		CAN_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
-		CAN_process_buffer(BUFFER_OUT);
+// 		i = 4; //vxmx....
+// 		while (CMD_buffer [i] != '\0') { //copy to output buffer
+// 			CAN_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
+// 		}
+// 		CAN_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
+		//usb_tx_string_P(PSTR("CMD>>>:"));
+		//usb_cdc_send_string(USB_CMD, CMD_buffer+4);
+		//menu_send_n();
+		strcat_P(CMD_buffer, PSTR("\r\n"));
+		//usb_tx_string_P(PSTR("CMD->CAN>>>:"));
+		//usb_cdc_send_string(USB_CMD, CMD_buffer+4);
+		CAN_add_string_to_buffer(BUFFER_OUT, CMD_buffer+4);//&CMD_buffer[4]);
+		CAN_mark_for_processing(BUFFER_OUT);
 		break;
 	case '?':
 	default:
@@ -419,11 +429,6 @@ void menu_timer(void) {
 	}
 }
 
-void clear_buffer(char * buffer) {
-	int cnt = strlen(buffer);
-	for(int i = 0; i < cnt; i++)
-		{buffer[i] = '\0';}
-}
 void menu_send_ok(void) {usb_tx_string_P(PSTR("OK\r"));
 }
 void menu_send_q(void) {usb_tx_string_P(PSTR("?\r"));
@@ -451,6 +456,10 @@ long menu_sample_number(char * input) {
 void usb_tx_string_P(const char *data) {
 	while (pgm_read_byte(data))
 		usb_cdc_send_byte(USB_CMD, pgm_read_byte(data++));
+}
+
+void menu_lockup (void) {
+	clear_buffer(CMD_buffer);
 }
 
 void menu_status (void) {

@@ -485,6 +485,12 @@
     <Compile Include="src\V2X\V2X_can.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\V2X\V2X_control.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_control.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\V2X\V2X_gsm.c">
       <SubType>compile</SubType>
     </Compile>
