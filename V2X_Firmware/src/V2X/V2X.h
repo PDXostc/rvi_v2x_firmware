@@ -13,6 +13,7 @@
 #include "V2X_usb.h"
 #include "V2X_Accel.h"
 #include "V2X_button.h"
+#include "V2X_control.h"
 #include "V2X_gsm.h"
 #include "V2X_init.h"
 #include "V2X_led.h"
@@ -22,6 +23,7 @@
 #include "V2X_menu.h"
 #include "V2X_time.h"
 #include "V2X_can.h"
+
 //#include "V2X_"
 
 #endif /* V2X_H_ */

@@ -109,22 +109,24 @@ void uart_rx_notify(uint8_t port) //message received over USB
 	}else if (port == USB_CMD) {
 		if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
  			data = udi_cdc_multi_getc(port);	//get 1 char of data
-			if (data == '?'						//allow '?'
-			||  data == '-'						//minus sign
-			||  data == '+'						//plus
-			||  data == '='						//plus
-			||  data == 0x7f					//backspace
-			||  data == '\r'					//return
-			|| (data >= '0' && data <= '9') 	//numbers
-			|| (data >= 'A' && data <= 'Z') 	//capitals
-			|| (data >= 'a' && data <= 'z')) {	//lower case
+// 			if (data == '?'						//allow '?'
+// 			||  data == '-'						//minus sign
+// 			||  data == '+'						//plus
+// 			||  data == '='						//plus
+// 			||  data == '\"'						//plus
+// 			||  data == 0x7f					//backspace
+// 			||  data == '\r'					//return
+// 			|| (data >= '0' && data <= '9') 	//numbers
+// 			|| (data >= 'A' && data <= 'Z') 	//capitals
+// 			|| (data >= 'a' && data <= 'z')) {	//lower case
+	 		if (data >= 0x20 && data <= 0x7F || data == '\r') {
 				if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
  					udi_cdc_multi_signal_overrun(port);		//no
  				} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
-				if (data == '\r') { //if carage return, run the menu
+				if (data == '\r') { //if carriage return, run the menu
 					menu_main();
 					return;
-				} else { //was a standard charecter that should be stored in the buffer
+				} else { //was a standard character that should be stored in the buffer
 					menu_add_to_command(data);
 				}
 			} else { //there was a special character
@@ -139,7 +141,13 @@ void uart_rx_notify(uint8_t port) //message received over USB
 		int data = udi_cdc_multi_getc(port);	//get all the data
 		if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
 			udi_cdc_multi_signal_overrun(port);		//no
-		}else{udi_cdc_multi_putc(port, data);}
+		}else{
+			if (data == 'r' || data == 'R') {
+				menu_lockup();
+			}
+			udi_cdc_multi_putc(port, data);
+			
+		}
 		}
 	}
 }
@@ -167,7 +175,8 @@ ISR(USART_RX_Vect)
 		//host is off, capture message for processing
 		value = USART.DATA;
 		if (value == '>' || value == '\r' ) {
-			CAN_process_buffer(BUFFER_IN);
+			//CAN_process_buffer(BUFFER_IN);
+			CAN_mark_for_processing(BUFFER_IN);
 		} else {
 			CAN_add_to_buffer(BUFFER_IN, value);
 		}
@@ -192,7 +201,10 @@ ISR(USART_DRE_Vect)
 	case false:
 	default:
 		if (CAN_bytes_to_send(BUFFER_OUT)) {
-			USART.DATA = CAN_next_byte(BUFFER_OUT);
+// 			value = CAN_next_byte(BUFFER_OUT);
+// 			usb_cdc_send_byte(USB_CMD, value);
+// 			USART.DATA = value;
+ 			USART.DATA = CAN_next_byte(BUFFER_OUT);
 		} else {
 			CAN_purge_buffer(BUFFER_OUT);
 			CAN_clear_tx_int();

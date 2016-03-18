@@ -53,6 +53,12 @@ void menu_send_0(void);
 void menu_send_n(void);
 
 /**
+ * @def menu_send_n_st
+ * @brief canned message, sends "\n>"
+ **/
+void menu_send_n_st(void);
+
+/**
  * @def menu_send_out_of_range
  * @brief canned message "ERROR: out of range"
  **/
@@ -147,10 +153,10 @@ void menu_timer_status(void);
 void usb_tx_string_P(const char *data);
 
 /**
- * @def clear_CMD_buffer
- * @brief resets the command buffer to '\0'
- * @param CMD_buffer pointer to the beginning of the buffer
+ * @def menu_lockup
+ * @brief special routine to dump the CMD buffer from the ACL USB interface
  **/
-void clear_buffer(char * CMD_buffer);
+void menu_lockup (void);
+
 
 #endif /* V2X_MENU_H_ */
