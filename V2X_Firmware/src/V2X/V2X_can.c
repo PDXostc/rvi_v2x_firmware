@@ -9,66 +9,29 @@
 
 volatile buff CAN;
 
-// char CAN_input_buffer[30];
-// char CAN_output_buffer[30];
-// int CAN_output_buffer_ptr = 0;
-// int CAN_input_buffer_ptr = 0;
-// int CAN_output_buffer_index = 0;
-// int CAN_input_buffer_index = 0;
-
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
-// 	switch (buffer_select) {  //output is 1
-// 		case BUFFER_IN:
-// 		//udi_cdc_multi_putc(USB_CAN, value);
-// 		CAN_input_buffer[CAN_input_buffer_index++] = value;
-// 		break;
-// 		case BUFFER_OUT:
-// 		//udi_cdc_multi_putc(USB_CAN, value);
-// 		CAN_output_buffer[CAN_output_buffer_index++] = value;
-// 		break;
-// 	}
 	CTL_add_to_buffer(&CAN, buffer_select, value);
  }
-// 
+ 
  int CAN_bytes_to_send (uint8_t buffer_select) {
-// 	switch (buffer_select) {
-// 		case BUFFER_IN:
-// 		return strlen((CAN_input_buffer+CAN_input_buffer_ptr));
-// 		break;
-// 		case BUFFER_OUT:
-// 		return strlen((CAN_output_buffer+CAN_output_buffer_ptr));
-// 		break;
-// 	}
 	return CTL_bytes_to_send(&CAN, buffer_select);
  }
-// 
+ 
  char CAN_next_byte (uint8_t buffer_select) {
-// 	switch (buffer_select) {
-// 		case BUFFER_IN:
-// 		return CAN_input_buffer[CAN_input_buffer_ptr++];
-// 		break;
-// 		case BUFFER_OUT:
-// 		return CAN_output_buffer[CAN_output_buffer_ptr++];
-// 		break;
-// 	}
 	return CTL_next_byte(&CAN, buffer_select);
  }
-// 
+ 
  void CAN_purge_buffer(uint8_t buffer_select) {
-// 	switch (buffer_select) {
-// 	case BUFFER_IN:
-// 		clear_buffer(CAN_input_buffer);
-// 		CAN_input_buffer_ptr = 0;
-// 		CAN_input_buffer_index = 0;
-// 		break;
-// 	case BUFFER_OUT:
-// 		clear_buffer(CAN_output_buffer);
-// 		CAN_output_buffer_ptr = 0;
-// 		CAN_output_buffer_index = 0;
-// 		break;
-// 	}
 	CTL_purge_buffer(&CAN, buffer_select);
  }
+
+void CAN_mark_for_processing (Bool in_out) {
+	CTL_mark_for_processing(&CAN, in_out);
+}
+
+void CAN_add_string_to_buffer(Bool in_out, char * to_add) {
+	CTL_add_string_to_buffer(&CAN, in_out, to_add);
+}
 
 void CAN_uart_start (void) {
 	uart_open(USB_CAN);
@@ -111,40 +74,15 @@ void CAN_clear_tx_int(void) {
 }
 
 void CAN_process_buffer (void) {
-// 	switch (buffer_select) {
-// 	case BUFFER_IN:
-// 		if (CAN_bytes_to_send(BUFFER_IN)) {
-// 			usb_tx_string_P(PSTR("CAN>>>:"));
-// 			usb_cdc_send_string(USB_CMD, CAN_input_buffer);
-// 			usb_tx_string_P(PSTR("\r>"));
-// 			CAN_purge_buffer(BUFFER_IN);
-// 		}
-// 		break;
-// 	case BUFFER_OUT:
-// 		if (CAN_bytes_to_send(BUFFER_OUT)) {
-// 			CAN_set_tx_int(); //set to continue sending buffer
-// 		}
-// 		break;
-// 	}
 	// if there is something received
 	if (CTL_bytes_to_send(&CAN, BUFFER_IN)) {
-		usb_tx_string_P(PSTR("CAN.>>>:"));
+		usb_tx_string_P(PSTR("CAN>>>:"));
 		usb_cdc_send_string(USB_CMD, CTL_ptr_to_proc_buffer(&CAN, BUFFER_IN));
 		usb_tx_string_P(PSTR("\r>"));
-//		CAN_control(CTL_ptr_to_proc_buffer(&CAN, BUFFER_IN)); //process messages if in sleep mode
 		CTL_purge_buffer(&CAN, BUFFER_IN);
 	}
 	if (CTL_bytes_to_send(&CAN, BUFFER_OUT)) {
-		//usb_tx_string_P(PSTR("\rbegin out tx\r"));
-		CAN_set_tx_int(); //set to continue sending buffer
+		CAN_set_tx_int(); //set to send buffer
 	} 
 
-}
-
-void CAN_mark_for_processing (Bool in_out) {
-	CTL_mark_for_processing(&CAN, in_out);
-}
-
-void CAN_add_string_to_buffer(Bool in_out, char * to_add) {
-	CTL_add_string_to_buffer(&CAN, in_out, to_add);
 }

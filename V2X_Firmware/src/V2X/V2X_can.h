@@ -9,7 +9,6 @@
 #ifndef V2X_CAN_H_
 #define V2X_CAN_H_
 
-
 /**
  * @def CAN_uart_start
  * @brief configure the usart port used by the CAN device, active RX
@@ -68,10 +67,23 @@ void CAN_process_buffer ();
 /**
  * @def CAN_purge_buffer
  * @brief empties the buffer to 0 and resets pointers
- * @param buffer_select (0,1) input/output
+ * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
 */
 void CAN_purge_buffer(uint8_t buffer_select);
 
+/**
+ * @def CAN_mark_for_processing
+ * @brief swaps the roles of the A/B buffers, starts sending routines
+ * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
+*/
 void CAN_mark_for_processing (Bool in_out);
+
+/**
+ * @def CAN_add_string_to_buffer
+ * @brief adds the passed-in string to the active buffer, in/out
+ * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
+ * @param *to_add pointer to the string that should be added
+*/
 void CAN_add_string_to_buffer(Bool in_out, char * to_add);
+
 #endif /* V2X_CAN_H_ */

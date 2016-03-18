@@ -12,9 +12,12 @@ char CMD_buffer [30] = "\0";
 uint8_t sample[6] = {0,0,0,0,0,0};
 
 void menu_add_to_command(char value) {
-	if (value == 8 | value == 0x7f) {				//if backspace or delete
-		CMD_buffer[strlen(CMD_buffer)-1] = '\0';	//null out the deleted char
-	} else if (value > 0x20 && value < 0x7f || value == '+') {		//if in ascii set
+	if (value == 8 || value == 0x7f) {//if backspace or delete
+		int leng = strlen(CMD_buffer); //get buffer sting length
+		if (leng > 0) {	//if length not 0
+			CMD_buffer[leng-1] = '\0';	//null out the last char
+		}
+	} else if (value > 0x20 && value < 0x7E ) {		//if in ascii set
 		strcat(CMD_buffer, &value);					//store to buffer
 	}
 }
@@ -45,7 +48,8 @@ void menu_main(void) {
 				menu_can();
 				break;
 			case 's':  //sleep
-				GSM_start_sleep();
+				GSM_begin_init();
+				menu_send_n_st();
 				break;
 			case 'm':  //modem
 				menu_modem();
@@ -192,10 +196,8 @@ void menu_accel (void) {
 	case 'g':
 		if (ACL_sampling()){
 			if (usb_cdc_is_active(USB_ACL)) {
-//				usb_tx_string_P(PSTR("Streaming, get last\r"));
 				ACL_get_last_sample(sample);
 			} else {
-//				usb_tx_string_P(PSTR("Not streaming, get single\r"));
 				ACL_take_sample(sample);
 			}
 			ACL_data_to_string(sample, CMD_buffer); 
@@ -247,10 +249,6 @@ void menu_modem (void) {
 		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G GSM modem + GPS receiver by SIMCOM\r"));
 		break;
 	case 'x':
-// 		i = 4; //vxmx....
-// 		while (CMD_buffer [i] != '\0') { //copy to output buffer
-// 			CTL_add_char_to_buffer(&GSM, BUFFER_OUT, CMD_buffer[i++]);
-// 		}
 		strcat_P(CMD_buffer, PSTR("\r\n"));
 		GSM_add_string_to_buffer(BUFFER_OUT, &CMD_buffer[4]);
 		GSM_mark_for_processing(BUFFER_OUT);
@@ -295,18 +293,8 @@ void menu_can (void) {
 		usb_tx_string_P(PSTR("The STN1110 is compliant with the ELM327 V1.3\r"));
 		break;
 	case 'x':
-// 		i = 4; //vxmx....
-// 		while (CMD_buffer [i] != '\0') { //copy to output buffer
-// 			CAN_add_to_buffer(BUFFER_OUT, CMD_buffer[i++]);
-// 		}
-// 		CAN_add_to_buffer(BUFFER_OUT, '\r');//0x0D);
-		//usb_tx_string_P(PSTR("CMD>>>:"));
-		//usb_cdc_send_string(USB_CMD, CMD_buffer+4);
-		//menu_send_n();
 		strcat_P(CMD_buffer, PSTR("\r\n"));
-		//usb_tx_string_P(PSTR("CMD->CAN>>>:"));
-		//usb_cdc_send_string(USB_CMD, CMD_buffer+4);
-		CAN_add_string_to_buffer(BUFFER_OUT, CMD_buffer+4);//&CMD_buffer[4]);
+		CAN_add_string_to_buffer(BUFFER_OUT, CMD_buffer+4);
 		CAN_mark_for_processing(BUFFER_OUT);
 		break;
 	case '?':
@@ -315,6 +303,7 @@ void menu_can (void) {
 		break;
 	}
 }
+
 void menu_power (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable power
@@ -374,7 +363,6 @@ void menu_power (void) {
 		}
 		break;  //enable power
 	case 'r':  
-		//power_control_init;
 		power_control_turn_off(~POWER_CONTROL_DEFAULT_VALUE);
 		power_control_turn_on(POWER_CONTROL_DEFAULT_VALUE);
 		power_control_push();
@@ -431,16 +419,25 @@ void menu_timer(void) {
 
 void menu_send_ok(void) {usb_tx_string_P(PSTR("OK\r"));
 }
+
 void menu_send_q(void) {usb_tx_string_P(PSTR("?\r"));
 }
+
 void menu_send_1(void) {usb_tx_string_P(PSTR("1\r"));
 }
+
 void menu_send_0(void) {usb_tx_string_P(PSTR("0\r"));
 }
+
 void menu_send_n(void) {usb_tx_string_P(PSTR("\r"));
+}
+
+void menu_send_n_st(void) {usb_tx_string_P(PSTR("\r>"));
 }			
+
 void menu_send_out_of_range(void) {	usb_tx_string_P(PSTR("ERROR: out of range\r"));
 }
+
 void menu_print_int(long value) {	
 	char c_buf[13];
 	ltoa(value, c_buf, 10);
@@ -469,12 +466,14 @@ void menu_status (void) {
 	menu_modem_status();
 	menu_timer_status();
 }
+
 void menu_accel_status(void) {
 	usb_tx_string_P(PSTR("ACL="));
 	if (ACL_sampling())
 	{menu_send_1();}
 	else	{menu_send_0();}
 }
+
 void menu_modem_status(void) {
 	usb_tx_string_P(PSTR("SIMPWR="));
 	if (sim_power_status())
@@ -489,17 +488,20 @@ void menu_modem_status(void) {
 	{menu_send_1();}
 	else	{menu_send_0();}
 }
+
 void menu_simcard_status(void){
 	if (simcard_status())
 		{menu_send_1();}
 	else	{menu_send_0();}
 }
+
 void menu_can_status(void) {
 	usb_tx_string_P(PSTR("CAN="));
 	if (power_query((1<<ENABLE_CAN_RESET)))
 			{menu_send_1();}
 	else	{menu_send_0();}
 }
+
 void menu_power_status(void) {
 	usb_tx_string_P(PSTR("3V3="));
 	if (power_query((1<<ENABLE_3V3)))

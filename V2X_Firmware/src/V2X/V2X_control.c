@@ -8,8 +8,6 @@
 #include "V2X.h"
 
 void CTL_add_to_buffer(buff * buffer, Bool in_out, char value) {
-	//usb_cdc_send_byte(USB_CMD, value);
-	
 	switch (in_out) {
 	case BUFFER_IN:
 		switch (buffer->active_in) {
@@ -190,54 +188,30 @@ void CTL_mark_for_processing(buff * buffer, Bool in_out) {
 		break;
 		case BUFFER_OUT:
 		default:
-		//usb_tx_string_P(PSTR("Buffer out check\r"));
 		switch (buffer->active_out) {
 			case BUFFER_A:
-			//usb_tx_string_P(PSTR(":A:\r"));
 			if (buffer->out_store_a != 0) {
 				if (buffer->out_proc_b != 0) {
 					usb_tx_string_P(PSTR("ERROR: output B did not complete***"));
 					CTL_purge_buffer(buffer, BUFFER_OUT);
 				}
 				buffer->active_out = BUFFER_B;
-				//usb_tx_string_P(PSTR("Out B active\r"));
-			} //else {usb_tx_string_P(PSTR("Buffer A empty\r"));}
+			} 
 			break;
 			case BUFFER_B:
 			default:
-			//usb_tx_string_P(PSTR(":B:\r"));
 			if (buffer->out_store_b != 0) {
 				if (buffer->out_proc_a != 0) {
 					usb_tx_string_P(PSTR("ERROR: output A did not complete***"));
 					CTL_purge_buffer(buffer, BUFFER_OUT);
 				}
 				buffer->active_out = BUFFER_A;
-				//usb_tx_string_P(PSTR("Out A active\r"));
-			} //else {usb_tx_string_P(PSTR("Buffer B empty\r"));}
+			} 
 			break;
 		}
 		break;
 	}
 }
-
-/*	switch (in_out) {
-		case BUFFER_IN:
-			switch (buffer->active_in) {
-				case BUFFER_A:
-					break;
-				case BUFFER_B:
-					break;
-			}
-			break;
-		case BUFFER_OUT:
-			switch (buffer->active_out) {
-				case BUFFER_A:
-					break;
-				case BUFFER_B:
-					break;
-			}
-			break;
-	} */
 
 void clear_buffer(char * buffer) {
 	int cnt = strlen(buffer);

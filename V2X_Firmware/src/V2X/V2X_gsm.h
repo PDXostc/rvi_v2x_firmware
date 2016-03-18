@@ -41,37 +41,27 @@ void GSM_set_tx_int(void);
 void GSM_clear_tx_int(void);
 
 /**
- * @def GSM_add_to_buffer
- * @brief adds the input char to the selected buffer
- * @param buffer_select (0,1) input/output
- * @param value what to add to the buffer
- */
-//void GSM_add_to_buffer(uint8_t buffer_select, char value);
-//void GSM_add_string_to_buffer_P(uint8_t buffer_select, char * to_add);
-/**
- * @def GSM_bytes_to_send
- * @brief querys the number of bytes remaining to be sent
- * @param buffer_select (0,1) input/output
- * @retval bytes remaining to be sent
- */
-//int  GSM_bytes_to_send (uint8_t buffer_select);
-
-/**
- * @def GSM_next_byte
- * @brief gets the next char and increments the pointer
- * @param buffer_select (0,1) input/output
- * @retval next char in the buffer
- */
-//char GSM_next_byte (uint8_t buffer_select);
-
-/**
  * @def GSM_process_buffer
  * @brief if the buffer has data it set sending in motion
  * @param buffer_select (0,1) input/output
  */
 void GSM_process_buffer (void);
-void GSM_add_string_to_buffer(Bool in_out, char * to_add);
+
+
+/**
+ * @def GSM_add_string_to_buffer
+ * @brief adds a passed char* string to the active buffer
+ * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
+ * @param *to_add char string to add the buffer
+*/void GSM_add_string_to_buffer(Bool in_out, char * to_add);
+
+/**
+ * @def GSM_mark_for_processing
+ * @brief changes roles of A/B buffers - in/active
+ * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
+*/
 void GSM_mark_for_processing(Bool in_out);
+
 /**
  * @def GSM_purge_buffer
  * @brief empties the buffer to 0 and resets pointers
@@ -86,19 +76,22 @@ void GSM_purge_buffer(uint8_t buffer_select);
 void GSM_usart_init (void);
 
 /**
- * @def buffer_selection
- * @brief switch for selecting in and out buffers
+ * @def GSM_sequence_states
+ * @brief switch for selecting control states
  */
-
-	
 enum GSM_sequence_states {
 	GSM_state_idle = 0,
+	GSM_state_check,
 	GSM_state_start,
 	GSM_state_init_SMS,
 	GSM_state_time_get,
 	GSM_state_wake_host
 	};
 	
+/**
+ * @def GSM_sequence_states
+ * @brief generic switch for moving through control substates
+ */
 enum GSM_subsequence_states {
 	GSM_subssequence_1 = 0,
 	GSM_subssequence_2,
@@ -113,9 +106,38 @@ enum GSM_subsequence_states {
 	GSM_subssequence_FAIL
 	};
 	
+/**
+ * @def GSM_control
+ * @brief head of the controller sequencer, sends calls into corect module
+ * @param *responce_buffer pointer to the buffer to be analysed
+ */
 void GSM_control(char * responce_buffer);
+
+/**
+ * @def GSM_control_check
+ * @brief SIM5320 startup pre-start module, set power check for responce
+ * @param *responce_buffer pointer to the buffer to be analysed
+ */
+void GSM_control_check (char * responce_buffer);
+
+/**
+ * @def GSM_control_start
+ * @brief SIM5320 startup start module, stop echo, check SIM model, capture IMEI number
+ * @param *responce_buffer pointer to the buffer to be analysed
+ */
 void GSM_control_start(char * responce_buffer);
-void GSM_start_sleep (void);
+
+/**
+ * @def GSM_begin_init
+ * @brief sets up conditions to begin interaction with GSM
+ */
+void GSM_begin_init (void);
+
+/**
+ * @def show_buffer
+ * @brief prints what it finds to the CMD USB for debug purposes
+ * @param *buffer pointer to the buffer to be sent to user
+ */
 void show_buffer(char * buffer);
 
 

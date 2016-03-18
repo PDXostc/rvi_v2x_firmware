@@ -8,8 +8,11 @@
 #include "V2X.h"
 
 
-long IMEI = 0;
+char imei[16] = "\0";
 volatile buff GSM;
+char stng[10] = "\0";
+int GSM_sequence_state = GSM_state_idle;
+int GSM_subsequence_state = GSM_subssequence_FAIL;
 
 void GSM_usart_init (void) {
 	sysclk_enable_module(USART_SIM_PORT_SYSCLK, USART_SIM_SYSCLK);
@@ -40,6 +43,7 @@ void GSM_usart_init (void) {
 	CTL_mark_for_processing(&GSM, BUFFER_OUT);
 	CTL_purge_buffer(&GSM, BUFFER_OUT);
 	
+	clear_buffer(stng);
 }
 
 void GSM_set_tx_int(void) {
@@ -88,27 +92,30 @@ ISR(USART_SIM_RX_Vect)
 ISR(USART_SIM_DRE_Vect)
 {
 	if (CTL_bytes_to_send(&GSM, BUFFER_OUT)) {
-		uint8_t value = CTL_next_byte(&GSM, BUFFER_OUT);
-		USART_SIM.DATA = value;
-		usb_cdc_send_byte(USB_CMD, value);
+// 		uint8_t value = CTL_next_byte(&GSM, BUFFER_OUT);
+// 		USART_SIM.DATA = value;
+// 		usb_cdc_send_byte(USB_CMD, value);
+		USART_SIM.DATA = CTL_next_byte(&GSM, BUFFER_OUT);
 		} else {
 		CTL_purge_buffer(&GSM, BUFFER_OUT);
 		GSM_clear_tx_int();
 	}
 }
 
-int GSM_sequence_state = 0;
-int GSM_subsequence_state = 0;
-
-void GSM_start_sleep (void) {
-	GSM_sequence_state = GSM_state_start;
+void GSM_begin_init (void) {
+	if (GSM_sequence_state == GSM_state_idle) {
+	GSM_sequence_state = GSM_state_check;
 	GSM_subsequence_state = GSM_subssequence_1; //move to response state
 	GSM_control (CTL_ptr_to_proc_buffer(&GSM, BUFFER_OUT));
+	}
 }
 
 void GSM_control (char * responce_buffer) {
 	switch (GSM_sequence_state) {
 	case GSM_state_idle:
+		break;
+	case GSM_state_check:
+		GSM_control_check(responce_buffer);
 		break;
 	case GSM_state_start:
 		GSM_control_start(responce_buffer);
@@ -118,65 +125,118 @@ void GSM_control (char * responce_buffer) {
 	}
 }
 
+void GSM_control_check (char * responce_buffer){
+//	char stng[10] = "\0";
+	switch (GSM_subsequence_state) {
+	case GSM_subssequence_1:  //check module power
+		if (power_query((1<<ENABLE_4V1))) { //is the module power on?
+			GSM_subsequence_state = GSM_subssequence_3; 
+			GSM_control_check(responce_buffer);
+		} else { //if not power it up
+			usb_tx_string_P(PSTR("CTL>>>:Power up GSM\r>"));
+			power_control_turn_on((1<<ENABLE_4V1));
+			power_control_push();
+			power_sim_start();
+			GSM_subsequence_state = GSM_subssequence_2;
+		}
+		break;
+	case GSM_subssequence_2: //Module clean boot, look for "start"
+		if (strcmp_P(responce_buffer, PSTR("START")) == 0) {
+			GSM_subsequence_state = GSM_subssequence_3;  //got expected response, go to next step
+			GSM_control_check(responce_buffer);
+		//expired timestamp check
+		} 
+		break;
+	case GSM_subssequence_3: //check for SIM power LED state
+		if (sim_power_status()) {
+			GSM_subsequence_state = GSM_subssequence_6;
+			usb_tx_string_P(PSTR("CTL>>>:GSM is powered\r>"));
+			GSM_control_check(responce_buffer);
+		} else { //try a reset
+			usb_tx_string_P(PSTR("CTL>>>:Trying to reboot GSM\r>"));
+			power_sim_stop(); 
+			power_sim_start();
+			GSM_subsequence_state = GSM_subssequence_2;
+		}
+		break;
+	case GSM_subssequence_6: //check for command responce
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT\r")); //compose message
+		CTL_mark_for_processing(&GSM, BUFFER_OUT);
+		GSM_subsequence_state = GSM_subssequence_7; //move to response state
+		break;
+	case GSM_subssequence_7:
+		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
+			GSM_subsequence_state = GSM_subssequence_1;  //got expected response, go to next step
+			GSM_sequence_state = GSM_state_start;
+			usb_tx_string_P(PSTR("CTL>>>:GSM responding to commands\r>"));
+			GSM_control(responce_buffer); //start next state
+		} else if (strcmp_P(responce_buffer, PSTR("AT")) == 0) {
+			GSM_subsequence_state = GSM_subsequence_state;
+		} else {
+			GSM_subsequence_state = GSM_subssequence_FAIL;
+		}
+		break;
+	case GSM_subssequence_FAIL:
+	default:
+		GSM_sequence_state = GSM_state_idle;
+		usb_tx_string_P(PSTR("CTL>>>:Could not connect to GSM\r>"));
+		break;
+	}
+}
+
 void GSM_control_start (char * responce_buffer){
-	char stng[10] = "nope";
-	clear_buffer(stng);
 	switch (GSM_subsequence_state) {
 	case GSM_subssequence_1:
 		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("ATE0\r")); //compose message
-		//GSM_process_buffer(BUFFER_OUT); //send it
 		CTL_mark_for_processing(&GSM, BUFFER_OUT);
 		GSM_subsequence_state = GSM_subssequence_2; //move to response state
 		break;
 	case GSM_subssequence_2:
 		if (strcmp_P(responce_buffer, PSTR("ATE0")) == 0) {
-			GSM_subsequence_state = GSM_subssequence_3;  //got expected response, go to next step
+			GSM_subsequence_state = GSM_subsequence_state;  //got expected response, go to next step
+		} else if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
+			CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("ATI\r")); //compose message
+			CTL_mark_for_processing(&GSM, BUFFER_OUT); //send it
+//			GSM_subsequence_state = GSM_subssequence_4; //move to response state
+			//no need to detect model number yet
+			GSM_subsequence_state = GSM_subssequence_5;
 		} else {
 			GSM_subsequence_state = GSM_subssequence_FAIL;
 		}
 		break;
-	case GSM_subssequence_3:
-		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
-			//GSM_subsequence_state = GSM_subssequence_4; //got expected response, go to next step
-			//usb_tx_string_P(PSTR("Echo off\r>"));
-			CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("ATI\r")); //compose message
-			CTL_mark_for_processing(&GSM, BUFFER_OUT); //send it
-			GSM_subsequence_state = GSM_subssequence_5; //move to response state
-			//GSM_control_start(responce_buffer); //send next command
-			} else {
-			GSM_subsequence_state = GSM_subssequence_FAIL;
-		}
-		break;
 	case GSM_subssequence_4:  //get device information
-// 		GSM_add_string_to_buffer_P(BUFFER_OUT, PSTR("ATI\r")); //compose message
-// 		GSM_process_buffer(BUFFER_OUT); //send it
-// 		GSM_subsequence_state = GSM_subssequence_5; //move to response state
-		break;
-	case GSM_subssequence_5:
-		if (strcmp_P(responce_buffer, PSTR("Mel: SIMCOM_SIM5320A")) == 0) {
-			usb_tx_string_P(PSTR("SIM device detected:"));
-			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
+		if (strcmp_P(responce_buffer, PSTR("Model: SIMCOM_SIM5320A")) == 0) {
+//			usb_tx_string_P(PSTR("CTL<<<:SIM5320A device detected\r>"));
+			GSM_subsequence_state = GSM_subssequence_5;  //got expected response, go to next step
 		} else if (strcmp_P(responce_buffer, PSTR("OK")) == 0){
 			GSM_subsequence_state = GSM_subssequence_FAIL;
 		}  //else {keep looking}
 		break;
-	case GSM_subssequence_6:  //IEI:....
+	case GSM_subssequence_5:
 		for (int i = 0; i < 4; i++) {stng[i] = responce_buffer[i];} //move first 4 to compare
-		if (strcmp_P(stng, PSTR("IEI: ")) == 0) {
-			IMEI = menu_sample_number(responce_buffer+6);
-			GSM_subsequence_state = GSM_subssequence_7;  //got expected response, go to next step
+		if (strcmp_P(stng, PSTR("IMEI")) == 0) {
+//			usb_tx_string_P(PSTR("CTL>>>:IMEI found\r>"));
+//			for (int i = 0; i < 15; i++) {imei[i] = responce_buffer[i+6];}
+			clear_buffer(imei);
+			strcat(imei, responce_buffer+6);
+			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
 		}
 		break;
-	case GSM_subssequence_7:
+	case GSM_subssequence_6:
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0){
+			usb_tx_string_P(PSTR("CTL<<<IMEI:"));
+			usb_cdc_send_string(USB_CMD, imei);
+			menu_send_n_st();
 			GSM_subsequence_state = GSM_subssequence_FAIL;
-			usb_tx_string_P(PSTR("IMEI captured:>"));
-			menu_print_int(IMEI);
+			GSM_control_start(responce_buffer);
 		}  //else {keep looking}
+		break;
+	case GSM_subssequence_7:
 		break;
 	
 	case GSM_subssequence_FAIL:
 	default:
+		usb_tx_string_P(PSTR("END\r>"));
 		GSM_subsequence_state = GSM_subssequence_1;
 		GSM_sequence_state = GSM_state_idle;
 		break;
