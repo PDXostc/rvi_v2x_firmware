@@ -21,10 +21,13 @@
 
 int main ()
 {
+
+	
 	v2x_board_init();	//configure pins and initial safe condition
 	
 	while (1){
 		sleepmgr_enter_sleep();
+		reset_processor();
 		button_service();
 		GSM_process_buffer();
 		CAN_process_buffer();

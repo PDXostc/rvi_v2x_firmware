@@ -236,7 +236,7 @@ void GSM_control_start (char * responce_buffer){
 	
 	case GSM_subssequence_FAIL:
 	default:
-		usb_tx_string_P(PSTR("END\r>"));
+		usb_tx_string_P(PSTR("CTL>>>SIM Start end\r>"));
 		GSM_subsequence_state = GSM_subssequence_1;
 		GSM_sequence_state = GSM_state_idle;
 		break;

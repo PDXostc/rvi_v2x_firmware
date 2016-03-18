@@ -7,6 +7,8 @@
  **/
 #include "V2X.h"
 
+uint8_t reset_flags = RESET_NONE;
+
 void pin_init(void)
 {
 		ioport_configure_pin(EXT1_PIN_HUB_STATUS			, IOPORT_DIR_INPUT						);
@@ -68,9 +70,9 @@ void v2x_board_init(void)
 	sleepmgr_init();						// Initialize the sleep manager
 	ioport_init();							//Initializes the IOPORT service
 	pin_init();								//whole chip pin init, modes and initial conditions
-	time_init();
 	spi_start();							//start SPI driver
 	power_control_init();					//sets SR to default states - holds power up
+	time_init();
 	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling
 	GSM_usart_init();
@@ -78,4 +80,53 @@ void v2x_board_init(void)
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 	cpu_irq_enable();
 	udc_start();							//start stack and vbus monitoring
+	power_hub_start();						//connect the hub to the computer
+}
+
+void reset_processor(void) {
+	if (reset_flags != 0) {
+		switch (reset_flags) {
+		case RESET_SYSTEM:
+			usb_tx_string_P(PSTR("V2X restarting\rPlease close this window\r>"));
+			delay_s(10);
+			CCP = 0xd8; //enable write protected registers
+			RST_CTRL = true; //force SW reset
+			break;
+		case RESET_USB:
+			usb_tx_string_P(PSTR("USB restarting"));
+			delay_s(10);
+			power_hub_stop();
+			delay_s(7);
+			power_hub_start();
+			delay_s(1);
+			break;
+		case RESET_CAN:
+			usb_tx_string_P(PSTR("ELM restarting"));
+			CAN_restart();
+			break;
+		case RESET_SIM:
+			power_sim_stop();
+			power_sim_start();
+			break;
+		default:
+			break;
+		}
+	}
+	reset_flags = RESET_NONE;
+}
+
+void reset_trigger_USB (void) {
+	reset_flags = RESET_USB;
+}
+
+void reset_trigger_SYSTEM (void) {
+	reset_flags = RESET_SYSTEM;
+}
+
+void reset_trigger_CAN (void) {
+	reset_flags = RESET_CAN;
+}
+
+void reset_trigger_SIM (void) {
+	reset_flags = RESET_SIM;
 }

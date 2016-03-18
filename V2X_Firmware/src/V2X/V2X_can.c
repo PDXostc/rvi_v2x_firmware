@@ -86,3 +86,19 @@ void CAN_process_buffer (void) {
 	} 
 
 }
+
+void CAN_power_off (void) {
+	power_control_turn_off((1<<ENABLE_CAN_RESET));
+	power_control_push();
+};
+	
+void CAN_power_on (void) {
+	power_control_turn_on((1<<ENABLE_CAN_RESET)|(1<<ENABLE_CAN_SLEEP));
+	power_control_push();
+};
+
+void CAN_restart (void) {
+	CAN_power_off();
+	delay_ms(10);
+	CAN_power_on();
+}
