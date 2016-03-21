@@ -401,6 +401,10 @@ void menu_timer(void) {
 	case 'q':  //timer inquery
 		menu_timer_status();
 		break;
+	case 'u':
+		//usb_tx_string_P(PSTR("GPS update\r"));
+		GSM_time_job();
+		break;
 	case '?':  //Menu options
 	default:
 		usb_tx_string_P(PSTR("*** Timer Menu ***\rSn: Set V2X time (UET)\rG: Get V2X time\rAn: Set absolute alarm (UET) \rRn: Set relative alarm (Seconds)\rI: timer information\rQ: Timer inquery\r"));

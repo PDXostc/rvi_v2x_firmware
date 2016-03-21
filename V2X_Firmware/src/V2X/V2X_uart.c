@@ -123,7 +123,7 @@ void uart_rx_notify(uint8_t port) //message received over USB
 				if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
  					udi_cdc_multi_signal_overrun(port);		//no
  				} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
-				if (data == '\r') { //if carriage return, run the menu
+				if (data == '\r' || data == '\n') { //if carriage return, run the menu
 					menu_main();
 					return;
 				} else { //was a standard character that should be stored in the buffer

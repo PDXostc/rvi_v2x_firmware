@@ -72,13 +72,13 @@ void v2x_board_init(void)
 	pin_init();								//whole chip pin init, modes and initial conditions
 	spi_start();							//start SPI driver
 	power_control_init();					//sets SR to default states - holds power up
+	cpu_irq_enable();
 	time_init();
 	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling
 	GSM_usart_init();
 	CAN_uart_start();
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
-	cpu_irq_enable();
 	udc_start();							//start stack and vbus monitoring
 	power_hub_start();						//connect the hub to the computer
 }

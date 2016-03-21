@@ -139,6 +139,9 @@ void GSM_begin_init (void);
  * @param *buffer pointer to the buffer to be sent to user
  */
 void show_buffer(char * buffer);
-
+void GSM_time_job (void);
+void GSM_time_sync  (char * responce_buffer);
+void GSM_parse_gps_info (char * responce_buffer);
+//void show_indexes (int start_i, int end_i);
 
 #endif /* V2X_GSM_H_ */
