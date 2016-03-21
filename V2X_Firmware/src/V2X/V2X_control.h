@@ -16,10 +16,10 @@
 typedef struct buff_t {
 	Bool active_in; //being active indicates where new bytes are stored
 	Bool active_out; //being inactive indicates send/processing 
-	char input_a[40]; //input buffer A
-	char input_b[40]; //input buffer B
-	char output_a[20]; //output buffer A
-	char output_b[20]; //output buffer B
+	char input_a[80]; //input buffer A
+	char input_b[80]; //input buffer B
+	char output_a[30]; //output buffer A
+	char output_b[30]; //output buffer B
 	uint8_t in_store_a;  //input storage pointer for A
 	uint8_t in_store_b;  //input storage pointer for B
 	uint8_t out_store_a; //output storage pointer for A

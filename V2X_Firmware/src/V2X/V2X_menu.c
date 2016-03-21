@@ -39,7 +39,7 @@ void menu_main(void) {
 				menu_status();
 				break;
 			case 'r':  //reset
-				usb_tx_string_P(PSTR("Reset function not available yet, please power cycle.\r"));
+				reset_trigger_SYSTEM();
 				break;
 			case 'a':  //accel
 				menu_accel();
@@ -49,7 +49,6 @@ void menu_main(void) {
 				break;
 			case 's':  //sleep
 				GSM_begin_init();
-				menu_send_n_st();
 				break;
 			case 'm':  //modem
 				menu_modem();
@@ -237,8 +236,7 @@ void menu_modem (void) {
 		usb_tx_string_P(PSTR("Modem has been started\r"));
 		break;
 	case 'r':  //reset
-		power_sim_stop();
-		power_sim_start();
+		reset_trigger_SIM();
 		usb_tx_string_P(PSTR("Modem has been restarted\r"));
 		break;
 	case 'q':
@@ -266,24 +264,17 @@ void menu_modem (void) {
 void menu_can (void) {
 	int i;
 	switch (CMD_buffer[3]) {
-	case 'd':  //disable
-		power_control_turn_off((1<<ENABLE_CAN_RESET));
-		power_control_push();
+	case 'd':  //disable;
+		CAN_power_off();
 		usb_tx_string_P(PSTR("CANbus is off\r"));
 		break;
 	case 'e':  //enable
-		power_control_turn_on((1<<ENABLE_CAN_RESET)|(1<<ENABLE_CAN_SLEEP));
-		power_control_push();
+		CAN_power_on();
 		usb_tx_string_P(PSTR("CANbus has been started\r"));
 		break;
 	case 'r':  //reset
-		power_control_turn_off((1<<ENABLE_CAN_RESET));
-		power_control_push();
-		delay_us(10);
-		power_control_turn_on((1<<ENABLE_CAN_RESET)|(1<<ENABLE_CAN_SLEEP));
-		power_control_push();
+		reset_trigger_CAN();
 		usb_tx_string_P(PSTR("CANbus has been restarted\r"));
-		
 		break;
 	case 'q':
 		menu_can_status();
@@ -410,6 +401,10 @@ void menu_timer(void) {
 	case 'q':  //timer inquery
 		menu_timer_status();
 		break;
+	case 'u':
+		//usb_tx_string_P(PSTR("GPS update\r"));
+		GSM_time_job();
+		break;
 	case '?':  //Menu options
 	default:
 		usb_tx_string_P(PSTR("*** Timer Menu ***\rSn: Set V2X time (UET)\rG: Get V2X time\rAn: Set absolute alarm (UET) \rRn: Set relative alarm (Seconds)\rI: timer information\rQ: Timer inquery\r"));
@@ -456,7 +451,17 @@ void usb_tx_string_P(const char *data) {
 }
 
 void menu_lockup (void) {
-	clear_buffer(CMD_buffer);
+	//clear_buffer(CMD_buffer);
+// 	usb_tx_string_P(USB_CMD, PSTR("RESET:\r>"));
+// 	usb_tx_string_P(USB_ACL, PSTR("RESET:\r>"));
+	char msg[] = "AVR>>RESET:\r";
+	usb_cdc_send_string(USB_CMD, msg);
+	usb_cdc_send_string(USB_ACL, msg);
+	usb_cdc_send_string(USB_CAN, msg);
+	delay_s(1);
+	power_hub_stop();
+	delay_s(1);
+	RST_CTRL = true; //force SW reset
 }
 
 void menu_status (void) {

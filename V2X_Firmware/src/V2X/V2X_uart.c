@@ -123,7 +123,7 @@ void uart_rx_notify(uint8_t port) //message received over USB
 				if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
  					udi_cdc_multi_signal_overrun(port);		//no
  				} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
-				if (data == '\r') { //if carriage return, run the menu
+				if (data == '\r' || data == '\n') { //if carriage return, run the menu
 					menu_main();
 					return;
 				} else { //was a standard character that should be stored in the buffer
@@ -137,17 +137,18 @@ void uart_rx_notify(uint8_t port) //message received over USB
 			}
 		}
 	}else if (port == USB_ACL) { //loop back
-	while (udi_cdc_multi_is_rx_ready(port)) {  //is there data
-		int data = udi_cdc_multi_getc(port);	//get all the data
-		if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
-			udi_cdc_multi_signal_overrun(port);		//no
-		}else{
-			if (data == 'r' || data == 'R') {
-				menu_lockup();
+		while (udi_cdc_multi_is_rx_ready(port)) {  //is there data
+			int data = udi_cdc_multi_getc(port);	//get all the data
+			if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
+				udi_cdc_multi_signal_overrun(port);		//no
+			}else{
+				if (data == 'u' || data == 'U') {
+					reset_trigger_USB();
+				} else if (data == 'r' || data == 'R') {
+					reset_trigger_SYSTEM();
+				}
+				udi_cdc_multi_putc(port, data);	
 			}
-			udi_cdc_multi_putc(port, data);
-			
-		}
 		}
 	}
 }

@@ -86,4 +86,16 @@ void power_sim_stop(void);
  */
 bool power_query(uint16_t mask);
 
+/**
+ * @def power_hub_start
+ * @brief sends a sequence to disable the USB hub
+ */
+void power_hub_start(void);
+
+/**
+ * @def power_hub_reset
+ * @brief sends a sequence to disable the USB hub
+ */
+void power_hub_stop(void);
+
 #endif /* V2X_DRIVERS_H_ */

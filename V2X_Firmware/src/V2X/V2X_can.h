@@ -86,4 +86,22 @@ void CAN_mark_for_processing (Bool in_out);
 */
 void CAN_add_string_to_buffer(Bool in_out, char * to_add);
 
+/**
+ * @def CAN_power_off
+ * @brief disables the ELM with hardware reset pin
+*/
+void CAN_power_off (void);
+
+/**
+ * @def CAN_power_on
+ * @brief enables the ELM with hardware reset pin
+*/
+void CAN_power_on (void);
+
+/**
+ * @def CAN_restart
+ * @brief disables then enables the ELM with hardware reset pin and sleep
+*/
+void CAN_restart (void);
+
 #endif /* V2X_CAN_H_ */

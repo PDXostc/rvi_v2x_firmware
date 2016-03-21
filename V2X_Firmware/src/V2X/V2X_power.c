@@ -67,3 +67,13 @@ bool power_query(uint16_t mask) {
 	if ((power_control_state & mask) != 0) {return true;}
 	else {return false;}
 }
+
+void power_hub_start(void) {
+	power_control_turn_on((1<<ENABLE_HUB));
+	power_control_push();
+}
+
+void power_hub_stop(void){
+	power_control_turn_off((1<<ENABLE_HUB));
+	power_control_push();
+}

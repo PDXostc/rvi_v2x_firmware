@@ -10,6 +10,7 @@
 #define V2X_TIME_H_
 
 #define time_seed 1456961042  //time starter
+#define RTC_VALIDITY_PERIOD 86400  //RTC syncs with GPS
 
 /**
  * @def time_init
@@ -93,5 +94,8 @@ int time_zone_get (void);
  * @brief prints a human readable timestamp to the CMD interface 
  **/
 void print_human_time (void);
+
+void job_coordinator (void);
+void time_set_by_strings (char * date, char * time);
 
 #endif /* V2X_TIME_H_ */

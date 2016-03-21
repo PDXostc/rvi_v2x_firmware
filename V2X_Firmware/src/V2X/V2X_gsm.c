@@ -9,8 +9,14 @@
 
 
 char imei[16] = "\0";
+char latitude[13] = "\0";
+char latitude_hemispere[2] = "\0";
+char longitude[13] = "\0";
+char longitude_hemispere[2] = "\0";
+char hold[100] = "\0";
+
 volatile buff GSM;
-char stng[10] = "\0";
+char stng[100] = "\0";
 int GSM_sequence_state = GSM_state_idle;
 int GSM_subsequence_state = GSM_subssequence_FAIL;
 
@@ -58,10 +64,16 @@ void GSM_process_buffer (void) {
 	// if there is something received
 	if (CTL_bytes_to_send(&GSM, BUFFER_IN)) {
 		usb_tx_string_P(PSTR("GSM>>>:"));
-		usb_cdc_send_string(USB_CMD, CTL_ptr_to_proc_buffer(&GSM, BUFFER_IN));
-		usb_tx_string_P(PSTR("\r>"));
-		GSM_control(CTL_ptr_to_proc_buffer(&GSM, BUFFER_IN)); //process messages if in sleep mode
+		char * srt = CTL_ptr_to_proc_buffer(&GSM, BUFFER_IN);
+		for (int i = 0; srt[i] != '\0'; i++) {
+			hold[i] = srt[i];
+			usb_cdc_send_byte(USB_CMD, hold[i]);
+			srt[i] = '\0';
+		}
+		menu_send_n_st();
 		CTL_purge_buffer(&GSM, BUFFER_IN);
+		GSM_control(hold); //process messages if in sleep mode
+		//usb_cdc_send_string(USB_CMD, hold);
 	}
 	if (CTL_bytes_to_send(&GSM, BUFFER_OUT)) {
 		GSM_set_tx_int(); //set to continue sending buffer
@@ -77,7 +89,8 @@ void GSM_mark_for_processing(Bool in_out) {
 }
 
 ISR(USART_SIM_RX_Vect)
-{	// Transfer UART RX fifo to buffer
+{
+// Transfer UART RX fifo to buffer
 // 	if (0 != (USART.STATUS & (USART_FERR_bm | USART_BUFOVF_bm))) {
 // 		udi_cdc_multi_putc(USB_CAN, '!');
 // 	}
@@ -110,6 +123,14 @@ void GSM_begin_init (void) {
 	}
 }
 
+void GSM_time_job (void) {
+	if (GSM_sequence_state == GSM_state_idle) {
+		GSM_sequence_state = GSM_state_time_get;
+		GSM_subsequence_state = GSM_subssequence_1; //move to response state
+		GSM_control (CTL_ptr_to_proc_buffer(&GSM, BUFFER_OUT));
+	}
+}
+
 void GSM_control (char * responce_buffer) {
 	switch (GSM_sequence_state) {
 	case GSM_state_idle:
@@ -119,6 +140,9 @@ void GSM_control (char * responce_buffer) {
 		break;
 	case GSM_state_start:
 		GSM_control_start(responce_buffer);
+		break;
+	case GSM_state_time_get:
+		GSM_time_sync(responce_buffer);
 		break;
 	default:
 		GSM_sequence_state = GSM_state_idle;
@@ -236,7 +260,39 @@ void GSM_control_start (char * responce_buffer){
 	
 	case GSM_subssequence_FAIL:
 	default:
-		usb_tx_string_P(PSTR("END\r>"));
+		usb_tx_string_P(PSTR("CTL>>>SIM Start end\r>"));
+		GSM_subsequence_state = GSM_subssequence_1;
+		GSM_sequence_state = GSM_state_idle;
+		break;
+	}
+}
+
+void GSM_time_sync (char * responce_buffer) {
+	switch (GSM_subsequence_state) {
+	case GSM_subssequence_1:
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSINFO\r")); //compose message
+		CTL_mark_for_processing(&GSM, BUFFER_OUT);
+		GSM_subsequence_state = GSM_subssequence_2; //move to response state
+		break;
+	case GSM_subssequence_2:
+		for (int i = 0; i < 10; i++) {stng[i] = responce_buffer[i];} //move first 10 to compare
+		//show_buffer(stng);
+		if (strcmp_P(stng, PSTR("+CGPSINFO:")) == 0) {
+			GSM_parse_gps_info(responce_buffer);
+//			GSM_subsequence_state = GSM_subssequence_FAIL;
+		} else if (strcmp_P(stng, PSTR("OK")) == 0) {
+			GSM_subsequence_state = GSM_subssequence_3;
+			GSM_control_start(responce_buffer);
+		}
+		break;
+	case GSM_subssequence_3:
+		usb_tx_string_P(PSTR("CTL>>>GPS time update success\r>"));
+		GSM_subsequence_state = GSM_subssequence_1;
+		GSM_sequence_state = GSM_state_idle;
+		break;
+	case GSM_subssequence_FAIL:
+	default:
+		usb_tx_string_P(PSTR("CTL>>>GPS time update FAIL\r>"));
 		GSM_subsequence_state = GSM_subssequence_1;
 		GSM_sequence_state = GSM_state_idle;
 		break;
@@ -248,4 +304,62 @@ void show_buffer(char * buffer) {
 	usb_cdc_send_string(USB_CMD, buffer);
 	usb_tx_string_P(PSTR("\""));
 	
+}
+
+// 	>GSM>>>:+CGPSINFO:4532.003283,N,12241.160752,W,180316,211341.1,-9.2,
+// 	>GSM>>>:AmpI/AmpQ: 483/460
+// 	>GSM>>>:OK
+// 	>GSM>>>:+STIN: 25
+// 	>
+void GSM_parse_gps_info (char * responce_buffer) {
+	
+	char * start_ptr = strchr(responce_buffer, ':') + 1;
+	for (int i = 0; start_ptr[i] != ','; i++) {
+		latitude[i] = start_ptr[i];	//copy lat string
+	}
+	start_ptr = strchr(start_ptr+1, ',') + 1;
+	for (int i = 0; start_ptr[i] != ','; i++) {
+		latitude_hemispere[i] = start_ptr[i];	//copy lat hemi string
+	}
+	start_ptr = strchr(start_ptr+1, ',') + 1;
+	for (int i = 0; start_ptr[i] != ','; i++) {
+		longitude[i] = start_ptr[i];	//copy long string
+	}
+	start_ptr = strchr(start_ptr+1, ',') + 1;
+	for (int i = 0; start_ptr[i] != ','; i++) {
+		longitude_hemispere[i] = start_ptr[i];	//copy long hemi string
+	}
+	start_ptr = strchr(start_ptr+1, ',') + 1;
+	char date[10] = "\0";
+	for (int i = 0; start_ptr[i] != ','; i++) {
+		date[i] = start_ptr[i];	//copy date string
+	}
+	start_ptr = strchr(start_ptr+1, ',') + 1;
+	char time[10] = "\0";
+	for (int i = 0; start_ptr[i] != ','; i++) {
+		time[i] = start_ptr[i];	//copy time string
+	}
+		
+	usb_tx_string_P(PSTR("lat = "));
+	show_buffer(latitude);
+	menu_send_n_st();
+	usb_tx_string_P(PSTR("lat_h = "));
+	show_buffer(latitude_hemispere);
+	menu_send_n_st();
+	usb_tx_string_P(PSTR("long = "));
+	show_buffer(longitude);
+	menu_send_n_st();
+	usb_tx_string_P(PSTR("long_h = "));
+	show_buffer(longitude_hemispere);
+	menu_send_n_st();
+	usb_tx_string_P(PSTR("time = "));
+	show_buffer(time);
+	menu_send_n_st();
+	usb_tx_string_P(PSTR("date = "));
+	show_buffer(date);
+	menu_send_n_st();
+	
+	time_set_by_strings(date, time);
+	print_human_time();
+	menu_send_n_st();
 }
