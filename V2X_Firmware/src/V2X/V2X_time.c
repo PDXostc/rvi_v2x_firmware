@@ -11,8 +11,6 @@ Bool alarm_is_set = false;
 Bool time_is_set = false; 
 long time_was_set = 0; //marks the last time the clock was adjusted
 int time_zone = -7;
-uint32_t job_timeout = 0;
-
 
 struct calendar_date date_s = {
 	.second = 12,
@@ -93,46 +91,52 @@ void print_human_time (void) {
 	menu_print_int(date_s.minute);
 	usb_tx_string_P(PSTR(":"));
 	menu_print_int(date_s.second);
+	menu_send_n_st();
 }
+
+void time_set_by_strings (char * date, char * time) {
+	char bufr[3] = "\0";
+	for (int i = 0; i < 2; i++) {bufr[i] = date[i];}
+	date_s.date = atoi(bufr)-1;
+	//usb_tx_string_P(PSTR("\rdate"));
+	//menu_print_int(date_s.date);
+	for (int i = 0; i < 2; i++) {bufr[i] = date[i+2];}
+	date_s.month = atoi(bufr)-1;
+	//usb_tx_string_P(PSTR("\rmonth"));
+	//menu_print_int(date_s.month);
+	for (int i = 0; i < 2; i++) {bufr[i] = date[i+4];}
+	date_s.year = atoi(bufr) + 2000;
+	//usb_tx_string_P(PSTR("\ryear"));
+	//menu_print_int(date_s.year);
+	for (int i = 0; i < 2; i++) {bufr[i] = time[i];}
+	date_s.hour = atoi(bufr);
+	//usb_tx_string_P(PSTR("\rhour"));
+	//menu_print_int(date_s.hour);
+	for (int i = 0; i < 2; i++) {bufr[i] = time[i+2];}
+	date_s.minute = atoi(bufr);
+	//usb_tx_string_P(PSTR("\rminute"));
+	//menu_print_int(date_s.minute);
+	for (int i = 0; i < 2; i++) {bufr[i] = time[i+4];}
+	date_s.second = atoi(bufr);
+	//usb_tx_string_P(PSTR("\rsecond"));
+	//menu_print_int(date_s.second);
+	//menu_send_n();
+	// GPS time handled as Zulu time, no offset while setting.
+	long new_time = calendar_date_to_timestamp_tz(&date_s, 0, 0);
+	rtc_set_time(new_time);
+}
+
 
 void job_coordinator (void) {
 	uint32_t temp_time = time_get();
 	if (temp_time % 600 == 0) {
 		if (time_is_current() == 0) { //needs a sync
-			GSM_time_job();
+			GSM_time_job(); //kick off a time sync job
 		}
 	}
-	
-}
-
-void time_set_by_strings (char * date, char * time) {
-	char bufr[5] = "\0";
-	for (int i = 0; i < 2; i++) {bufr[i] = date[i];}
-	date_s.date = atoi(bufr)-1;
-	usb_tx_string_P(PSTR("\rdate"));
-	menu_print_int(date_s.date);
-	for (int i = 0; i < 2; i++) {bufr[i] = date[i+2];}
-	date_s.month = atoi(bufr)-1;
-	usb_tx_string_P(PSTR("\rmonth"));
-	menu_print_int(date_s.month);
-	for (int i = 0; i < 2; i++) {bufr[i] = date[i+4];}
-	date_s.year = atoi(bufr) + 2000;
-	usb_tx_string_P(PSTR("\ryear"));
-	menu_print_int(date_s.year);
-	for (int i = 0; i < 2; i++) {bufr[i] = time[i];}
-	date_s.hour = atoi(bufr);
-	usb_tx_string_P(PSTR("\rhour"));
-	menu_print_int(date_s.hour);
-	for (int i = 0; i < 2; i++) {bufr[i] = time[i+2];}
-	date_s.minute = atoi(bufr);
-	usb_tx_string_P(PSTR("\rminute"));
-	menu_print_int(date_s.minute);
-	for (int i = 0; i < 2; i++) {bufr[i] = time[i+4];}
-	date_s.second = atoi(bufr);
-	usb_tx_string_P(PSTR("\rsecond"));
-	menu_print_int(date_s.second);
-	menu_send_n();
-	long new_time = calendar_date_to_timestamp_tz(&date_s, 0, 0);
-	rtc_set_time(new_time);
+	if (job_check_timeout()) {
+		char nuthin[] = "\0";
+		GSM_control(nuthin);  //start another job to catch the timeout
+	}	
 }
 

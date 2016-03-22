@@ -143,5 +143,9 @@ void GSM_time_job (void);
 void GSM_time_sync  (char * responce_buffer);
 void GSM_parse_gps_info (char * responce_buffer);
 //void show_indexes (int start_i, int end_i);
+void job_set_timeout (int span);
+Bool job_check_timeout(void);
+void job_clear_timeout (void);
+void job_check_fail (void);
 
 #endif /* V2X_GSM_H_ */

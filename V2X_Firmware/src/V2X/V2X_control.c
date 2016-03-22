@@ -156,6 +156,11 @@ void CTL_purge_buffer(buff * buffer, Bool in_out) {
 	}
 }
 
+void clear_buffer(char * buffer) {
+	int cnt = strlen(buffer);
+	for(int i = 0; i < cnt; i++)
+	{buffer[i] = '\0';}
+}
 
 void CTL_mark_for_processing(buff * buffer, Bool in_out) {
 	switch (in_out) {
@@ -211,12 +216,6 @@ void CTL_mark_for_processing(buff * buffer, Bool in_out) {
 		}
 		break;
 	}
-}
-
-void clear_buffer(char * buffer) {
-	int cnt = strlen(buffer);
-	for(int i = 0; i < cnt; i++)
-	{buffer[i] = '\0';}
 }
 
 char * CTL_ptr_to_proc_buffer(buff * buffer, Bool in_out) {
