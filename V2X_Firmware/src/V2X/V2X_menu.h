@@ -65,6 +65,30 @@ void menu_send_n_st(void);
 void menu_send_out_of_range(void);
 
 /**
+ * @def menu_send_n_st
+ * @brief canned message, sends "GSM>>>:"
+ **/
+void menu_send_GSM(void);
+
+/**
+ * @def menu_send_n_st
+ * @brief canned message, sends "CAN>>>:"
+ **/
+void menu_send_CAN(void);
+
+/**
+ * @def menu_send_n_st
+ * @brief canned message, sends "BTN>>>:"
+ **/
+void menu_send_BTN(void);
+
+/**
+ * @def menu_send_n_st
+ * @brief canned message, sends "CTL>>>:"
+ **/
+void menu_send_CTL(void);
+
+/**
  * @def menu_print_int
  * @brief coverts an int to char then sends over ACL usb
  * @param value the number to send over USB
@@ -157,6 +181,5 @@ void usb_tx_string_P(const char *data);
  * @brief special routine to dump the CMD buffer from the ACL USB interface
  **/
 void menu_lockup (void);
-
 
 #endif /* V2X_MENU_H_ */

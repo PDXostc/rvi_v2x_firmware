@@ -29,15 +29,18 @@ void button_service(void) {
 		switch (button_pressed) {
 		case true: //button was released (previously pressed), figure out ho long
 			delta = time_get() - pressed_at; //calc press duration
-			usb_tx_string_P(PSTR("BUTTON.RELEASE:"));		// report to CMD interface
+			menu_send_BTN();
+			usb_tx_string_P(PSTR("RELEASE:"));		// report to CMD interface
 			menu_print_int(delta);		
-			usb_tx_string_P(PSTR("\r>"));  //re-prompt for user input
+			menu_send_n_st();
 			button_pressed = false;		//note the button was released
 			break;
 		case false:  //button was pressed, capture press time
 			pressed_at = time_get(); //store press time
 			button_pressed = true;  //hold button state
-			usb_tx_string_P(PSTR("BUTTON.PRESS\r>")); //report press event to CMD
+			menu_send_BTN();
+			usb_tx_string_P(PSTR("PRESS")); //report press event to CMD
+			menu_send_n_st();
 			break;
 		}		
 		

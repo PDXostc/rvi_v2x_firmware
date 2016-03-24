@@ -139,13 +139,31 @@ void GSM_begin_init (void);
  * @param *buffer pointer to the buffer to be sent to user
  */
 void show_buffer(char * buffer);
+
+/**
+ * @def GSM_time_job
+ * @brief launches the control sequence to sync time with GPS data
+ */
 void GSM_time_job (void);
+
+/**
+ * @def GSM_time_sync
+ * @brief control sequence operator for time sync
+ * @param *responce_buffer pointer to the buffer to be analysed
+ */
 void GSM_time_sync  (char * responce_buffer);
+
+/**
+ * @def GSM_parse_gps_info
+ * @brief takes GPS string parses into usable sections
+ * @param *responce_buffer pointer to the buffer to be analysed
+ */
 void GSM_parse_gps_info (char * responce_buffer);
-//void show_indexes (int start_i, int end_i);
-void job_set_timeout (int span);
-Bool job_check_timeout(void);
-void job_clear_timeout (void);
-void job_check_fail (void);
+
+/**
+ * @def GSM_control_fail
+ * @brief puts the GSM control sequence in a fail state due to timeout
+ */
+void GSM_control_fail (void);
 
 #endif /* V2X_GSM_H_ */

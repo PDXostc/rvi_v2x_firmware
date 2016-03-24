@@ -13,7 +13,7 @@ enum reset_flag_defs {
 	RESET_SYSTEM,
 	RESET_USB,
 	RESET_CAN,
-	RESET_SIM
+	RESET_GSM
 };
 
 /**
@@ -28,10 +28,34 @@ void pin_init(void);
  **/
 void v2x_board_init(void);
 
-void reset_trigger_USB (void);
-void reset_trigger_SYSTEM (void);
-void reset_trigger_CAN (void);
-void reset_trigger_SIM (void);
+/**
+ * @def reset_processor
+ * @brief check reset flags and performs actions needed
+ **/
 void reset_processor(void);
+
+/**
+ * @def reset_trigger_USB
+ * @brief marks reset flag for USB 
+ **/
+void reset_trigger_USB (void);
+
+/**
+ * @def reset_trigger_SYSTEM
+ * @brief marks reset flag for the AVR
+ **/
+void reset_trigger_SYSTEM (void);
+
+/**
+ * @def reset_trigger_CAN
+ * @brief marks reset flag for ELM
+ **/
+void reset_trigger_CAN (void);
+
+/**
+ * @def reset_trigger_SIM
+ * @brief marks reset flag for GSM
+ **/
+void reset_trigger_GSM (void);
 
 #endif /* V2X_INIT_H_ */

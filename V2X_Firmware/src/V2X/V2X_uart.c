@@ -202,9 +202,6 @@ ISR(USART_DRE_Vect)
 	case false:
 	default:
 		if (CAN_bytes_to_send(BUFFER_OUT)) {
-// 			value = CAN_next_byte(BUFFER_OUT);
-// 			usb_cdc_send_byte(USB_CMD, value);
-// 			USART.DATA = value;
  			USART.DATA = CAN_next_byte(BUFFER_OUT);
 		} else {
 			CAN_purge_buffer(BUFFER_OUT);
