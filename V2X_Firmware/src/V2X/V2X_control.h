@@ -14,25 +14,24 @@
  * @brief buffer struct for the double buffering system
  **/
 typedef struct buff_t {
-	Bool active_in; //being active indicates where new bytes are stored
-	Bool active_out; //being inactive indicates send/processing 
-	char input_a[80]; //input buffer A
-	char input_b[80]; //input buffer B
-	char output_a[30]; //output buffer A
-	char output_b[30]; //output buffer B
-	uint8_t in_store_a;  //input storage pointer for A
-	uint8_t in_store_b;  //input storage pointer for B
-	uint8_t out_store_a; //output storage pointer for A
-	uint8_t out_store_b; //output storage pointer for B
-	uint8_t in_proc_a;   //input processing pointer for A
-	uint8_t in_proc_b;	 //input processing pointer for B
-	uint8_t out_proc_a;	 //output processing pointer for A
-	uint8_t out_proc_b;	 //output processing pointer for B
+	uint8_t input_index;			//input buffer index at most recently received data 
+	uint8_t input_proc_index;		//input buffer index at beginning of unprocessed data
+	uint8_t output_proc_index;		//output processing index
+	
+	char input_buf[200];			//input circular buffer
+	char input_proc_buf[75];		//input processing buffer
+	char output_proc_buf[20];		//output processing buffer
+	
+	Bool input_proc_flag;			//the input buffer is ready to be searched for a string
+	Bool input_proc_loaded;			//the input process buffer is loaded for analysis
+	Bool output_proc_active_flag;	//the output buffer is being used
+	Bool output_proc_loaded;		//the output buffer is primed and ready to send.
+	
 	} buff;
 
 /**
  * @def buffer_selection
- * @brief buffer deffinition for the double buffering system
+ * @brief buffer definition for the double buffering system
  **/
 enum buffer_selection {
 	BUFFER_IN = 0,
@@ -41,11 +40,20 @@ enum buffer_selection {
 
 /**
  * @def buffer_switch
- * @brief buffer deffinition for the double buffering system
+ * @brief buffer definition for the double buffering system
  **/
 enum buffer_switch {
 	BUFFER_A = 0,
 	BUFFER_B
+};
+
+/**
+ * @def system_switch
+ * @brief system definition for the double buffering system
+ **/
+enum system_switch {
+	SYS_CAN = 0,
+	SYS_GSM
 };
 
 /**
@@ -55,7 +63,7 @@ enum buffer_switch {
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
  * @param value char to add the string
 */
-void CTL_add_to_buffer(buff * buffer, Bool in_out, char value);
+void CTL_add_to_buffer (buff * buffer, Bool in_out, char value);
 
 /**
  * @def CTL_add_string_to_buffer_P
@@ -64,7 +72,7 @@ void CTL_add_to_buffer(buff * buffer, Bool in_out, char value);
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
  * @param *to_add PSTR("...") stored char string to add the buffer
 */
-void CTL_add_string_to_buffer_P(buff * buffer, Bool in_out, const char * to_add);
+void CTL_add_string_to_buffer_P (buff * buffer, Bool in_out, const char * to_add);
 
 /**
  * @def CTL_add_string_to_buffer
@@ -73,7 +81,7 @@ void CTL_add_string_to_buffer_P(buff * buffer, Bool in_out, const char * to_add)
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
  * @param *to_add char string to add the buffer
 */
-void CTL_add_string_to_buffer(buff * buffer, Bool in_out, char * to_add);
+void CTL_add_string_to_buffer (buff * buffer, Bool in_out, char * to_add);
 
 /**
  * @def CTL_bytes_to_send
@@ -99,7 +107,7 @@ char CTL_next_byte (buff * buffer, Bool in_out);
  * @param *buffer pointer to the buffer struct buff_t
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
 */
-void CTL_purge_buffer(buff * buffer, Bool in_out);
+void CTL_purge_buffer (buff * buffer, Bool in_out);
 
 /**
  * @def CTL_mark_for_processing
@@ -107,7 +115,7 @@ void CTL_purge_buffer(buff * buffer, Bool in_out);
  * @param *buffer pointer to the buffer struct buff_t
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
 */
-void CTL_mark_for_processing(buff * buffer, Bool in_out);
+void CTL_mark_for_processing (buff * buffer, Bool in_out);
 
 /**
  * @def CTL_ptr_to_proc_buffer
@@ -116,13 +124,70 @@ void CTL_mark_for_processing(buff * buffer, Bool in_out);
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
  * @retval char * to add the inactive string
 */
-char * CTL_ptr_to_proc_buffer(buff * buffer, Bool in_out);
+char * CTL_ptr_to_proc_buffer (buff * buffer, Bool in_out);
 
 /**
  * @def clear_buffer
  * @brief resets the buffer to all '\0'
  * @param buffer pointer to the beginning of the buffer
  **/
-void clear_buffer(char * buffer);
+void clear_buffer (char * buffer);
+
+/**
+ * @def CTL_copy_to_proc
+ * @brief moves oldest string in circular input buffer into proc buffer
+ * @param *buffer pointer to the buffer struct buff_t
+ **/
+void CTL_copy_to_proc (buff * buffer);
+
+/**
+ * @def CTL_input_index_check
+ * @brief 
+ * @param *buffer pointer to the buffer struct buff_t
+ **/
+void CTL_input_index_check (buff * buffer);
+
+/**
+ * @def CTL_input_proc_index_check
+ * @brief 
+ * @param *buffer pointer to the buffer struct buff_t
+ **/
+void CTL_input_proc_index_check (buff * buffer);
+
+/**
+ * @def job_coordinator
+ * @brief uses the RTC to launch chron jobs
+ **/
+void job_coordinator (void);
+
+/**
+ * @def job_set_timeout
+ * @brief sets a new timeout time and enables checking of timeouts
+ * @param system - SYS_CAN or SYS_GPS system
+ * @param span - number of seconds until timeout
+ **/
+void job_set_timeout (uint8_t system, int span);
+
+/**
+ * @def job_check_timeout
+ * @brief check of timeout of system and return if expired
+ * @param system - SYS_CAN or SYS_GPS system
+ * @retval true if timer has expired 
+ **/
+Bool job_check_timeout(uint8_t system);
+
+/**
+ * @def job_clear_timeout
+ * @brief disables checking of timeouts
+ * @param system - SYS_CAN or SYS_GPS system
+ **/
+void job_clear_timeout (uint8_t system);
+
+/**
+ * @def job_check_fail
+ * @brief check of timeout of system, launch fail recovery if expired
+ * @param system - SYS_CAN or SYS_GPS system
+ **/
+void job_check_fail (uint8_t system);
 
 #endif /* V2X_COMMAND_H_ */

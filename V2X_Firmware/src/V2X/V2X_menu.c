@@ -23,7 +23,6 @@ void menu_add_to_command(char value) {
 }
 
 void menu_main(void) {
-	//int cnt = strlen(CMD_buffer);
 	for(int i = 0; i < 4; i++){
 		CMD_buffer[i] = tolower(CMD_buffer[i]);
 	}
@@ -236,7 +235,7 @@ void menu_modem (void) {
 		usb_tx_string_P(PSTR("Modem has been started\r"));
 		break;
 	case 'r':  //reset
-		reset_trigger_SIM();
+		reset_trigger_GSM();
 		usb_tx_string_P(PSTR("Modem has been restarted\r"));
 		break;
 	case 'q':
@@ -380,7 +379,7 @@ void menu_timer(void) {
 		usb_tx_string_P(PSTR("UET: "));
 		menu_print_int(time_get());
 		usb_tx_string_P(PSTR("\rTime: "));
-		print_human_time();
+		time_print_human_readable();
 		menu_send_n();
 		break;
 	case 'a':  //absolute alarm
@@ -430,7 +429,19 @@ void menu_send_n(void) {usb_tx_string_P(PSTR("\r"));
 void menu_send_n_st(void) {usb_tx_string_P(PSTR("\r>"));
 }			
 
-void menu_send_out_of_range(void) {	usb_tx_string_P(PSTR("ERROR: out of range\r"));
+void menu_send_out_of_range(void) {usb_tx_string_P(PSTR("ERROR: out of range\r"));
+}
+
+void menu_send_GSM(void) {usb_tx_string_P(PSTR("GSM>>>:"));
+}
+
+void menu_send_CTL(void) {usb_tx_string_P(PSTR("CTL>>>:"));
+}
+	
+void menu_send_CAN(void) {usb_tx_string_P(PSTR("CAN>>>:"));
+}
+	
+void menu_send_BTN(void) {usb_tx_string_P(PSTR("BTN>>>:"));
 }
 
 void menu_print_int(long value) {	
@@ -451,9 +462,6 @@ void usb_tx_string_P(const char *data) {
 }
 
 void menu_lockup (void) {
-	//clear_buffer(CMD_buffer);
-// 	usb_tx_string_P(USB_CMD, PSTR("RESET:\r>"));
-// 	usb_tx_string_P(USB_ACL, PSTR("RESET:\r>"));
 	char msg[] = "AVR>>RESET:\r";
 	usb_cdc_send_string(USB_CMD, msg);
 	usb_cdc_send_string(USB_ACL, msg);

@@ -10,6 +10,34 @@
 #define V2X_CAN_H_
 
 /**
+ * @def CAN_sequence_states
+ * @brief switch for selecting control states
+ */
+enum CAN_sequence_states {
+	CAN_state_idle = 0,
+	CAN_state_check,
+	CAN_state_start,
+	};
+	
+/**
+ * @def CAN_subsequence_states
+ * @brief generic switch for moving through control substates
+ */
+enum CAN_subsequence_states {
+	CAN_subssequence_1 = 0,
+	CAN_subssequence_2,
+	CAN_subssequence_3,
+	CAN_subssequence_4,
+	CAN_subssequence_5,
+	CAN_subssequence_6,
+	CAN_subssequence_7,
+	CAN_subssequence_8,
+	CAN_subssequence_9,
+	CAN_subssequence_10,
+	CAN_subssequence_FAIL
+	};
+	
+/**
  * @def CAN_uart_start
  * @brief configure the usart port used by the CAN device, active RX
  */
@@ -103,5 +131,18 @@ void CAN_power_on (void);
  * @brief disables then enables the ELM with hardware reset pin and sleep
 */
 void CAN_restart (void);
+
+/**
+ * @def CAN_control
+ * @brief interaction control sequencer, host asleep.
+ * @param *to_add pointer to the buffer recieved from CAN
+*/
+void CAN_control (char * responce_buffer);
+
+/**
+ * @def CAN_control_fail
+ * @brief puts the CAN control sequence in a fail state due to timeout
+*/
+void CAN_control_fail (void);
 
 #endif /* V2X_CAN_H_ */

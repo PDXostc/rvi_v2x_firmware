@@ -8,6 +8,8 @@
 #include "V2X.h"
 
 volatile buff CAN;
+uint8_t CAN_sequence_state = CAN_state_idle;
+uint8_t CAN_subsequence_state = CAN_subssequence_1;
 
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
 	CTL_add_to_buffer(&CAN, buffer_select, value);
@@ -42,27 +44,13 @@ void CAN_uart_start (void) {
 	USART.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHAR_LENGTH | USART_PARITY | USART_STOP_BIT;
 	CAN_clear_tx_int();
 
-	CAN.in_store_a = CAN.in_store_b = CAN.out_store_a = CAN.out_store_b = 0;
-	CAN.in_proc_a = CAN.in_proc_b = CAN.out_proc_a = CAN.out_proc_b = 0;
-	CAN.active_in = CAN.active_out = BUFFER_A;	
-
-	CTL_add_to_buffer(&CAN, BUFFER_IN, '\n'); //A
-	CTL_mark_for_processing(&CAN, BUFFER_IN);
-	CTL_purge_buffer(&CAN, BUFFER_IN);
-	CTL_add_to_buffer(&CAN, BUFFER_IN, '\n'); //B
-	CTL_mark_for_processing(&CAN, BUFFER_IN);
-	CTL_purge_buffer(&CAN, BUFFER_IN);
-
-	CTL_add_to_buffer(&CAN, BUFFER_OUT, '\n');
-	CTL_mark_for_processing(&CAN, BUFFER_OUT);
-	CTL_purge_buffer(&CAN, BUFFER_OUT);
-	CTL_add_to_buffer(&CAN, BUFFER_OUT, '\n');
-	CTL_mark_for_processing(&CAN, BUFFER_OUT);
-	CTL_purge_buffer(&CAN, BUFFER_OUT);
+	CAN.input_proc_flag = CAN.input_proc_index = CAN.input_index = 0;
+	CAN.output_proc_active_flag = CAN.output_proc_index = 0;
+	CTL_add_to_buffer(&CAN, BUFFER_IN, '\r'); //put something in buffer so pointers are different
 }
 
 void CAN_uart_stop (void) {
-	uart_close(false);
+	uart_close(USB_CAN);
 }
 
 void CAN_set_tx_int(void) {
@@ -74,18 +62,25 @@ void CAN_clear_tx_int(void) {
 }
 
 void CAN_process_buffer (void) {
-	// if there is something received
-	if (CTL_bytes_to_send(&CAN, BUFFER_IN)) {
-		usb_tx_string_P(PSTR("CAN>>>:"));
-		usb_cdc_send_string(USB_CMD, CTL_ptr_to_proc_buffer(&CAN, BUFFER_IN));
-		usb_tx_string_P(PSTR("\r>"));
-		CTL_purge_buffer(&CAN, BUFFER_IN);
+	if (CAN.output_proc_active_flag) {
+		if (CAN.output_proc_loaded) { //output buffer is ready to send
+			CAN_set_tx_int();		//set ISR flag
+			} else {
+			CTL_purge_buffer(&CAN, BUFFER_OUT);
+		}
 	}
-	if (CTL_bytes_to_send(&CAN, BUFFER_OUT)) {
-		CAN_set_tx_int(); //set to send buffer
-	} 
-
+	while (CAN.input_proc_flag) {
+		CTL_copy_to_proc(&CAN); //copy string from buffer
+		if (CAN.input_proc_loaded) { //process string
+			menu_send_CAN();
+			usb_cdc_send_string(USB_CMD, CAN.input_proc_buf);
+			menu_send_n_st();
+			CAN_control(CAN.input_proc_buf);
+			CAN.input_proc_loaded = false;		//input proc buffer has been handled
+		}
+	}
 }
+
 
 void CAN_power_off (void) {
 	power_control_turn_off((1<<ENABLE_CAN_RESET));
@@ -101,4 +96,19 @@ void CAN_restart (void) {
 	CAN_power_off();
 	delay_ms(10);
 	CAN_power_on();
+}
+
+void CAN_control (char * responce_buffer) {
+	switch (CAN_sequence_state) {
+	case CAN_state_idle:
+	case CAN_state_check:
+	case CAN_state_start:
+	default:
+		CAN_sequence_state = CAN_state_idle;
+		break;
+	}
+}
+
+void CAN_control_fail (void) {
+	CAN_subsequence_state = CAN_subssequence_FAIL;
 }
