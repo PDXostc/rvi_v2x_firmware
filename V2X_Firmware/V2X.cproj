@@ -491,6 +491,12 @@
     <Compile Include="src\V2X\V2X_control.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\V2X\V2X_eeprom.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\V2X\V2X_eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\V2X\V2X_gsm.c">
       <SubType>compile</SubType>
     </Compile>

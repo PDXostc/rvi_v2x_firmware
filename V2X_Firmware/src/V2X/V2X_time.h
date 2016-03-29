@@ -11,6 +11,7 @@
 
 #define time_seed 1456961042  //time starter
 #define RTC_VALIDITY_PERIOD 600  //RTC syncs with GPS
+#define TZ_OFFSET 20
 
 /**
  * @def time_init
@@ -102,5 +103,9 @@ void time_print_human_readable (void);
  * @param *time string of chars containing date info HHMMSS
  **/
 void time_set_by_strings (char * date, char * time);
+
+void time_dst_set(Bool set);
+Bool time_dst_get (void);
+long alarm_get(void);
 
 #endif /* V2X_TIME_H_ */

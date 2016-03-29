@@ -18,8 +18,8 @@ typedef struct buff_t {
 	uint8_t input_proc_index;		//input buffer index at beginning of unprocessed data
 	uint8_t output_proc_index;		//output processing index
 	
-	char input_buf[200];			//input circular buffer
-	char input_proc_buf[75];		//input processing buffer
+	char input_buf[300];			//input circular buffer
+	char input_proc_buf[100];		//input processing buffer
 	char output_proc_buf[20];		//output processing buffer
 	
 	Bool input_proc_flag;			//the input buffer is ready to be searched for a string

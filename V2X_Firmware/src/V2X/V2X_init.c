@@ -73,6 +73,7 @@ void v2x_board_init(void)
 	spi_start();							//start SPI driver
 	power_control_init();					//sets SR to default states - holds power up
 	cpu_irq_enable();
+	eeprom_init();							//verifies eeprom safe for use
 	time_init();
 	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling

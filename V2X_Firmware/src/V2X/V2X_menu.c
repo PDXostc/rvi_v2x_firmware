@@ -392,7 +392,18 @@ void menu_timer(void) {
 		break;
 	case 'z':  //set time zone
 		time_zone_set(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_P(PSTR("Time Zone has been set"));
+		usb_tx_string_P(PSTR("TZN="));
+		menu_print_int(time_zone_get());
+		break;
+	case 'd':  //set time zone
+		usb_tx_string_P(PSTR("DST="));
+		if (menu_sample_number(CMD_buffer+4)) {
+			time_dst_set(1);
+			menu_send_1();
+		} else {
+			time_dst_set(0);
+			menu_send_0();
+		}
 		break;
 	case 'i':  //timer system information
 		usb_tx_string_P(PSTR("The timer module uses Unix Epoch timestamps (UET) \rH24: clock has been set/sync within 24hrs\rALM: alarm is set for the future\r"));
@@ -406,7 +417,7 @@ void menu_timer(void) {
 		break;
 	case '?':  //Menu options
 	default:
-		usb_tx_string_P(PSTR("*** Timer Menu ***\rSn: Set V2X time (UET)\rG: Get V2X time\rAn: Set absolute alarm (UET) \rRn: Set relative alarm (Seconds)\rI: timer information\rQ: Timer inquery\r"));
+		usb_tx_string_P(PSTR("*** Timer Menu ***\rSn: Set V2X time (UET)\rDn: Daylight Savings Time\rG: Get V2X time\rAn: Set absolute alarm (UET) \rRn: Set relative alarm (Seconds)\rI: timer information\rQ: Timer inquery\rU: Update using gps\rZn: Set timezone\r"));
 		break;
 	}
 }
@@ -535,18 +546,26 @@ void menu_power_status(void) {
 }
 
 void menu_timer_status (void) {
+	usb_tx_string_P(PSTR("TZN="));
+	menu_print_int(time_zone_get());
+	menu_send_n();
+	usb_tx_string_P(PSTR("DST="));
+	if (time_dst_get())
+			{menu_send_1();}
+	else	{menu_send_0();}
+	usb_tx_string_P(PSTR("UTC="));
+	menu_print_int(time_get());		
+	menu_send_n();
 	usb_tx_string_P(PSTR("H24="));
 	if (time_is_current())
 			{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("ALM="));
+	menu_print_int(alarm_get());		
+	menu_send_n();
+	usb_tx_string_P(PSTR("ALS="));
 	if (time_alarm_active())
 			{menu_send_1();}
 	else	{menu_send_0();}
-	usb_tx_string_P(PSTR("TZN="));
-	menu_print_int(time_zone_get());
-	menu_send_n();
-	usb_tx_string_P(PSTR("UET="));
-	menu_print_int(time_get());		
-	menu_send_n();
+
 }

@@ -271,7 +271,7 @@ void GSM_time_sync (char * responce_buffer) {
 		break;
 	case GSM_subssequence_2:
 		for (int i = 0; i < 10; i++) {stng[i] = responce_buffer[i];} //move first 10 to compare
-		if (strcmp_P(stng, PSTR("+CGPSINFO:")) == 0) {
+		if (strcmp_P(stng, PSTR("+CGPSINFO:")) == 0 && responce_buffer[10] != ',') {
 			GSM_parse_gps_info(responce_buffer);
 			GSM_subsequence_state = GSM_subssequence_3;
 			job_set_timeout(SYS_GSM, 2);
@@ -310,28 +310,29 @@ void GSM_parse_gps_info (char * responce_buffer) {
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		latitude[i] = start_ptr[i];	//copy lat string
 	}
-	start_ptr = strchr(start_ptr+1, ',') + 1;
+	start_ptr = strchr(start_ptr, ',') + 1;
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		latitude_hemispere[i] = start_ptr[i];	//copy lat hemi string
 	}
-	start_ptr = strchr(start_ptr+1, ',') + 1;
+	start_ptr = strchr(start_ptr, ',') + 1;
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		longitude[i] = start_ptr[i];	//copy long string
 	}
-	start_ptr = strchr(start_ptr+1, ',') + 1;
+	start_ptr = strchr(start_ptr, ',') + 1;
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		longitude_hemispere[i] = start_ptr[i];	//copy long hemi string
 	}
-	start_ptr = strchr(start_ptr+1, ',') + 1;
+	start_ptr = strchr(start_ptr, ',') + 1;
 	char date[10] = "\0";
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		date[i] = start_ptr[i];	//copy date string
 	}
-	start_ptr = strchr(start_ptr+1, ',') + 1;
+	start_ptr = strchr(start_ptr, ',') + 1;
 	char time[10] = "\0";
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		time[i] = start_ptr[i];	//copy time string
 	}
+	
 	usb_tx_string_P(PSTR("CTL>>>:Time sync start: "));
 	time_print_human_readable();
 	menu_send_n_st();
