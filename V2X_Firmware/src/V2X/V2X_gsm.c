@@ -37,6 +37,7 @@ void GSM_usart_init (void) {
 	CTL_add_to_buffer(&GSM, BUFFER_IN, '\r'); //put something in buffer so pointers are different
 }
 
+
 void GSM_set_tx_int(void) {
 	USART_SIM.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_HI_gc;
 }
@@ -57,10 +58,10 @@ void GSM_mark_for_processing(Bool in_out) {
 ISR(USART_SIM_RX_Vect)
 {
 	char value = USART_SIM.DATA;
+	CTL_add_to_buffer(&GSM, BUFFER_IN, value);
 	if (value == '\n' || value == '\r' ) {
 		GSM.input_proc_flag = true;
 	}
-	CTL_add_to_buffer(&GSM, BUFFER_IN, value);
 }
 
 ISR(USART_SIM_DRE_Vect)
@@ -73,9 +74,9 @@ ISR(USART_SIM_DRE_Vect)
 	}
 }
 
-void GSM_begin_init (void) {
+void GSM_modem_init (void) {
 	if (GSM_sequence_state == GSM_state_idle) {
-	GSM_sequence_state = GSM_state_check;
+	GSM_sequence_state = GSM_power_check;
 	GSM_subsequence_state = GSM_subssequence_1; //move to response state
 	GSM_control (hold);
 	}
@@ -93,7 +94,7 @@ void GSM_control (char * responce_buffer) {
 	switch (GSM_sequence_state) {
 		case GSM_state_idle:
 		break;
-		case GSM_state_check:
+		case GSM_power_check:
 		GSM_control_check(responce_buffer);
 		break;
 		case GSM_state_start:
@@ -110,15 +111,12 @@ void GSM_control (char * responce_buffer) {
 void GSM_control_check (char * responce_buffer){
 	switch (GSM_subsequence_state) {
 	case GSM_subssequence_1:  //check module power
-		if (power_query((1<<ENABLE_4V1))) { //is the module power on?
+		if (PWR_query((1<<ENABLE_4V1))) { //is the module power on?
 			GSM_subsequence_state = GSM_subssequence_3; 
 			GSM_control_check(responce_buffer);
 		} else { //if not power it up
-			usb_tx_string_P(PSTR(">CTL>>>:Power up GSM"));  //does not need end of string, exits through menu
-			power_control_turn_on((1<<ENABLE_4V1));
-			power_control_push();
-			delay_ms(10);
-			power_sim_start();
+			usb_tx_string_P(PSTR(">CTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
+			PWR_gsm_start();
 			GSM_subsequence_state = GSM_subssequence_2;
 			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start
 		}
@@ -138,9 +136,9 @@ void GSM_control_check (char * responce_buffer){
 			GSM_control_check(responce_buffer);
 		} else { //try a reset
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("Trying to reboot GSM\r>"));
-			power_sim_stop(); 
-			power_sim_start();
+			usb_tx_string_P(PSTR("GSM rebooting\r>"));
+			PWR_gsm_stop(); 
+			PWR_gsm_start();
 			GSM_subsequence_state = GSM_subssequence_2;
 			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start
 		}
@@ -154,7 +152,7 @@ void GSM_control_check (char * responce_buffer){
 	case GSM_subssequence_7:
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("Responding to commands\r>"));
+			usb_tx_string_P(PSTR("GSM Responding\r>"));
 			GSM_subsequence_state = GSM_subssequence_1;  //got expected response, go to next step
 			GSM_sequence_state = GSM_state_start;
 			GSM_control(responce_buffer); //start next state
@@ -182,7 +180,7 @@ void GSM_control_start (char * responce_buffer){
 	case GSM_subssequence_2:
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("Echo off\r>"));
+			usb_tx_string_P(PSTR("GSM Echo off\r>"));
 			GSM_subsequence_state = GSM_subssequence_3; //move to response state
 			GSM_control(responce_buffer);
 		} 
@@ -198,6 +196,7 @@ void GSM_control_start (char * responce_buffer){
 		if (strcmp_P(responce_buffer, PSTR("Model: SIMCOM_SIM5320A")) == 0) {
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("SIM5320A device detected\r>"));
+			job_set_timeout(SYS_GSM, 2);
 			GSM_subsequence_state = GSM_subssequence_5;  //got expected response, go to next step
 		} else if (strcmp_P(responce_buffer, PSTR("OK")) == 0){	//did not see matching device ID
 			GSM_subsequence_state = GSM_subssequence_FAIL;
@@ -207,19 +206,21 @@ void GSM_control_start (char * responce_buffer){
 		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_5:
-		for (int i = 0; i < 4; i++) {stng[i] = responce_buffer[i];} //move first 4 to compare
-		if (strcmp_P(stng, PSTR("IMEI")) == 0) {
+		clear_buffer(stng);
+		for (int i = 0; i < 5; i++) {stng[i] = responce_buffer[i];} //move first 4 to compare
+		if (strcmp_P(stng, PSTR("IMEI:")) == 0) {
 			clear_buffer(imei);
 			strcat(imei, responce_buffer+6);
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("IMEI captured "));
+			menu_send_n_st();
+			job_set_timeout(SYS_GSM, 2);
 			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
 		}
 		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_6:
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0){
-			usb_tx_string_P(PSTR("IMEI<<:"));
-			usb_cdc_send_string(USB_CMD, imei);
-			menu_send_n_st();
 			GSM_subsequence_state = GSM_subssequence_7;
 			GSM_control(responce_buffer);
 		}  //else {keep looking}
@@ -227,14 +228,14 @@ void GSM_control_start (char * responce_buffer){
 		break;
 	case GSM_subssequence_7:
 		menu_send_CTL();
-		usb_tx_string_P(PSTR("SIM Start end\r>"));
+		usb_tx_string_P(PSTR("GSM Started\r>"));
 		GSM_sequence_state = GSM_state_idle;
 		job_clear_timeout(SYS_GSM);
 		break;
 	case GSM_subssequence_FAIL:
 	default:
 		menu_send_CTL();
-		usb_tx_string_P(PSTR("SIM Start FAULT\r>"));
+		usb_tx_string_P(PSTR("GSM Start failure\r>"));
 		GSM_sequence_state = GSM_state_idle;
 		job_clear_timeout(SYS_GSM);
 		break;
@@ -281,8 +282,7 @@ void GSM_time_sync (char * responce_buffer) {
 	case GSM_subssequence_3:
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
 			GSM_sequence_state = GSM_state_idle;
-			menu_send_CTL();
-			usb_tx_string_P(PSTR("GPS time sync\r>"));
+			
 			job_clear_timeout(SYS_GSM);
 		}
 		job_check_fail(SYS_GSM);
@@ -332,23 +332,20 @@ void GSM_parse_gps_info (char * responce_buffer) {
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		time[i] = start_ptr[i];	//copy time string
 	}
-	
-	usb_tx_string_P(PSTR("CTL>>>:Time sync start: "));
-	time_print_human_readable();
-	menu_send_n_st();
-		
+			
 	if (atoi(date) != 0) { //this logic wont work on Jan 1 2100
 		time_set_by_strings(date, time);
 		menu_send_CTL();
-		usb_tx_string_P(PSTR("Time updated to: "));
+		usb_tx_string_P(PSTR("GPS time sync @ "));
 		time_print_human_readable();
-		menu_send_n_st();		
-	} else {	
-		menu_send_CTL();
-		usb_tx_string_P(PSTR("Time not updated\r>"));
+		menu_send_n_st();	
 	}
 }
 
 void GSM_control_fail (void) {
 	GSM_subsequence_state = GSM_subssequence_FAIL;
+}
+
+char * GSM_get_imei (void) {
+	return &imei;
 }

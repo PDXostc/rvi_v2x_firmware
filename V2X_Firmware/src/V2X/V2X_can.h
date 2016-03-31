@@ -15,7 +15,7 @@
  */
 enum CAN_sequence_states {
 	CAN_state_idle = 0,
-	CAN_state_check,
+	CAN_state_power,
 	CAN_state_start,
 	};
 	
@@ -114,28 +114,11 @@ void CAN_mark_for_processing (Bool in_out);
 */
 void CAN_add_string_to_buffer(Bool in_out, char * to_add);
 
-/**
- * @def CAN_power_off
- * @brief disables the ELM with hardware reset pin
-*/
-void CAN_power_off (void);
-
-/**
- * @def CAN_power_on
- * @brief enables the ELM with hardware reset pin
-*/
-void CAN_power_on (void);
-
-/**
- * @def CAN_restart
- * @brief disables then enables the ELM with hardware reset pin and sleep
-*/
-void CAN_restart (void);
 
 /**
  * @def CAN_control
  * @brief interaction control sequencer, host asleep.
- * @param *to_add pointer to the buffer recieved from CAN
+ * @param *responce_buffer pointer to the buffer to be analysed
 */
 void CAN_control (char * responce_buffer);
 
@@ -144,5 +127,61 @@ void CAN_control (char * responce_buffer);
  * @brief puts the CAN control sequence in a fail state due to timeout
 */
 void CAN_control_fail (void);
+
+/**
+ * @def CAN_mark_as_sent
+ * @brief clears the loaded bit in the can output buffer
+*/
+void CAN_mark_as_sent(void);
+
+/**
+ * @def CAN_elm_init
+ * @brief Starts a control sequence job that initializes the ELM
+*/
+void CAN_elm_init (void);
+
+/**
+ * @def CAN_control_init
+ * @brief control processor for the init sequence
+ * @param *responce_buffer pointer to the buffer to be analysed
+*/
+void CAN_control_init (char * responce_buffer);
+
+/**
+ * @def CAN_is_controlled
+ * @brief indicates the ELM is under transaction with controller
+*/
+Bool CAN_is_controlled(void);
+
+/**
+ * @def CAN_new_data
+ * @brief called by serial ISR to store data to the inpout buffer
+ * @param value the value to store in buffer
+*/
+void CAN_new_data (uint8_t value);
+
+/**
+ * @def CAN_send_data
+ * @brief routine called by serial Tx ISR for sending output buffer data
+*/
+void CAN_send_data (void);
+
+/**
+ * @def CAN_start_snoop
+ * @brief called by the VXCX menu to pass/listen CAN commands in CMD
+*/
+void CAN_start_snoop (void);
+
+/**
+ * @def CAN_stop_snoop
+ * @brief stops listening of CAN by CMD
+*/
+void CAN_stop_snoop (void);
+
+/**
+ * @def CAN_is_snooping
+ * @brief used to determine the snoop state
+*/
+Bool CAN_is_snooping(void);
 
 #endif /* V2X_CAN_H_ */

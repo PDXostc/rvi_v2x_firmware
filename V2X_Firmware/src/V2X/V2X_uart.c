@@ -17,6 +17,8 @@ void canbus_serial_routing(uint8_t source)
 
 void uart_config(uint8_t port, usb_cdc_line_coding_t * cfg)
 {
+	if (port != USB_CAN) {return;}
+	
 	uint8_t reg_ctrlc;
 	uint16_t bsel;
 
@@ -83,8 +85,7 @@ void uart_open(uint8_t port)
 	// Enable both RX and TX
 	USART.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_CLK2X_bm;
 	// Enable interrupt with priority higher than USB
-	USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t)
-	USART_DREINTLVL_OFF_gc;
+	CAN_clear_tx_int();
 }
 
 void uart_close(uint8_t port)
@@ -107,7 +108,7 @@ void uart_rx_notify(uint8_t port) //message received over USB
 			USART_DREINTLVL_HI_gc;
 		}
 	}else if (port == USB_CMD) {
-		if (udi_cdc_multi_is_rx_ready(port)) {  //is there data
+		while (udi_cdc_multi_is_rx_ready(port)) {  //is there data
  			data = udi_cdc_multi_getc(port);	//get 1 char of data
 // 			if (data == '?'						//allow '?'
 // 			||  data == '-'						//minus sign
@@ -119,7 +120,7 @@ void uart_rx_notify(uint8_t port) //message received over USB
 // 			|| (data >= '0' && data <= '9') 	//numbers
 // 			|| (data >= 'A' && data <= 'Z') 	//capitals
 // 			|| (data >= 'a' && data <= 'z')) {	//lower case
-	 		if (data >= 0x20 && data <= 0x7F || data == '\r') {
+	 		if (data >= 0x20 && data <= 0x7F || data == '\r' || data == 8) {
 				if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
  					udi_cdc_multi_signal_overrun(port);		//no
  				} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
@@ -129,11 +130,11 @@ void uart_rx_notify(uint8_t port) //message received over USB
 				} else { //was a standard character that should be stored in the buffer
 					menu_add_to_command(data);
 				}
-			} else { //there was a special character
-				//run through the buffer until it is empty
-				while (udi_cdc_multi_is_rx_ready(port)) {  
-					data = udi_cdc_multi_getc(port);
-				}
+// 			} else { //there was a special character
+// 				//run through the buffer until it is empty
+// 				while (udi_cdc_multi_is_rx_ready(port)) {  
+// 					data = udi_cdc_multi_getc(port);
+// 				}
 			}
 		}
 	}else if (port == USB_ACL) { //loop back
@@ -155,41 +156,33 @@ void uart_rx_notify(uint8_t port) //message received over USB
 
 ISR(USART_RX_Vect)
 {
-	uint8_t value;
-	switch (usb_cdc_is_active(USB_CAN)){
-	case true:
+	uint8_t value = USART.DATA;
+	if (CAN_is_controlled() || CAN_is_snooping() || usb_cdc_is_active(USB_CAN) == false) {
+		CAN_new_data(value);
+	} 
+	
+	if (usb_cdc_is_active(USB_CAN) == true){
 		//host is on, send over USB
 		if (0 != (USART.STATUS & (USART_FERR_bm | USART_BUFOVF_bm))) {
 			udi_cdc_multi_signal_framing_error(USB_CAN);
 		}
 		// Transfer UART RX fifo to CDC TX
-		value = USART.DATA;
 		if (!udi_cdc_multi_is_tx_ready(USB_CAN)) {
 			// Fifo full
 			udi_cdc_multi_signal_overrun(USB_CAN);
 		}else{
 			udi_cdc_multi_putc(USB_CAN, value);
 		}
-		break;
-	case false:
-	default:
-		//host is off, capture message for processing
-		value = USART.DATA;
-		if (value == '>' || value == '\r' ) {
-			//CAN_process_buffer(BUFFER_IN);
-			CAN_mark_for_processing(BUFFER_IN);
-		} else {
-			CAN_add_to_buffer(BUFFER_IN, value);
-		}
-		break;
 	}
 }
 
 ISR(USART_DRE_Vect)
 {
-	uint8_t value;
-	switch (usb_cdc_is_active(USB_CAN)){
-	case true:
+	if (CAN_is_controlled() || CAN_is_snooping() || !usb_cdc_is_active(USB_CAN) == false) { //can controller needs to send data
+		CAN_send_data();
+	} 
+	
+	if (usb_cdc_is_active(USB_CAN) == true){  //usb is in control
 		// Data from USB
 		if (udi_cdc_is_rx_ready()) {
 			// Transmit next data
@@ -198,15 +191,5 @@ ISR(USART_DRE_Vect)
 			// Fifo empty then Stop UART transmission
 			CAN_clear_tx_int();
 		}
-		break;
-	case false:
-	default:
-		if (CAN_bytes_to_send(BUFFER_OUT)) {
- 			USART.DATA = CAN_next_byte(BUFFER_OUT);
-		} else {
-			CAN_purge_buffer(BUFFER_OUT);
-			CAN_clear_tx_int();
-		}
-		break;
 	}
 }

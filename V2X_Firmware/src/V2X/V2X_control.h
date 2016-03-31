@@ -18,7 +18,7 @@ typedef struct buff_t {
 	uint8_t input_proc_index;		//input buffer index at beginning of unprocessed data
 	uint8_t output_proc_index;		//output processing index
 	
-	char input_buf[300];			//input circular buffer
+	char input_buf[200];			//input circular buffer
 	char input_proc_buf[100];		//input processing buffer
 	char output_proc_buf[20];		//output processing buffer
 	
@@ -52,8 +52,10 @@ enum buffer_switch {
  * @brief system definition for the double buffering system
  **/
 enum system_switch {
-	SYS_CAN = 0,
-	SYS_GSM
+	SYS_CAN = 0,	//used for direct control of CAN
+	SYS_GSM,		//used for direct control of GSM
+	SYS_CAN_CTL,	//used for CTL passthrough of CAN
+	SYS_CTL			//stand alone sequence jobs, wake host, etc.
 };
 
 /**

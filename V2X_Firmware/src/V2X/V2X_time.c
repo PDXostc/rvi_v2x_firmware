@@ -63,7 +63,7 @@ long time_get(void) {
 	return  rtc_get_time();
 }
 
-long alarm_get(void) {
+long time_alarm_get(void) {
 	return  alarm_will_expire;
 }
 

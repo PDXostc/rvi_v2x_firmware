@@ -7,8 +7,8 @@
 
 #include "V2X.h"
 
-uint32_t job_timeout[2] = {0, 0};
-Bool job_timeout_enable[2] = {false, false};
+uint32_t job_timeout[2] = {0, 0, 0, 0};
+Bool job_timeout_enable[4] = {false, false, false, false};
 
 void CTL_add_to_buffer(buff * buffer, Bool in_out, char value) {
 	switch (in_out) {
@@ -116,7 +116,7 @@ void CTL_copy_to_proc(buff * buffer) { //enters with buffer->input_proc_flag tru
 	while  (buffer->input_proc_flag && buffer->input_proc_index != buffer->input_index) { //while still processing
 		char temp = buffer->input_buf[buffer->input_proc_index++]; //get char from input array
  		CTL_input_proc_index_check(buffer);
-		if ( temp == '\n' || temp == '\r') {//an end of string char has been found
+		if ( temp == '\n' || temp == '\r' || temp == 0x07 || temp == '>') {//an end of string char has been found
 			if (i != 0)	{
 				buffer->input_proc_loaded = true; //set flag of buffer copied
 				buffer->input_proc_flag = false; //clear flag to exit loop
@@ -162,6 +162,9 @@ void job_coordinator (void) {
 		char nuthin[] = ".timeout.";
 		CAN_control(nuthin);  //start another job to catch the timeout
 	}
+	if (job_check_timeout(SYS_CAN_CTL)) {
+		CAN_stop_snoop();
+	}
 	//more jobs to add
 	//compare GPS coordinates to trigger alarm/host
 	//compare ACL data to trigger alarm/host
@@ -186,18 +189,18 @@ void job_clear_timeout (uint8_t system) {
 void job_check_fail(uint8_t system) {
 	if (job_check_timeout(system)) {//has the controller been called by a timeout?
 		job_clear_timeout(system);
-	switch (system) {
-	case SYS_GSM:
-		GSM_control_fail();
-		menu_send_GSM();
-		break;
-	case SYS_CAN:
-		CAN_control_fail();
-		menu_send_CAN();
-		break;
-	}
-	usb_tx_string_P(PSTR("did not respond, control timeout\r>"));
-	job_set_timeout(system, 1);
+		switch (system) {
+			case SYS_GSM:
+			GSM_control_fail();
+			menu_send_GSM();
+			break;
+			case SYS_CAN:
+			CAN_control_fail();
+			menu_send_CAN();
+			break;
+		}
+		usb_tx_string_P(PSTR("Control timeout\r>"));
+		job_set_timeout(system, 1);
 	}
 }
 

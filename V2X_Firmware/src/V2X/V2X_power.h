@@ -32,70 +32,100 @@ volatile uint16_t power_control_state;
  *			this turns on power supplies to maintain the atmel and other circuits
  *			not very specific yet, all function just turn on.
  **/
-void power_control_init(void);
+void PWR_init(void);
 
 /**
  * @def shift_register_latch
  * @brief	causes the serial data just shifted into the shift register to latch to the outputs
  **/
-void power_control_latch(void);
+void PWR_latch(void);
 
 /**
  * @def shift_register_clear
  * @brief Causes the register to latch all outputs to low
  **/
-void power_control_clear(void);
+void PWR_clear(void);
 
 /**
  * @def state_to_shift_register
  * @brief	Sends the current power state to the shift register and latches to the outputs
  **/
-void power_control_push(void);
+void PWR_push(void);
 
 /**
  * @def turn_on
  * @brief Sets bits in the power state variable, in preparation for a state change
  * @param pins_mask bit wise mask of enable/power pins
  **/
-void power_control_turn_on(uint16_t pins_mask);
+void PWR_turn_on(uint16_t pins_mask);
 
 /**
  * @def shift_register_clear
  * @brief Clears bits in the power state variable, in preparation for a state change
  * @param pins_mask bit wise mask of enable/power pins
  **/
-void power_control_turn_off(uint16_t pins_mask);
+void PWR_turn_off(uint16_t pins_mask);
 
 /**
- * @def power_sim_start
- * @brief sends a sequence to enable the SIM5320 module
- */
-void power_sim_start(void);
-
-/**
- * @def power_sim_reset
- * @brief sends a sequence to disable the SIM5320 module
- */
-void power_sim_stop(void);
-
-/**
- * @def power_query
+ * @def PWR_query
  * @brief returns if the  
  * @param mask bitwise mask use with power_sequence_outputs
  * @retval if power_status_mask & var_mask != 0 returns true
  */
-bool power_query(uint16_t mask);
+Bool PWR_query(uint16_t mask);
 
 /**
  * @def power_hub_start
  * @brief sends a sequence to disable the USB hub
  */
-void power_hub_start(void);
+void PWR_hub_start(void);
 
 /**
  * @def power_hub_reset
  * @brief sends a sequence to disable the USB hub
  */
-void power_hub_stop(void);
+void PWR_hub_stop(void);
+
+/**
+ * @def PWR_is_5_needed
+ * @brief turns off 5v rail if unused
+ */
+void PWR_is_5_needed (void);
+
+/**
+ * @def PWR_host_start
+ * @brief sends power to the host computer
+ */
+void PWR_host_start(void);
+
+/**
+ * @def PWR_host_stop
+ * @brief turns off power to host and 5v rail if unused
+ */
+void PWR_host_stop(void);
+
+/**
+ * @def PWR_can_stop
+ * @brief disables the ELM with hardware reset pin turns off 5v rail if unused
+*/
+void PWR_can_stop (void);
+
+/**
+ * @def PWR_can_start
+ * @brief enables the ELM with hardware reset pin
+*/
+void PWR_can_start (void);
+
+/**
+ * @def GSM_start
+ * @brief sends a sequence to enable the SIM5320 module
+ */
+void PWR_gsm_start(void);
+
+/**
+ * @def power_sim_reset
+ * @brief sends a sequence to disable the SIM5320 module
+ */
+void PWR_gsm_stop(void);
 
 #endif /* V2X_DRIVERS_H_ */

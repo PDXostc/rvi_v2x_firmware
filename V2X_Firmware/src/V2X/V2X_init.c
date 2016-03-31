@@ -71,60 +71,78 @@ void v2x_board_init(void)
 	ioport_init();							//Initializes the IOPORT service
 	pin_init();								//whole chip pin init, modes and initial conditions
 	spi_start();							//start SPI driver
-	power_control_init();					//sets SR to default states - holds power up
+	PWR_init();								//sets SR to default states - holds power up
 	cpu_irq_enable();
 	eeprom_init();							//verifies eeprom safe for use
-	time_init();
+	time_init();							//starts the RTC
 	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling
-	GSM_usart_init();
-	CAN_uart_start();
+	GSM_usart_init();						//starts direct serial channel to the SIM module
+	CAN_uart_start();						//starts direct serial channel to the ELM module
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
 	udc_start();							//start stack and vbus monitoring
-	power_hub_start();						//connect the hub to the computer
+	PWR_hub_start();						//connect the hub to the computer
+
+	//autostart all systems
+	delay_ms(500);
+	GSM_modem_init();
+	CAN_elm_init();
+	ACL_set_sample_on();
+	PWR_host_start();
 }
 
 void reset_processor(void) {
-	if (reset_flags != 0) {
-		if (reset_flags & (1<<RESET_SYSTEM) != 0) {
+	if (reset_flags) {
+		if (reset_flags & (1<<RESET_SYSTEM)) {
 			usb_tx_string_P(PSTR("V2X restarting\rPlease close this window\r>"));
 			delay_s(10);
 			CCP = 0xd8; //enable write protected registers
 			RST_CTRL = true; //force SW reset
 		}
-		if (reset_flags & (1<<RESET_USB) != 0) {
+		if (reset_flags & (1<<RESET_USB)) {
 			usb_tx_string_P(PSTR("USB restarting\r>"));
 			delay_s(10);
-			power_hub_stop();
+			PWR_hub_stop();
 			delay_s(7);
-			power_hub_start();
+			PWR_hub_start();
 			delay_s(1);
+			reset_flags &= ~(1<<RESET_USB);
 		}
-		if (reset_flags & (1<<RESET_CAN) != 0) {
-			usb_tx_string_P(PSTR("ELM restarting\r>"));
-			CAN_restart();
+		if (reset_flags & (1<<RESET_CAN)) {
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("CAN restarting\r>"));
+			PWR_can_stop();
+			delay_ms(100);
+			CAN_elm_init();
+			reset_flags &= ~(1<<RESET_CAN);
 		}
-		if (reset_flags & (1<<RESET_GSM) != 0) {
-			usb_tx_string_P(PSTR("Modem restarting\r>"));
-			power_sim_stop();
-			power_sim_start();
+		if (reset_flags & (1<<RESET_GSM)) {
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("GSM restarting\r>"));
+			PWR_gsm_stop();
+			delay_ms(100);
+			GSM_modem_init();
+			reset_flags &= ~(1<<RESET_GSM);
+		}
+		if (reset_flags & ~((1<<RESET_SYSTEM)|(1<<RESET_USB)|(1<<RESET_CAN)|(1<<RESET_GSM))) {
+			reset_flags = reset_flags & ~((1<<RESET_SYSTEM)|(1<<RESET_USB)|(1<<RESET_CAN)|(1<<RESET_GSM));
 		}
 	}
-	reset_flags = RESET_NONE;
+	
 }
 
 void reset_trigger_USB (void) {
-	reset_flags |= (1<<RESET_USB);
+	reset_flags = reset_flags | (1<<RESET_USB);
 }
 
 void reset_trigger_SYSTEM (void) {
-	reset_flags |= (1<<RESET_SYSTEM);
+	reset_flags = reset_flags | (1<<RESET_SYSTEM);
 }
 
 void reset_trigger_CAN (void) {
-	reset_flags |= (1<<RESET_CAN);
+	reset_flags = reset_flags | (1<<RESET_CAN);
 }
 
 void reset_trigger_GSM (void) {
-	reset_flags |= (1<<RESET_GSM);
+	reset_flags = reset_flags | (1<<RESET_GSM);
 }

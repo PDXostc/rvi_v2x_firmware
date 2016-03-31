@@ -19,25 +19,17 @@ void usb_resume_action(void)
 	//operation to perform when USB starts
 }
 
-bool usb_cdc_enable(uint8_t port)
+Bool usb_cdc_enable(uint8_t port)
 {
-// 	if (port == USB_CAN) {
-// 		
-// 		uart_open(port);	// Open USB passthrough communication
-// 	}
 	return true;
 }
 
-bool usb_cdc_is_active(uint8_t port) {
+Bool usb_cdc_is_active(uint8_t port) {
 	return usb_cdc_enabled_bool[port];
 }
 
 void usb_cdc_disable(uint8_t port)
 {
-// 	// Close communication
-// 	if (port == USB_CAN) {
-// 		uart_close(port);	// Open communication
-// 	}
 }
 
 void usb_sof_action(void)  //causes led 0 to flash on USB activity
@@ -54,14 +46,14 @@ void usb_cdc_set_dtr(uint8_t port, bool b_enable)
 			uart_open(port);	// Open USB passthrough communication
 		}else if (port == USB_CMD) {
 			led_1_on();
-			usb_tx_string_P(PSTR("\r>"));
-			//start Hayes interface 
+			menu_send_n_st();
+			//start Hayes CMD interface 
 		}else if (port == USB_ACL) {
 			led_2_on();
 			//enable ACL
 			//ACL_sample_on();
 		}
-	}else{
+	} else {
 		// Host terminal has close COM
 		if (port == USB_CAN) { //change can from pass through to direct mode
 			led_0_off();
