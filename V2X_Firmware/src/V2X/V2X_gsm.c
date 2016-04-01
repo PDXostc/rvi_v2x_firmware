@@ -221,16 +221,23 @@ void GSM_control_start (char * responce_buffer){
 		break;
 	case GSM_subssequence_6:
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0){
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("GSM Started\r>"));
+			CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPS=1\r")); //compose message
+			CTL_mark_for_processing(&GSM, BUFFER_OUT); //send it
 			GSM_subsequence_state = GSM_subssequence_7;
-			GSM_control(responce_buffer);
+			job_set_timeout(SYS_GSM, 2);
 		}  //else {keep looking}
 		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_7:
-		menu_send_CTL();
-		usb_tx_string_P(PSTR("GSM Started\r>"));
-		GSM_sequence_state = GSM_state_idle;
-		job_clear_timeout(SYS_GSM);
+		if (strcmp_P(responce_buffer, PSTR("OK")) == 0){
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("GPS Started\r>"));
+			GSM_sequence_state = GSM_state_idle;
+			job_clear_timeout(SYS_GSM);
+		}  //else {keep looking}
+		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_FAIL:
 	default:
