@@ -13,7 +13,6 @@ char latitude[13] = "\0";
 char latitude_hemispere[2] = "\0";
 char longitude[13] = "\0";
 char longitude_hemispere[2] = "\0";
-char hold[100] = "\0";
 
 volatile buff GSM;
 char stng[100] = "\0";
@@ -76,9 +75,10 @@ ISR(USART_SIM_DRE_Vect)
 
 void GSM_modem_init (void) {
 	if (GSM_sequence_state == GSM_state_idle) {
-	GSM_sequence_state = GSM_power_check;
-	GSM_subsequence_state = GSM_subssequence_1; //move to response state
-	GSM_control (hold);
+		GSM_sequence_state = GSM_power_check;
+		GSM_subsequence_state = GSM_subssequence_1; //move to response state
+		char hold[2];
+		GSM_control (hold);
 	}
 }
 
@@ -86,6 +86,7 @@ void GSM_time_job (void) {
 	if (GSM_sequence_state == GSM_state_idle) {
 		GSM_sequence_state = GSM_state_time_get;
 		GSM_subsequence_state = GSM_subssequence_1; //move to response state
+		char hold[2];
 		GSM_control (hold);
 	}
 }

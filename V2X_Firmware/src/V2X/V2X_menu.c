@@ -260,6 +260,7 @@ void menu_modem (void) {
 
 void menu_can (void) {
 	int i;
+	char buffer[EE_CAN_ARRAY_SIZE+1];
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable;
 		usb_tx_string_P(PSTR("CAN is off\r"));
@@ -288,7 +289,17 @@ void menu_can (void) {
 		CAN_mark_for_processing(BUFFER_OUT);
 		CAN_start_snoop();
 		break;
-
+	case 's':  //save string to eeprom
+		//strcat_P(CMD_buffer, PSTR("\r"));
+		eeprom_store_CAN_string(CMD_buffer+4);
+		break;
+	case 'a': //load string and parse from eeprom
+		usb_tx_string_P(PSTR("EE:"));
+		eeprom_read_CAN_string(buffer);
+		usb_cdc_send_string(USB_CMD, buffer);
+		menu_send_n();
+		//CAN_can_start();
+		break;
 	case '?':
 	default:
 		usb_tx_string_P(PSTR("*** CANbus Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\r"));

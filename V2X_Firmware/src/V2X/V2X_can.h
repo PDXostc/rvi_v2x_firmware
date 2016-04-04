@@ -90,7 +90,7 @@ char CAN_next_byte (uint8_t buffer_select);
  * @brief if the buffer has data it set sending in motion
  * @param buffer_select (0,1) input/output
  */
-void CAN_process_buffer ();
+void CAN_process_buffer (void);
 
 /**
  * @def CAN_purge_buffer
@@ -184,4 +184,11 @@ void CAN_stop_snoop (void);
 */
 Bool CAN_is_snooping(void);
 
+/**
+ * @def CAN_control_start
+ * @brief run from within the CAN_control process, uses eeprom string to configure the ELM
+*/
+void CAN_control_start(char * responce_buffer);
+void CAN_can_start (void);
+Bool CAN_find_message (char * buffer, uint8_t step);
 #endif /* V2X_CAN_H_ */
