@@ -11,6 +11,7 @@
 
 #define time_seed 1456961042  //time starter
 #define RTC_VALIDITY_PERIOD 600  //RTC syncs with GPS
+#define TZ_OFFSET 20
 
 /**
  * @def time_init
@@ -102,5 +103,26 @@ void time_print_human_readable (void);
  * @param *time string of chars containing date info HHMMSS
  **/
 void time_set_by_strings (char * date, char * time);
+
+/**
+ * @def time_dst_set
+ * @brief sets and stores to EEprom the state of daylight savings time
+ * @param set use true if march to october 
+ **/
+void time_dst_set(Bool set);
+
+/**
+ * @def time_dst_get
+ * @brief reads the state of daylight savings time
+ * @retval state of daylight savings time
+ **/
+Bool time_dst_get (void);
+
+/**
+ * @def time_alarm_get
+ * @brief called to get the time the alarm is set to
+ * @retval time of the configured alarm
+ **/
+long time_alarm_get(void);
 
 #endif /* V2X_TIME_H_ */

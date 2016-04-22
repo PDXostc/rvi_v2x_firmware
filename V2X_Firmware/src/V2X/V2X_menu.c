@@ -32,7 +32,7 @@ void menu_main(void) {
 				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\rOpen source hardware and software\rHW Rev1.2 \rSW Rev0.1\r"));
 				break;
 			case 'j': //Jaguar
-				usb_tx_string_P(PSTR("   ,ggp@@@@mgg,,\r,$Q$(`S@@$;g$$$$$@$@@gg,\r;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r                                    *$@@L ```T$W~)%g,\r                                      *%@gg,,,,,    5/Sw,     ,\r                                          ```` ` `9g `9g,``*^|'\r                                                    `#g,`)h\r\r   Developed at Jaguar Land Rover OSCT. Portland OR 2016\r"));
+				usb_tx_string_P(PSTR("\r\r   ,ggp@@@@mgg,,\r,$Q$(`S@@$;g$$$$$@$@@gg,\r;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r                                    *$@@L ```T$W~)%g,\r                                      *%@gg,,,,,    5/Sw,     ,\r                                          ```` ` `9g `9g,``*^|'\r                                                    `#g,`)h\r\r   Developed at Jaguar Land Rover OSCT. Portland OR 2016\r"));
 				break;
 			case 'q':
 				menu_status();
@@ -46,8 +46,10 @@ void menu_main(void) {
 			case 'c':  //CAN interface
 				menu_can();
 				break;
-			case 's':  //sleep
-				GSM_begin_init();
+			case 's':  //start all modules
+				GSM_modem_init();
+				CAN_elm_init();
+				ACL_set_sample_on();
 				break;
 			case 'm':  //modem
 				menu_modem();
@@ -60,14 +62,14 @@ void menu_main(void) {
 				break;
 			case '?':  //timer functions
 			default:
-				usb_tx_string_P(PSTR("*** Main Menu ***\rI: Device information\rA: Accelerometer\rC: CANbus\rM: Modem\rP: Power\rT: Timer\rQ: Query system status\rS: Simcard status\rR: Reboot\r"));
+				usb_tx_string_P(PSTR("*** Main Menu ***\rI: Device information\rA: Accelerometer menu(ACL)\rC: ELM327 menu(CAN)\rM: SIM Modem menu(GSM)\rP: Power menu\rT: Timer menu\rQ: Query system status\rS: Start System\rR: Reboot\r"));
 				break;
 			}
 	}else{
 			usb_tx_string_P(PSTR("All commands start VX\r"));
 	}
 	clear_buffer(CMD_buffer);	//clear the buffer for next command	
-	usb_tx_string_P(PSTR("\r>"));  //prompt for user input
+	menu_send_n_st();
 }
 
 void menu_accel (void) {
@@ -226,66 +228,77 @@ void menu_accel (void) {
 void menu_modem (void) {
 	int i; 
 	switch (CMD_buffer[3]) {
-	case 'd':  //disable
-		power_sim_stop();
-		usb_tx_string_P(PSTR("Modem is off\r"));
+	case 'd':  
+		PWR_gsm_stop(); //disable
+		usb_tx_string_P(PSTR("GSM is off\r"));
 		break;
 	case 'e':  //enable modem
-		power_sim_start();
-		usb_tx_string_P(PSTR("Modem has been started\r"));
+		usb_tx_string_P(PSTR("GSM Start pending"));
+		GSM_modem_init();
 		break;
 	case 'r':  //reset
 		reset_trigger_GSM();
-		usb_tx_string_P(PSTR("Modem has been restarted\r"));
+		usb_tx_string_P(PSTR("GSM restarting\r"));
 		break;
 	case 'q':
 		menu_modem_status();
-		//simcard_status();
 		break;
 	case 'i':
 		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G GSM modem + GPS receiver by SIMCOM\r"));
 		break;
 	case 'x':
-		strcat_P(CMD_buffer, PSTR("\r\n"));
-		GSM_add_string_to_buffer(BUFFER_OUT, &CMD_buffer[4]);
-		GSM_mark_for_processing(BUFFER_OUT);
+		strcat_P(CMD_buffer, PSTR("\r\n"));  //put these char at the end of the string
+		GSM_add_string_to_buffer(BUFFER_OUT, &CMD_buffer[4]); //send it on to the modem
+		GSM_mark_for_processing(BUFFER_OUT); //initiate send
  		break;
-	case 's':  
-		simcard_status();
-		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rS: SIMCARD Status\rX: AT Command Pass through\r"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rX: AT Command Pass through\r"));
 		break;
 	}
 }
 
 void menu_can (void) {
 	int i;
+	char buffer[EE_CAN_ARRAY_SIZE+1];
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable;
-		CAN_power_off();
-		usb_tx_string_P(PSTR("CANbus is off\r"));
+		usb_tx_string_P(PSTR("CAN is off\r"));
+		PWR_can_stop();
+		PWR_is_5_needed();
 		break;
 	case 'e':  //enable
-		CAN_power_on();
-		usb_tx_string_P(PSTR("CANbus has been started\r"));
+		usb_tx_string_P(PSTR("CAN Starting\r"));
+		CAN_elm_init();
 		break;
 	case 'r':  //reset
+		usb_tx_string_P(PSTR("CAN restarting\r"));
 		reset_trigger_CAN();
-		usb_tx_string_P(PSTR("CANbus has been restarted\r"));
 		break;
-	case 'q':
+	case 'q': //query
 		menu_can_status();
 		break;
-	case 'i':
+	case 'i': //info
 		usb_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\r"));
 		usb_tx_string_P(PSTR("The STN1110 is compliant with the ELM327 V1.3\r"));
 		break;
-	case 'x':
-		strcat_P(CMD_buffer, PSTR("\r\n"));
+	case 'x': //pass command
+		strcat_P(CMD_buffer, PSTR("\r"));
+		
 		CAN_add_string_to_buffer(BUFFER_OUT, CMD_buffer+4);
 		CAN_mark_for_processing(BUFFER_OUT);
+		CAN_start_snoop();
+		break;
+	case 's':  //save string to eeprom
+		//strcat_P(CMD_buffer, PSTR("\r"));
+		eeprom_store_CAN_string(CMD_buffer+4);
+		break;
+	case 'a': //load string and parse from eeprom
+		usb_tx_string_P(PSTR("EE:"));
+		eeprom_read_CAN_string(buffer);
+		usb_cdc_send_string(USB_CMD, buffer);
+		menu_send_n();
+		//CAN_can_start();
 		break;
 	case '?':
 	default:
@@ -302,22 +315,23 @@ void menu_power (void) {
 			menu_send_ok();
 			usb_tx_string_P(PSTR("Shutting down V2X in 30 seconds\r"));
 			delay_s(30);
-			power_control_turn_off((1<<ENABLE_3V3));
-			power_control_push();
+			PWR_turn_off((1<<ENABLE_3V3));
+			PWR_push();
 			break;
 		case '4':  //4v
-			power_control_turn_off((1<<ENABLE_4V1));
-			power_control_push();
+			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
+			PWR_push();
 			menu_send_ok();
 			break;
 		case '5':  //5v
-			power_control_turn_off((1<<ENABLE_5V0));
-			power_control_push();
+			PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
+			PWR_push();
 			menu_send_ok();
 			break;
 		case 'h':  //host
-			power_control_turn_off((1<<ENABLE_5V0B));
-			power_control_push();
+			PWR_turn_off((1<<ENABLE_5V0B));
+			PWR_push();
+			PWR_is_5_needed();
 			menu_send_ok();
 			break;
 		default:
@@ -328,23 +342,23 @@ void menu_power (void) {
 	case 'e':  //enable power
 		switch (CMD_buffer[4]) {
 		case '3':  //3v
-			power_control_turn_on((1<<ENABLE_3V3));
-			power_control_push();
+			PWR_turn_on((1<<ENABLE_3V3));
+			PWR_push();
 			menu_send_ok();
 			break;
 		case '4':  //4v
-			power_control_turn_on((1<<ENABLE_4V1));
-			power_control_push();
+			PWR_turn_on((1<<ENABLE_4V1));
+			PWR_push();
 			menu_send_ok();
 			break;
 		case '5':  //5v
-			power_control_turn_on((1<<ENABLE_5V0));
-			power_control_push();
+			PWR_turn_on((1<<ENABLE_5V0));
+			PWR_push();
 			menu_send_ok();
 			break;
 		case 'h':  //host
-			power_control_turn_on((1<<ENABLE_5V0B));
-			power_control_push();
+			PWR_turn_on((1<<ENABLE_5V0B));
+			PWR_push();
 			menu_send_ok();
 			break;
 		default:
@@ -353,9 +367,9 @@ void menu_power (void) {
 		}
 		break;  //enable power
 	case 'r':  
-		power_control_turn_off(~POWER_CONTROL_DEFAULT_VALUE);
-		power_control_turn_on(POWER_CONTROL_DEFAULT_VALUE);
-		power_control_push();
+		PWR_turn_off(~POWER_CONTROL_DEFAULT_VALUE);
+		PWR_turn_on(POWER_CONTROL_DEFAULT_VALUE);
+		PWR_push();
 		menu_send_ok();
 		break;
 	case 'q':
@@ -392,7 +406,18 @@ void menu_timer(void) {
 		break;
 	case 'z':  //set time zone
 		time_zone_set(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_P(PSTR("Time Zone has been set"));
+		usb_tx_string_P(PSTR("TZN="));
+		menu_print_int(time_zone_get());
+		break;
+	case 'd':  //set time zone
+		usb_tx_string_P(PSTR("DST="));
+		if (menu_sample_number(CMD_buffer+4)) {
+			time_dst_set(1);
+			menu_send_1();
+		} else {
+			time_dst_set(0);
+			menu_send_0();
+		}
 		break;
 	case 'i':  //timer system information
 		usb_tx_string_P(PSTR("The timer module uses Unix Epoch timestamps (UET) \rH24: clock has been set/sync within 24hrs\rALM: alarm is set for the future\r"));
@@ -406,7 +431,7 @@ void menu_timer(void) {
 		break;
 	case '?':  //Menu options
 	default:
-		usb_tx_string_P(PSTR("*** Timer Menu ***\rSn: Set V2X time (UET)\rG: Get V2X time\rAn: Set absolute alarm (UET) \rRn: Set relative alarm (Seconds)\rI: timer information\rQ: Timer inquery\r"));
+		usb_tx_string_P(PSTR("*** Timer Menu ***\rSn: Set V2X time (UET)\rDn: Daylight Savings Time\rG: Get V2X time\rAn: Set absolute alarm (UET) \rRn: Set relative alarm (Seconds)\rI: timer information\rQ: Timer inquery\rU: Update using gps\rZn: Set timezone\r"));
 		break;
 	}
 }
@@ -432,16 +457,16 @@ void menu_send_n_st(void) {usb_tx_string_P(PSTR("\r>"));
 void menu_send_out_of_range(void) {usb_tx_string_P(PSTR("ERROR: out of range\r"));
 }
 
-void menu_send_GSM(void) {usb_tx_string_P(PSTR("GSM>>>:"));
+void menu_send_GSM(void) {usb_tx_string_P(PSTR("GSM>:"));
 }
 
-void menu_send_CTL(void) {usb_tx_string_P(PSTR("CTL>>>:"));
+void menu_send_CTL(void) {usb_tx_string_P(PSTR("CTL>:"));
 }
 	
-void menu_send_CAN(void) {usb_tx_string_P(PSTR("CAN>>>:"));
+void menu_send_CAN(void) {usb_tx_string_P(PSTR("CAN>:"));
 }
 	
-void menu_send_BTN(void) {usb_tx_string_P(PSTR("BTN>>>:"));
+void menu_send_BTN(void) {usb_tx_string_P(PSTR("BTN>:"));
 }
 
 void menu_print_int(long value) {	
@@ -467,7 +492,7 @@ void menu_lockup (void) {
 	usb_cdc_send_string(USB_ACL, msg);
 	usb_cdc_send_string(USB_CAN, msg);
 	delay_s(1);
-	power_hub_stop();
+	PWR_hub_stop();
 	delay_s(1);
 	RST_CTRL = true; //force SW reset
 }
@@ -500,6 +525,9 @@ void menu_modem_status(void) {
 	if (simcard_status())
 	{menu_send_1();}
 	else	{menu_send_0();}
+	usb_tx_string_P(PSTR("IMEI="));
+	usb_cdc_send_string(USB_CMD, GSM_get_imei());
+	menu_send_n();
 }
 
 void menu_simcard_status(void){
@@ -510,43 +538,51 @@ void menu_simcard_status(void){
 
 void menu_can_status(void) {
 	usb_tx_string_P(PSTR("CAN="));
-	if (power_query((1<<ENABLE_CAN_RESET)))
+	if (PWR_query((1<<ENABLE_CAN_RESET)))
 			{menu_send_1();}
 	else	{menu_send_0();}
 }
 
 void menu_power_status(void) {
 	usb_tx_string_P(PSTR("3V3="));
-	if (power_query((1<<ENABLE_3V3)))
+	if (PWR_query((1<<ENABLE_3V3)))
 			{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("4V1="));
-	if (power_query((1<<ENABLE_4V1)))
+	if (PWR_query((1<<ENABLE_4V1)))
 			{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("5V0="));
-	if (power_query((1<<ENABLE_5V0)))
+	if (PWR_query((1<<ENABLE_5V0)))
 			{menu_send_1();}
 	else	{menu_send_0();}
-	usb_tx_string_P(PSTR("USB="));
-	if (power_query((1<<ENABLE_5V0B)))
+	usb_tx_string_P(PSTR("HOST="));
+	if (PWR_query((1<<ENABLE_5V0B)))
 			{menu_send_1();}
 	else	{menu_send_0();}
 }
 
 void menu_timer_status (void) {
+	usb_tx_string_P(PSTR("TZN="));
+	menu_print_int(time_zone_get());
+	menu_send_n();
+	usb_tx_string_P(PSTR("DST="));
+	if (time_dst_get())
+			{menu_send_1();}
+	else	{menu_send_0();}
+	usb_tx_string_P(PSTR("UTC="));
+	menu_print_int(time_get());		
+	menu_send_n();
 	usb_tx_string_P(PSTR("H24="));
 	if (time_is_current())
 			{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("ALM="));
+	menu_print_int(time_alarm_get());		
+	menu_send_n();
+	usb_tx_string_P(PSTR("ALS="));
 	if (time_alarm_active())
 			{menu_send_1();}
 	else	{menu_send_0();}
-	usb_tx_string_P(PSTR("TZN="));
-	menu_print_int(time_zone_get());
-	menu_send_n();
-	usb_tx_string_P(PSTR("UET="));
-	menu_print_int(time_get());		
-	menu_send_n();
+
 }

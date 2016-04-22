@@ -81,7 +81,7 @@ void GSM_usart_init (void);
  */
 enum GSM_sequence_states {
 	GSM_state_idle = 0,
-	GSM_state_check,
+	GSM_power_check,
 	GSM_state_start,
 	GSM_state_init_SMS,
 	GSM_state_time_get,
@@ -128,10 +128,10 @@ void GSM_control_check (char * responce_buffer);
 void GSM_control_start(char * responce_buffer);
 
 /**
- * @def GSM_begin_init
+ * @def GSM_modem_init
  * @brief sets up conditions to begin interaction with GSM
  */
-void GSM_begin_init (void);
+void GSM_modem_init (void);
 
 /**
  * @def show_buffer
@@ -165,5 +165,12 @@ void GSM_parse_gps_info (char * responce_buffer);
  * @brief puts the GSM control sequence in a fail state due to timeout
  */
 void GSM_control_fail (void);
+
+/**
+ * @def GSM_get_imei
+ * @brief responds with a pointer to a buffer holding the IMEI number
+ * @retval char* pointer to string with IMEI number
+ */
+char * GSM_get_imei (void);
 
 #endif /* V2X_GSM_H_ */

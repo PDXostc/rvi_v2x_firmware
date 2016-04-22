@@ -27,7 +27,7 @@ void usb_resume_action(void);
  *
  * \retval true if cdc startup is successfully done
  */
-bool usb_cdc_enable(uint8_t port);
+Bool usb_cdc_enable(uint8_t port);
 
 /*! \def usb_cdc_disable
  * \brief Closes the communication port
@@ -66,5 +66,6 @@ void usb_cdc_send_byte(uint8_t port, int value);
  *	\brief Check if the port is actively monitored by the host
  *  \param port the usb cdc port
  */
-bool usb_cdc_is_active(uint8_t port);
+Bool usb_cdc_is_active(uint8_t port);
+
 #endif /* V2X_USB_H_ */

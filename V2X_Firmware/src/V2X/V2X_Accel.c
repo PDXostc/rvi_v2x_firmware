@@ -9,7 +9,6 @@
 
 Bool new_config = true;
 Bool new_offset = false;
-char wbuffer[30];
 uint8_t last_sample[6];
 uint8_t last_rate = ACL_RATE_100;	//100hz
 uint8_t last_data_format = (1<<ACL_RANGE_L)|(1<<ACL_RANGE_H)|(1<<ACL_FULL_RES);
@@ -89,7 +88,8 @@ void ACL_set_sample_off (void) {
 
 void ACL_data_to_string(uint8_t * data, char * buffer) {
 	uint16_t data16;
-	buffer[0] = '\0';
+	char wbuffer[30];
+	clear_buffer(buffer);
 	strcat(buffer, "XYZT: ");  //create starting string
 	for (int k = 0; k < 3; k++){  //convert and add x,y,z data, cat into buffer
 		data16 = (data[2*k+1] << 8) | data[2*k];
@@ -159,17 +159,17 @@ void ACL_send_configuration(void) {
 }
 
 void ACL_send_power (void) {
-	int temp = last_power;
+	uint8_t temp = last_power;
 	ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_POWER_CTL), &temp, 2);	
 }
 
 void ACL_send_data_format (void) {
-	int temp = last_data_format;
+	uint8_t temp = last_data_format;
 	ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_DATA_FORMAT), &temp, 2);
 }
 
 void ACL_send_rate (void) {
-	int temp = last_rate;
+	uint8_t temp = last_rate;
 	ACL_send_recv_data(ACL_command_builder(ACL_WRITE, ACL_SINGLE, ACL_MAP_BW_RATE), &temp, 2);
 }
 

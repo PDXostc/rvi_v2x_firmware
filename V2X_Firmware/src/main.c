@@ -22,19 +22,19 @@
 int main ()
 {
 	v2x_board_init();	//configure pins and initial safe condition
-	
+
 	while (1){
 		sleepmgr_enter_sleep();		//go to sleep until interrupt
-		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
+			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		reset_processor();			//look for pending resets
 		button_service();			//SCAN and report the button 
-		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
+			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		job_coordinator();			//schedule new jobs if needed
 		GSM_process_buffer();		//handle any pending jobs for GSM
 		CAN_process_buffer();		//handle any pending jobs for CAN
-		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
+			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		if (usb_cdc_is_active(USB_ACL)) //if host listening,
 			{report_accel_data();}   //create and send accel data
-		charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
+			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 	}
 }
