@@ -293,16 +293,16 @@ void menu_can (void) {
 		//strcat_P(CMD_buffer, PSTR("\r"));
 		eeprom_store_CAN_string(CMD_buffer+4);
 		break;
+	case 'w': //what is stored in EE?
+ 		eeprom_read_CAN_string(buffer);
+ 		usb_cdc_send_string(USB_CMD, buffer);
+		break;
 	case 'a': //load string and parse from eeprom
-		usb_tx_string_P(PSTR("EE:"));
-		eeprom_read_CAN_string(buffer);
-		usb_cdc_send_string(USB_CMD, buffer);
-		menu_send_n();
-		//CAN_can_start();
+		CAN_EE_start();
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** CANbus Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\r"));
+		usb_tx_string_P(PSTR("*** CANbus Menu ***\rE: Enable\rD: Disable\rR: Restart\rS: Store config string to EE\rA: Execute commands stored in EE\rW: Display stored EE commandsI: Subsystem Information\rQ: Query status\r"));
 		break;
 	}
 }
