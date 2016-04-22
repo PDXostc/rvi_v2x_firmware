@@ -16,7 +16,7 @@
 enum CAN_sequence_states {
 	CAN_state_idle = 0,
 	CAN_state_power,
-	CAN_state_start,
+	CAN_state_EE,
 	};
 	
 /**
@@ -185,10 +185,20 @@ void CAN_stop_snoop (void);
 Bool CAN_is_snooping(void);
 
 /**
- * @def CAN_control_start
- * @brief run from within the CAN_control process, uses eeprom string to configure the ELM
+ * @def CAN_ee_sequence
+ * @brief used by can_control to iterate through the EE commands
 */
-void CAN_control_start(char * responce_buffer);
-void CAN_can_start (void);
-Bool CAN_find_message (char * buffer, uint8_t step);
+void CAN_ee_sequence(char * responce_buffer);
+
+/**
+ * @def CAN_EE_start
+ * @brief kicks off the ee sequence job
+*/
+void CAN_EE_start (void);
+
+/**
+ * @def CAN_find_message
+ * @brief extracts sections of the EE string
+*/
+Bool CAN_find_message (char * buffer, uint8_t index);
 #endif /* V2X_CAN_H_ */

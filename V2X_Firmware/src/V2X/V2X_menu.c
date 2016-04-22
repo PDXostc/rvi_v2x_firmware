@@ -294,11 +294,12 @@ void menu_can (void) {
 		eeprom_store_CAN_string(CMD_buffer+4);
 		break;
 	case 'a': //load string and parse from eeprom
-		usb_tx_string_P(PSTR("EE:"));
-		eeprom_read_CAN_string(buffer);
-		usb_cdc_send_string(USB_CMD, buffer);
-		menu_send_n();
-		//CAN_can_start();
+// 		eeprom_read_CAN_string(buffer);
+// 		usb_cdc_send_string(USB_CMD, buffer);
+// 		menu_send_n();
+// 		//CAN_can_start();
+// 		CAN_find_message(buffer,0);
+		CAN_EE_start();
 		break;
 	case '?':
 	default:

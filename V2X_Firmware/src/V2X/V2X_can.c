@@ -126,8 +126,8 @@ void CAN_control (char * responce_buffer) {
 	case CAN_state_power:
 		CAN_control_init(responce_buffer);
 		break;
-	case CAN_state_start:
-		CAN_control_start(responce_buffer);
+	case CAN_state_EE:
+		CAN_ee_sequence(responce_buffer);
 		break;
 	default:
 		CAN_sequence_state = CAN_state_idle;
@@ -204,71 +204,76 @@ void CAN_control_init (char * responce_buffer){
 	}
 }
 
-void CAN_can_start (void) {
+void CAN_EE_start (void) {
 	if (CAN_sequence_state == CAN_state_idle) {
-		CAN_sequence_state = CAN_state_start;
+		CAN_sequence_state = CAN_state_EE;
 		CAN_subsequence_state = CAN_subssequence_1; //move to response state
-		//CAN_in_command = true; //make sure responses come back to command processor
+		CAN_in_command = true; //make sure responses come back to command processor
 		char hold[2] = "\0";
 		CAN_control (hold);
 	}
 }
 
-Bool CAN_find_message (char * buffer, uint8_t step) {
-	uint32_t start_ptr = 0; //start at beginning of buffer
+Bool CAN_find_message (char * buffer, uint8_t index) {
+	uint32_t start_ptr = buffer; //start at beginning of buffer
+	int length = strlen(buffer);	
 	int i = 0;	//index used throughout module
-	usb_tx_string_P(PSTR("L:"));
-	int length = strlen(buffer);	//get overall string length
-	menu_print_int(length);
-	
-	while (step != 0) {
-		if (i > length) {
-			usb_tx_string_P(PSTR("#"));
-			return false;
-			} //extraction ended badly
+	//move through buffer the number of commas in step
+	while (index != 0) {
 		start_ptr = strchr(start_ptr, ',') + 1; //look for comma wanted
-		usb_tx_string_P(PSTR("SA:"));
-		menu_print_int(start_ptr);
-		step--;
-		usb_tx_string_P(PSTR("SE:"));
-		menu_print_int(step);
-		
+		index--;		
 	}
+	int start_index = start_ptr - (uint32_t) buffer; 
 	uint32_t stop_ptr = strchr(start_ptr, ','); //find next comma
-		usb_tx_string_P(PSTR("SO:"));
-		menu_print_int(stop_ptr);
+	if (stop_ptr == 0) {
+		return false;  //buffer has no more messages
+	}
 	int span = stop_ptr - start_ptr;  //save span of string
-		usb_tx_string_P(PSTR("SP:"));
-		menu_print_int(span);
-		menu_send_n();
-		usb_tx_string_P(PSTR("B:"));
-		usb_cdc_send_string(USB_CMD, buffer);
 	for (i = 0; i < span; i++) {  
-		buffer[i] = buffer[i + start_ptr]; //copy wanted string to front
+		buffer[i] = buffer[i + start_index]; //copy wanted section to front
 	}
-		menu_send_n();
-		usb_tx_string_P(PSTR("B:"));
-		usb_cdc_send_string(USB_CMD, buffer);
-	for (i; i < length; i++) { 
-		buffer[i] = '\0'; //fill end string
+	buffer[i++] = '\r';
+	while (i < length) {
+		buffer[i++] = '\0'; //fill end string with garbage
 	}
-		menu_send_n();
-		usb_tx_string_P(PSTR("B:"));
-		usb_cdc_send_string(USB_CMD, buffer);
-	return true;
+	return true; //message was successfully parsed
 }
 
-void CAN_control_start (char * responce_buffer) {
-	delay_ms(500);
+void CAN_ee_sequence (char * responce_buffer) {
 	char buffer[EE_CAN_ARRAY_SIZE+1];
-	for (int i = 0; i < 10; i++) {
+	uint8_t found;
+	if (CAN_subsequence_state == CAN_subssequence_FAIL) {
+			CAN_sequence_state = CAN_state_idle;
+			job_clear_timeout(SYS_CAN);
+			menu_send_CAN();
+			usb_tx_string_P(PSTR("ERROR: EEPROM sequence fail\r>"));
+	} else if (CAN_subsequence_state != 0) { //not the first state, responce_buffer should have responce
+		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) { //if responce was OK
+			eeprom_read_CAN_string(buffer); //get copy of the entire string
+			found = CAN_find_message(buffer, CAN_subsequence_state++);
+			if (found) {
+				CTL_add_string_to_buffer(&CAN, BUFFER_OUT, buffer);
+				CTL_mark_for_processing(&CAN, BUFFER_OUT);
+				job_set_timeout(SYS_CAN, 2); //give ELM module 2 seconds to respond
+			} else {
+				CAN_sequence_state = CAN_state_idle;
+				job_clear_timeout(SYS_CAN);
+				menu_send_CAN();
+				usb_tx_string_P(PSTR("EEPROM sequence complete\r>"));
+			}
+		} else { //the response was bad
+			CAN_subsequence_state == CAN_subssequence_FAIL;
+			job_set_timeout(SYS_CAN, 1);  //end quickly
+		}
+	} else { //is the first command, just send a message
 		eeprom_read_CAN_string(buffer); //get copy of the entire string
-	//if (found) {
-		menu_print_int(i);
-		usb_tx_string_P(PSTR(":"));
-		uint8_t found = CAN_find_message(buffer, i);//CAN_subsequence_state);
-		if (found) {usb_tx_string_P(PSTR("f"));}
-		usb_cdc_send_string(USB_CMD, buffer);
-		menu_send_n_st();
+		if (found = CAN_find_message(buffer, CAN_subsequence_state++)) {//CAN_subsequence_state);
+			CTL_add_string_to_buffer(&CAN, BUFFER_OUT, buffer);
+			CTL_mark_for_processing(&CAN, BUFFER_OUT);
+			job_set_timeout(SYS_CAN, 2); //give ELM module 2 seconds to respond
+		} else { //the buffer was bad
+			CAN_subsequence_state == CAN_subssequence_FAIL;
+			job_set_timeout(SYS_CAN, 1);  //end quickly
+		}
 	}
 }

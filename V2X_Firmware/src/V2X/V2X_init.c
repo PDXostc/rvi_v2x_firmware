@@ -95,13 +95,13 @@ void reset_processor(void) {
 	if (reset_flags) {
 		if (reset_flags & (1<<RESET_SYSTEM)) {
 			usb_tx_string_P(PSTR("V2X restarting\rPlease close this window\r>"));
-			delay_s(10);
+			delay_s(3);
 			CCP = 0xd8; //enable write protected registers
 			RST_CTRL = true; //force SW reset
 		}
 		if (reset_flags & (1<<RESET_USB)) {
 			usb_tx_string_P(PSTR("USB restarting\r>"));
-			delay_s(10);
+			delay_s(3);
 			PWR_hub_stop();
 			delay_s(7);
 			PWR_hub_start();
