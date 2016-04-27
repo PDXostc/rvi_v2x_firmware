@@ -178,7 +178,7 @@ ISR(USART_RX_Vect)
 
 ISR(USART_DRE_Vect)
 {
-	if (CAN_is_controlled() || CAN_is_snooping() || !usb_cdc_is_active(USB_CAN) == false) { //can controller needs to send data
+	if (CAN_is_controlled() || CAN_is_snooping() || !usb_cdc_is_active(USB_CAN) == true) { //can controller needs to send data
 		CAN_send_data();
 	} 
 	

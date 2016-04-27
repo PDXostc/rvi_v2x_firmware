@@ -190,6 +190,7 @@ void CAN_control_init (char * responce_buffer){
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Responding\r>"));
 			CAN_sequence_state = CAN_state_idle;
+			CAN_in_command = false;
 			job_clear_timeout(SYS_CAN);
 		}
 		job_check_fail(SYS_CAN);
@@ -197,6 +198,7 @@ void CAN_control_init (char * responce_buffer){
 	case CAN_subssequence_FAIL:
 		default:
 		CAN_sequence_state = CAN_state_idle;
+		CAN_in_command = false;
 		job_clear_timeout(SYS_CAN);
 		menu_send_CTL();
 		usb_tx_string_P(PSTR("CAN start fail\r>"));

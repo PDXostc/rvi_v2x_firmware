@@ -279,8 +279,7 @@ void menu_can (void) {
 		menu_can_status();
 		break;
 	case 'i': //info
-		usb_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\r"));
-		usb_tx_string_P(PSTR("The STN1110 is compliant with the ELM327 V1.3\r"));
+		usb_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\rThe STN1110 is compliant with the ELM327 V1.3\r"));
 		break;
 	case 'x': //pass command
 		strcat_P(CMD_buffer, PSTR("\r"));
@@ -302,7 +301,7 @@ void menu_can (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** CANbus Menu ***\rE: Enable\rD: Disable\rR: Restart\rS: Store config string to EE\rA: Execute commands stored in EE\rW: Display stored EE commandsI: Subsystem Information\rQ: Query status\r"));
+		usb_tx_string_P(PSTR("*** CANbus Menu ***\rE: Enable\rD: Disable\rR: Restart\rS: Store config string to EE\rA: Execute commands stored in EE\rW: Display stored EE commands\rI: Subsystem Information\rQ: Query status\r"));
 		break;
 	}
 }
