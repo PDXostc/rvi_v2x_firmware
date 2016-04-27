@@ -116,7 +116,7 @@ void GSM_control_check (char * responce_buffer){
 			GSM_subsequence_state = GSM_subssequence_3; 
 			GSM_control_check(responce_buffer);
 		} else { //if not power it up
-			usb_tx_string_P(PSTR(">CTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
+			usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
 			PWR_gsm_start();
 			GSM_subsequence_state = GSM_subssequence_2;
 			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start

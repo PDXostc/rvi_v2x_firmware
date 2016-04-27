@@ -10,6 +10,12 @@
 #define V2X_MENU_H_
 
 /**
+* @def menu_init
+* @brief loads menu settings
+**/
+void menu_init(void);
+
+/**
  * @def menu_add_to_command
  * @brief controls the add/sub from the input command buffer
  * @param value the char to be added to the buffer, can be backspace
@@ -177,9 +183,18 @@ void menu_timer_status(void);
 void usb_tx_string_P(const char *data);
 
 /**
+ * @def usb_tx_string_PV
+ * @brief if not verbose, strings are preplaced by "OK"
+ * @param data pointer to PSTR() strored strings
+ **/
+void usb_tx_string_PV(const char *data);
+
+/**
  * @def menu_lockup
  * @brief special routine to dump the CMD buffer from the ACL USB interface
  **/
 void menu_lockup (void);
+
+Bool menu_verbose(void);
 
 #endif /* V2X_MENU_H_ */

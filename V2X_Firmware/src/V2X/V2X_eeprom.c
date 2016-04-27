@@ -12,6 +12,10 @@ void eeprom_init (void) {
 		//the check byte was not found, set EE defaults
 		nvm_eeprom_write_byte(EE_timezone, time_zone_get());
 		nvm_eeprom_write_byte(EE_dst, time_dst_get());
+		nvm_eeprom_write_byte(EE_verbose, menu_verbose());
+		for (int i = 0; i < EE_CAN_ARRAY_SIZE; i++) {
+			nvm_eeprom_write_byte(EE_can_array + i, '\0');  //add null at start
+		}
 		//set "eeprom is initilized" check byte
 		nvm_eeprom_write_byte(EE_check_byte, EE_CHECK_VALUE);
 	}

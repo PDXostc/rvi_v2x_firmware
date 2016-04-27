@@ -74,6 +74,7 @@ void v2x_board_init(void)
 	PWR_init();								//sets SR to default states - holds power up
 	cpu_irq_enable();
 	eeprom_init();							//verifies eeprom safe for use
+	menu_init();							//loads menu settings
 	time_init();							//starts the RTC
 	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling

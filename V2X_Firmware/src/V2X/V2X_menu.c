@@ -10,6 +10,11 @@
 
 char CMD_buffer [30] = "\0";
 uint8_t sample[6] = {0,0,0,0,0,0};
+Bool verbose = true;
+
+void menu_init(void) {
+	verbose = nvm_eeprom_read_byte(EE_verbose);
+}
 
 void menu_add_to_command(char value) {
 	if (value == 8 || value == 0x7f) {//if backspace or delete
@@ -46,11 +51,6 @@ void menu_main(void) {
 			case 'c':  //CAN interface
 				menu_can();
 				break;
-			case 's':  //start all modules
-				GSM_modem_init();
-				CAN_elm_init();
-				ACL_set_sample_on();
-				break;
 			case 'm':  //modem
 				menu_modem();
 				break;
@@ -60,13 +60,18 @@ void menu_main(void) {
 			case 't':  //timer functions
 				menu_timer();
 				break;
+			case 'v': //toggle verbose setting
+				verbose = !verbose;
+				nvm_eeprom_write_byte(EE_verbose,verbose);
+				usb_tx_string_PV(PSTR("Verbose is ON"));
+				break;
 			case '?':  //timer functions
 			default:
-				usb_tx_string_P(PSTR("*** Main Menu ***\rI: Device information\rA: Accelerometer menu(ACL)\rC: ELM327 menu(CAN)\rM: SIM Modem menu(GSM)\rP: Power menu\rT: Timer menu\rQ: Query system status\rS: Start System\rR: Reboot\r"));
+				usb_tx_string_P(PSTR("*** Main Menu ***\rI: Device information\rA: Accelerometer menu(ACL)\rC: ELM327 menu(CAN)\rM: SIM Modem menu(GSM)\rP: Power menu\rT: Timer menu\rQ: Query system status\rV: Toggle verbose messages\rR: Reboot\r"));
 				break;
 			}
 	}else{
-			usb_tx_string_P(PSTR("All commands start VX\r"));
+			usb_tx_string_PV(PSTR("All commands start VX\r"));
 	}
 	clear_buffer(CMD_buffer);	//clear the buffer for next command	
 	menu_send_n_st();
@@ -77,11 +82,11 @@ void menu_accel (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable
 		ACL_set_sample_off();
-		usb_tx_string_P(PSTR("Accelerometer is off\r"));
+		usb_tx_string_PV(PSTR("Accelerometer is off"));
 		break;
 	case 'e':  //enable
 		ACL_set_sample_on();
-		usb_tx_string_P(PSTR("Accelerometer has been started\r"));
+		usb_tx_string_PV(PSTR("Accelerometer started"));
 		break;
 	case 'i':
 		usb_tx_string_P(PSTR("V2X uses the ADXL345 accelerometer from Analog Devices\r"));
@@ -95,48 +100,48 @@ void menu_accel (void) {
 		ACL_init(); //
 		ACL_set_sample_on();
 		ACL_take_sample(sample); //pushes init
-		usb_tx_string_P(PSTR("Accelerometer has been restarted\r"));
+		usb_tx_string_PV(PSTR("Accelerometer has been restarted"));
 		break;
 	case 's':  //sample rate
  		speed = atoi(CMD_buffer+4);
 		if (speed > 3199) {
 			ACL_set_rate(ACL_RATE_3200);	
-			usb_tx_string_P(PSTR("Set to 3200Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 3200Hz"));
 		}else if (speed > 1599) {
 			ACL_set_rate(ACL_RATE_1600);
-			usb_tx_string_P(PSTR("Set to 1600Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 1600Hz"));
 		}else if (speed > 799) {
 			ACL_set_rate(ACL_RATE_800);
-			usb_tx_string_P(PSTR("Set to 800Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 800Hz"));
 		}else if (speed > 399) {
 			ACL_set_rate(ACL_RATE_400);
-			usb_tx_string_P(PSTR("Set to 400Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 400Hz"));
 		}else if (speed > 199) {
 			ACL_set_rate(ACL_RATE_200);
-			usb_tx_string_P(PSTR("Set to 200Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 200Hz"));
 		}else if (speed > 99) {
 			ACL_set_rate(ACL_RATE_100);
-			usb_tx_string_P(PSTR("Set to 100Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 100Hz"));
 		}else if (speed > 49) {
 			ACL_set_rate(ACL_RATE_50);
-			usb_tx_string_P(PSTR("Set to 50Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 50Hz"));
 		}else if (speed > 24) {
 			ACL_set_rate(ACL_RATE_25);
-			usb_tx_string_P(PSTR("Set to 25Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 25Hz"));
 		}else if (speed > 11) {
 			ACL_set_rate(ACL_RATE_12);
-			usb_tx_string_P(PSTR("Set to 12Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 12Hz"));
 		}else if (speed > 5) {
 			ACL_set_rate(ACL_RATE_6);
-			usb_tx_string_P(PSTR("Set to 6Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 6Hz"));
 		}else if (speed > 2) {
 			ACL_set_rate(ACL_RATE_3);
-			usb_tx_string_P(PSTR("Set to 3Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 3Hz"));
 		}else if (speed > 0) {
 			ACL_set_rate(ACL_RATE_1);
-			usb_tx_string_P(PSTR("Set to 1Hz\r"));
+			usb_tx_string_PV(PSTR("Set to 1Hz"));
  		}else {	
-			usb_tx_string_P(PSTR("ERROR: Out of range, try again.\r"));	
+			usb_tx_string_P(PSTR("ERROR: Out of range, try again."));
 		}
 		break;
 	case 'w':
@@ -144,16 +149,16 @@ void menu_accel (void) {
 		if (speed > 16) {speed = 0;}
 		if (speed > 8) {
 			ACL_set_range(ACL_16G_RANGE);
-			usb_tx_string_P(PSTR("+/-16G Range\r"));
+			usb_tx_string_PV(PSTR("+/-16G Range"));
 		}else if (speed > 4) {
 			ACL_set_range(ACL_8G_RANGE);
-			usb_tx_string_P(PSTR("+/-8G Range\r"));
+			usb_tx_string_PV(PSTR("+/-8G Range"));
 		}else if (speed > 2) {
 			ACL_set_range(ACL_4G_RANGE);
-			usb_tx_string_P(PSTR("+/-4G Range\r"));
+			usb_tx_string_PV(PSTR("+/-4G Range"));
 		}else if (speed > 0) {
 			ACL_set_range(ACL_2G_RANGE);
-			usb_tx_string_P(PSTR("+/-2G Range\r"));
+			usb_tx_string_PV(PSTR("+/-2G Range"));
 		}else {menu_send_out_of_range();}
 		break;
 		
@@ -162,7 +167,7 @@ void menu_accel (void) {
 	case 'z':
 		data16 = atoi(CMD_buffer+4);  //convert input chars to int
 		if (data16 == 0){ //conversion resulted in 0
-			if (CMD_buffer[4] != '0'){ //check if it is really a '0' of an invalad conversion
+			if (CMD_buffer[4] != '0'){ //check if it is really a '0' of an invalid conversion
 				menu_send_out_of_range(); //invalid result
 				break; //exit offset menu
 			}
@@ -173,24 +178,26 @@ void menu_accel (void) {
 			uint8_t data8 = (uint8_t)data16;  //reduce to 8 bits of data
 			switch (CMD_buffer[3]) {
 				case 'x':
-					usb_tx_string_P(PSTR("X"));
+					if (verbose) {usb_tx_string_P(PSTR("X"));}
 					ACL_set_offset(ACL_X_OFFSET, data8);
 					break;
 				case 'y':
-					usb_tx_string_P(PSTR("Y"));
+					if (verbose) {usb_tx_string_P(PSTR("Y"));}
 					ACL_set_offset(ACL_Y_OFFSET, data8);
 					break;
 				case 'z':
-					usb_tx_string_P(PSTR("Z"));
+					if (verbose) {usb_tx_string_P(PSTR("Z"));}
 					ACL_set_offset(ACL_Z_OFFSET, data8);
 					break;
 				default:
 					menu_send_q();
 					break;
 			}
-			usb_tx_string_P(PSTR(" Offset: "));
-			menu_print_int(data16);
-			menu_send_n();
+			usb_tx_string_PV(PSTR(" Offset: "));
+			if (verbose) {
+				menu_print_int(data16);
+				menu_send_n();
+			}
 		}
 		break;
 	case 'g':
@@ -210,17 +217,17 @@ void menu_accel (void) {
 	case 'f':
 		if (CMD_buffer[4] == '0') {
 			ACL_set_full_resolution(0);
-			usb_tx_string_P(PSTR("10bit resolution, scale changes with 'G' range\r"));
+			usb_tx_string_PV(PSTR("10bit resolution, scale changes with 'G' range\r"));
 		}
 		else if (CMD_buffer[4] == '1') {
 			ACL_set_full_resolution(1);
-			usb_tx_string_P(PSTR("Full resolution, 4mg/bit\r"));
+			usb_tx_string_PV(PSTR("Full resolution, 4mg/bit\r"));
 		}
 		else {menu_send_q();}
 		break;
 	case '?':  
 	default:
-		usb_tx_string_P(PSTR("*** Accelerometer Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rG: Get last Sample\rSn: Set sample rate in HZ (1, 3, 6, 12, 25, 50, 100, 200, 400, 800)\rWn: Set \"G\" Range (2, 4, 8, 16)\rF: Full range (1: full 0: 10bit)\rXn: Set X offset (+/-127)\rYn: Set Y offset\rZn: Set Z offset\r"));
+		usb_tx_string_P(PSTR("*** Accelerometer Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rG: Get last Sample\rSn: Set sample rate in HZ (1, 3, 6, 12, 25, 50, 100, 200, 400, 800)\rWn: Set \"G\" Range (2, 4, 8, 16)\rFn: Full range (1: full 0: 10bit)\rXn: Set X offset (+/-127)\rYn: Set Y offset\rZn: Set Z offset\r"));
 		break;
 	}
 }
@@ -230,15 +237,15 @@ void menu_modem (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':  
 		PWR_gsm_stop(); //disable
-		usb_tx_string_P(PSTR("GSM is off\r"));
+		usb_tx_string_PV(PSTR("GSM is off\r"));
 		break;
 	case 'e':  //enable modem
-		usb_tx_string_P(PSTR("GSM Start pending"));
+		usb_tx_string_PV(PSTR("GSM Start pending"));
 		GSM_modem_init();
 		break;
 	case 'r':  //reset
 		reset_trigger_GSM();
-		usb_tx_string_P(PSTR("GSM restarting\r"));
+		usb_tx_string_PV(PSTR("GSM restarting"));
 		break;
 	case 'q':
 		menu_modem_status();
@@ -263,16 +270,16 @@ void menu_can (void) {
 	char buffer[EE_CAN_ARRAY_SIZE+1];
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable;
-		usb_tx_string_P(PSTR("CAN is off\r"));
+		usb_tx_string_PV(PSTR("CAN is off\r"));
 		PWR_can_stop();
 		PWR_is_5_needed();
 		break;
 	case 'e':  //enable
-		usb_tx_string_P(PSTR("CAN Starting\r"));
+		usb_tx_string_PV(PSTR("CAN Starting\r"));
 		CAN_elm_init();
 		break;
 	case 'r':  //reset
-		usb_tx_string_P(PSTR("CAN restarting\r"));
+		usb_tx_string_PV(PSTR("CAN restarting\r"));
 		reset_trigger_CAN();
 		break;
 	case 'q': //query
@@ -301,7 +308,7 @@ void menu_can (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** CANbus Menu ***\rE: Enable\rD: Disable\rR: Restart\rS: Store config string to EE\rA: Execute commands stored in EE\rW: Display stored EE commands\rI: Subsystem Information\rQ: Query status\r"));
+		usb_tx_string_P(PSTR("*** CANbus Menu ***\rE: Enable\rD: Disable\rR: Restart\rS: Store config string to EE\rA: Execute config string in EE\rW: Display config string in EE\rI: Subsystem Information\rQ: Query status\r"));
 		break;
 	}
 }
@@ -311,27 +318,24 @@ void menu_power (void) {
 	case 'd':  //disable power
 		switch (CMD_buffer[4]) {
 		case '3':  //3v
-			menu_send_ok();
-			usb_tx_string_P(PSTR("Shutting down V2X in 30 seconds\r"));
-			delay_s(30);
+			usb_tx_string_PV(PSTR("Disabling 3V supply"));
 			PWR_turn_off((1<<ENABLE_3V3));
 			PWR_push();
 			break;
 		case '4':  //4v
+			usb_tx_string_PV(PSTR("Disabling 4V supply"));
 			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
 			PWR_push();
-			menu_send_ok();
 			break;
 		case '5':  //5v
+			usb_tx_string_PV(PSTR("Disabling 5V supply"));
 			PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
 			PWR_push();
-			menu_send_ok();
 			break;
 		case 'h':  //host
+			usb_tx_string_PV(PSTR("Disabling Host power supply"));
 			PWR_turn_off((1<<ENABLE_5V0B));
-			PWR_push();
 			PWR_is_5_needed();
-			menu_send_ok();
 			break;
 		default:
 			menu_send_q();
@@ -341,24 +345,24 @@ void menu_power (void) {
 	case 'e':  //enable power
 		switch (CMD_buffer[4]) {
 		case '3':  //3v
+			usb_tx_string_PV(PSTR("Enabling 3V supply"));
 			PWR_turn_on((1<<ENABLE_3V3));
 			PWR_push();
-			menu_send_ok();
 			break;
 		case '4':  //4v
+			usb_tx_string_PV(PSTR("Enabling 4V supply"));
 			PWR_turn_on((1<<ENABLE_4V1));
 			PWR_push();
-			menu_send_ok();
 			break;
 		case '5':  //5v
+			usb_tx_string_PV(PSTR("Enabling 5V supply"));
 			PWR_turn_on((1<<ENABLE_5V0));
 			PWR_push();
-			menu_send_ok();
 			break;
 		case 'h':  //host
+			usb_tx_string_PV(PSTR("Enabling Host power supply"));
 			PWR_turn_on((1<<ENABLE_5V0B));
 			PWR_push();
-			menu_send_ok();
 			break;
 		default:
 			menu_send_q();
@@ -386,7 +390,7 @@ void menu_timer(void) {
 	switch (CMD_buffer[3]) {
 	case 's':  //set V2X time
 		time_set(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_P(PSTR("Time has been set\r"));
+		usb_tx_string_PV(PSTR("Time has been set\r"));
 		break;
 	case 'g':  //get V2X time
 		usb_tx_string_P(PSTR("UET: "));
@@ -397,11 +401,11 @@ void menu_timer(void) {
 		break;
 	case 'a':  //absolute alarm
 		time_alarm_set(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_P(PSTR("Alarm has been set"));
+		usb_tx_string_PV(PSTR("Alarm has been set"));
 		break;
 	case 'r':  //relative alarm
 		time_alarm_set_relative(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_P(PSTR("Alarm has been set"));
+		usb_tx_string_PV(PSTR("Alarm has been set"));
 		break;
 	case 'z':  //set time zone
 		time_zone_set(menu_sample_number(CMD_buffer+4));
@@ -468,6 +472,10 @@ void menu_send_CAN(void) {usb_tx_string_P(PSTR("CAN>:"));
 void menu_send_BTN(void) {usb_tx_string_P(PSTR("BTN>:"));
 }
 
+Bool menu_verbose(void) {
+	return verbose;
+}
+
 void menu_print_int(long value) {	
 	char c_buf[13];
 	ltoa(value, c_buf, 10);
@@ -483,6 +491,15 @@ long menu_sample_number(char * input) {
 void usb_tx_string_P(const char *data) {
 	while (pgm_read_byte(data))
 		usb_cdc_send_byte(USB_CMD, pgm_read_byte(data++));
+}
+
+void usb_tx_string_PV(const char *data) {
+	if (verbose) {
+		usb_tx_string_P(data);
+	} else {
+		usb_tx_string_P(PSTR("OK"));
+	}
+
 }
 
 void menu_lockup (void) {
