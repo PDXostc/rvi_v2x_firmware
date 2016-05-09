@@ -84,6 +84,7 @@ void time_alarm_event(void) {
 	usb_tx_string_P(PSTR("ALARM"));
 	menu_send_n_st();
 	//respond to alarm
+	PWR_host_start();
 	//set flag that time alarm caused wakeup
 }
 

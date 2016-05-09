@@ -195,6 +195,10 @@ void usb_tx_string_PV(const char *data);
  **/
 void menu_lockup (void);
 
+/**
+ * @def menu_verbose
+ * @brief returns state of verbose variable
+ **/
 Bool menu_verbose(void);
 
 #endif /* V2X_MENU_H_ */
