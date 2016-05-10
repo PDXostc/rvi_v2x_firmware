@@ -16,7 +16,15 @@
 #include "V2X/V2X.h"
 
 #ifndef V2X_CLOCK_DEF
-#warning Clock file is not updated. please follow instructions in src/V2X/clock_conf.h header.
+#warning Clock file is not updated. please follow instructions in src/V2X/conf_clock.h header.
+#endif
+
+#ifndef V2X_USB_DEF
+#warning USB file is not updated. please follow instructions in src/V2X/conf_usb.h header.
+#endif
+
+#ifndef V2X_BOARD_DEF
+#warning Board file is not updated. please follow instructions in src/V2X/conf_board.h header.
 #endif
 
 int main ()
