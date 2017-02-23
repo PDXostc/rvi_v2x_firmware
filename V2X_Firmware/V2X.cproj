@@ -34,6 +34,7 @@
     <option id="common.drivers.nvm" value="Add" config="no_extmem" content-id="Atmel.ASF" />
     <option id="common.services.calendar" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.basic.clock" value="Add" config="" content-id="Atmel.ASF" />
+    <option id="common.services.basic.cpu" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.services.ioport" value="Add" config="" content-id="Atmel.ASF" />
@@ -59,7 +60,6 @@
     <option id="xmega.drivers.usart" value="Add" config="" content-id="Atmel.ASF" />
     <option id="xmega.drivers.wdt" value="Add" config="" content-id="Atmel.ASF" />
     <option id="xmega.services.pwm" value="Add" config="" content-id="Atmel.ASF" />
-    <option id="common.services.basic.cpu" value="Add" config="" content-id="Atmel.ASF" />
     <option id="common.boards.user_board.common" value="Add" config="" content-id="Atmel.ASF" />
   </options>
   <configurations>
@@ -193,7 +193,7 @@
   <documentation help="http://asf.atmel.com/docs/3.27.3/common.applications.user_application.user_board.xmegaau/html/index.html" />
   <offline-documentation help="" />
   <dependencies>
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.27.0" />
+    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.27.3" />
   </dependencies>
   <project id="common.applications.user_application.user_board.xmegaau" value="Add" config="" content-id="Atmel.ASF" />
   <board id="board.user_board.xmegaau" value="Add" config="" content-id="Atmel.ASF" />
