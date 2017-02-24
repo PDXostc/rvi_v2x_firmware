@@ -80,3 +80,5 @@ atmel*.*
 *.xslt
 
 tags
+
+V2X_Firmware/debug\.log
