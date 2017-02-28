@@ -21,14 +21,32 @@ extern "C" {
  * @{
  */
 
+/* Board revision */
+/* #define REV_12 */
+#define REV_20
+
+/* temporary stub for copying later */
+#if REV_12
+#elif REV_20
+#endif
+
 /** Name string macro */
-#define BOARD_NAME                "RVI_V2X_Version_1.2"
+#if REV_12
+#define BOARD_NAME 				  "RVI_V2X_Version_1.2"
+#elif REV_20
+/* REV20: board name change */
+#define BOARD_NAME                "RVI_V2X_Version_2.0"
+#endif
 /** @} */
 
 /** \name LED0 definitions
  *  net: SEQ_LED3 or "PWR" LED
  *  @{ */
+#if REV_12
 #define LED0_PIN                  IOPORT_CREATE_PIN(PORTB, 0)
+#elif REV_20
+#define LED0_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
+#endif
 #define LED0_ACTIVE               true
 #define LED0_INACTIVE             !LED0_ACTIVE
 /** @} */
@@ -36,7 +54,11 @@ extern "C" {
 /** \name LED1 definitions
  *  net: SEQ_LED1 or "M2M" LED
  *  @{ */
+#if REV_12
 #define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
+#elif REV_20
+#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 5)
+#endif
 #define LED1_ACTIVE               true
 #define LED1_INACTIVE             !LED0_ACTIVE
 /** @} */
@@ -44,7 +66,11 @@ extern "C" {
 /** \name LED2 definitions
  *  net: SEQ_LED3 or "GPS" LED
  *  @{ */
+#if REV_12
 #define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
+#elif REV_20
+#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
+#endif
 #define LED2_ACTIVE               true
 #define LED2_INACTIVE             !LED0_ACTIVE
 /** @} */
