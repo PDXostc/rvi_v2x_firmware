@@ -30,10 +30,10 @@ extern "C" {
 
 /** Name string macro */
 #if V2X_REV == REV_12
-#define BOARD_NAME 				  "RVI_V2X_Version_1.2"
+	#define BOARD_NAME 				  "RVI_V2X_Version_1.2"
 #elif V2X_REV >= REV_20
 /* REV20: board name change */
-#define BOARD_NAME                "RVI_V2X_Version_2.0"
+	#define BOARD_NAME                "RVI_V2X_Version_2.0"
 #endif
 /** @} */
 
@@ -41,9 +41,9 @@ extern "C" {
  *  net: SEQ_LED3 or "PWR" LED
  *  @{ */
 #if V2X_REV == REV_12
-#define LED0_PIN                  IOPORT_CREATE_PIN(PORTB, 0)
+	#define LED0_PIN                  IOPORT_CREATE_PIN(PORTB, 0)
 #elif V2X_REV >= REV_20
-#define LED0_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
+	#define LED0_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
 #endif
 #define LED0_ACTIVE               true
 #define LED0_INACTIVE             !LED0_ACTIVE
@@ -53,9 +53,9 @@ extern "C" {
  *  net: SEQ_LED1 or "M2M" LED
  *  @{ */
 #if V2X_REV == REV_12
-#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
+	#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
 #elif V2X_REV >= REV_20
-#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 5)
+	#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 5)
 #endif
 #define LED1_ACTIVE               true
 #define LED1_INACTIVE             !LED0_ACTIVE
@@ -65,9 +65,9 @@ extern "C" {
  *  net: SEQ_LED3 or "GPS" LED
  *  @{ */
 #if V2X_REV == REV_12
-#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
+	#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
 #elif V2X_REV >= REV_20
-#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
+	#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
 #endif
 #define LED2_ACTIVE               true
 #define LED2_INACTIVE             !LED0_ACTIVE
@@ -175,27 +175,35 @@ extern "C" {
 #define BUF0_INACTIVE              !BUF0_ACTIVE
 /** @} */
 
-/**
- * \name Serial Buffer #1 definitions
- *
- * Makes FTDI active communicator with ELM/STN device
- *
- *  @{ */
-#define BUF_1_NAME             "Buffer FTDI Active"
-#define BUF_1_PIN              BUF1_PIN
-#define BUF_1_ACTIVE           BUF1_ACTIVE
-#define BUF_1_INACTIVE         BUF1_INACTIVE
-/** @} */
+/* Revision 1.2 uses FTDI chip for primary routing. Control must be selected 
+ * specifically by either the FDTI or the Atmel. Revision 2.0 removes the FDTI
+ * chip. 
+ */
+#if V2X_REV == REV_12
+	/**
+	* \name Serial Buffer #1 definitions
+	*
+	* Makes FTDI active communicator with ELM/STN device
+	*
+	*  @{ */
+	#define BUF_1_NAME             "Buffer FTDI Active"
+	#define BUF_1_PIN              BUF1_PIN
+	#define BUF_1_ACTIVE           BUF1_ACTIVE
+	#define BUF_1_INACTIVE         BUF1_INACTIVE
+	/** @} */
 
-/** \name BUF1 definitions
- *  @{ */
-#define BUF1_PIN                   IOPORT_CREATE_PIN(PORTB, 3)
-#define BUF1_ACTIVE                true
-#define BUF1_INACTIVE              !BUF1_ACTIVE
-/** @} */
+	/** \name BUF1 definitions
+	*  @{ */
+	#define BUF1_PIN                   IOPORT_CREATE_PIN(PORTB, 3)
+	#define BUF1_ACTIVE                true
+	#define BUF1_INACTIVE              !BUF1_ACTIVE
+	/** @} */
 
-/** Number of on-board buttons */
-#define BUFFER_COUNT 2
+	/** Number of on-board buttons */
+	#define BUFFER_COUNT 2
+#elif V2X_REV >= REV_20
+	#define BUFFER_COUNT 1
+#endif
 
 /** \name CP0 definitions
  *  @{ */
