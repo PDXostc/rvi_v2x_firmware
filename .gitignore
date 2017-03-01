@@ -79,6 +79,16 @@ atmel*.*
 
 *.xslt
 
+# ctags
 tags
 
+# Project Specific
 V2X_Firmware/debug\.log
+
+# config folder ignored 
+# explanation: though necessary files live in the Config folder, they should be
+# handled by the Atmel Software Framework Wizard/Explorer tools included
+# with Atmel Studio, to ensure proper ASF modules have been loaded. Please read
+# the included "V2X project setup" pdf for instructions on managing ASF modules.
+V2X_Firmware/src/[Cc]onfig/
+
