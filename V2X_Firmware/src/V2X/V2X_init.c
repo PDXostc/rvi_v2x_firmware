@@ -55,7 +55,12 @@ void pin_init(void)
 		ioport_configure_pin(BUF0_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//blocks atmel serial path to CAN through buffer
 		ioport_configure_pin(BUF1_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//enables FTDI serial path to CAN through buffer
 
+	#if V2X_REV <= REV_12
+		/* Revision 1.2:
+		 * Use charge pump for powering leds
+		 */
 		ioport_configure_pin(CHARGEPUMP_0_PIN				, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
+	#endif
 }
 
 /* This function is meant to contain board-specific initialization code

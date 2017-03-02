@@ -26,7 +26,7 @@ extern "C" {
 #define REV_20		(20)
 
 /* Board revision in use */
-#define V2X_REV		(REV_20)
+#define V2X_REV		(REV_12)
 
 /** Name string macro */
 #if V2X_REV == REV_12
@@ -204,6 +204,7 @@ extern "C" {
 #define CP0_INACTIVE              !CP0_ACTIVE
 /** @} */
 
+#if V2X_REV <= REV_12
 /**
  * \name Charge Pump #0 definitions
  *
@@ -219,6 +220,7 @@ extern "C" {
 
 /** Number of on-board buttons */
 #define CHARGEPUMP_COUNT 1
+#endif
 
 /** \name Signal pin definitions
  *  @{
