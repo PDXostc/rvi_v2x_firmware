@@ -4,7 +4,7 @@
  * /brief V2X board hardware driver functions
  *
  * Author: Jesse Banks (jbanks2)
- **/ 
+ **/
 
 #include "V2X.h"
 
@@ -32,26 +32,38 @@ void PWR_clear(void)
 }
 
 void PWR_push(void) {  //uses shift_register_state to update the shift register
+#if V2X_REV <= REV_12
+/* With 2 shift registers, it is necessary to copy the power control values into
+ * 2 packets, with MSB written first, so that the 2 byte sequence lands on the 
+ * register outputs in the proper order.
+ */
 	uint8_t data[2];
 	data[1] = power_control_state & 0xff;
-	data[0] = (power_control_state >> 8) & 0xff; 
+	data[0] = (power_control_state >> 8) & 0xff;
 	spi_write_packet(SR_SPI, data, 2);
+#elif V2X_REV >= REV_20
+	/* We should be able to send the single byte to the single shift register,
+	 * as long as the bit order has been respected.
+	 */
+	spi_write_packet(SR_SPI, power_control_state, 1);
+#endif
 	PWR_latch();
 }
 
-void PWR_turn_on (uint16_t pins_mask) {  //updates the power state variable but does not update shift register
+void PWR_turn_on (SHIFT_REGISTER_TYPE pins_mask) {  //updates the power state variable but does not update shift register
 	power_control_state |= pins_mask;
 }
 
-void PWR_turn_off(uint16_t pins_mask) {  //updates the power state variable but does not update shift register
+void PWR_turn_off(SHIFT_REGISTER_TYPE pins_mask) {  //updates the power state variable but does not update shift register
 	power_control_state &= ~(pins_mask);
 }
 
-Bool PWR_query(uint16_t mask) {
+Bool PWR_query(SHIFT_REGISTER_TYPE mask) {
 	if ((power_control_state & mask) != 0) {return true;}
 	else {return false;}
 }
 
+#if V2X_REV <= REV_12
 void PWR_hub_start(void) {
 	PWR_turn_on((1<<ENABLE_HUB));
 	PWR_push();
@@ -61,6 +73,7 @@ void PWR_hub_stop(void){
 	PWR_turn_off((1<<ENABLE_HUB));
 	PWR_push();
 }
+#endif
 
 void PWR_host_start(void) {
 	PWR_turn_on((1<<ENABLE_5V0B));

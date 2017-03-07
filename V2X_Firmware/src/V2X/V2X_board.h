@@ -305,6 +305,10 @@ extern "C" {
  * This is used for power and reset sequencing
  *
  */
+#if V2X_REV <= REV_12
+/* Revision 1.2 features two shift registers, accommodating a 16 bit field for 
+ * the following power signals. Note: order is relevant!
+ */
 enum power_sequence_outputs {
 	ENABLE_3V3			= 0,
 	ENABLE_3V3B			,
@@ -323,6 +327,21 @@ enum power_sequence_outputs {
 	ENABLE_SIM_VBUS		,
 	ENABLE_FTDI_RESET	
 };
+#elif V2X_REV >= REV_20
+/* Revision 2.0 uses only a single shift register, accommodating an 8 bit field
+ * for the following power signals. Note: order is relevant!
+ */
+ enum power_sequence_outputs {
+	 ENABLE_4V1			= 0
+	 , ENABLE_5V0
+	 , ENABLE_5V0B
+	 , ENABLE_CAN_SLEEP
+	 , ENABLE_CAN_RESET
+	 , ENABLE_SIM_PWR_ON
+	 , ENABLE_SIM_RESET
+	 , ENABLE_SIM_WAKE
+ };
+#endif
 
 #define SR_SPI				&SPIC
 //! @}
