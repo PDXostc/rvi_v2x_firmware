@@ -223,8 +223,13 @@ extern "C" {
 /** \name Signal pin definitions
  *  @{
  */
+#if V2X_REV <= REV_12
 #define EXT1_PIN_ACL_INT2                  IOPORT_CREATE_PIN(PORTA,2)
 #define EXT1_PIN_ACL_INT1                  IOPORT_CREATE_PIN(PORTA,3)
+#elif V2X_REV >= REV_20
+#define EXT1_PIN_ACL_INT2                  IOPORT_CREATE_PIN(PORTA,1)
+#define EXT1_PIN_ACL_INT1                  IOPORT_CREATE_PIN(PORTA,2)
+#endif
 #define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,4)
 #define EXT1_PIN_HUB_SUSPEND               IOPORT_CREATE_PIN(PORTE,5)
 #define EXT1_PIN_HOST_SHORT_CIRCUIT        IOPORT_CREATE_PIN(PORTB,1)
