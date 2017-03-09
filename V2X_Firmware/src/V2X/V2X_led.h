@@ -9,11 +9,13 @@
 #ifndef V2X_LED_H_
 #define V2X_LED_H_
 
+#if V2X_REV <= REV_12
 /**
  * @def charge_pump_toggle
  * @brief Causes the pin driving the charge pump circuit to toggle state HIGH<>LOW
  **/
 inline static void charge_pump_toggle(void) {gpio_toggle_pin(CHARGEPUMP_0_PIN); }
+#endif
 
 /**
  * @def led_0_on
