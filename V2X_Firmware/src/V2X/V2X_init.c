@@ -12,7 +12,9 @@ uint8_t reset_flags = RESET_NONE;
 void pin_init(void)
 {
 		ioport_configure_pin(EXT1_PIN_HUB_STATUS			, IOPORT_DIR_INPUT						);
+#if V2X_REV <= REV_12
 		ioport_configure_pin(EXT1_PIN_HUB_SUSPEND			, IOPORT_DIR_INPUT						);	//NON_REM[0] USB hub Boot Strapping option, strapped by resistor
+#endif
 		ioport_configure_pin(EXT1_PIN_HOST_SHORT_CIRCUIT	, IOPORT_DIR_INPUT						);
 
 		ioport_configure_pin(EXT1_PIN_CAN_TXD				, IOPORT_DIR_INPUT						);
@@ -29,8 +31,10 @@ void pin_init(void)
 		ioport_configure_pin(EXT1_PIN_SR_CLEAR				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 		ioport_configure_pin(EXT1_PIN_SR_LATCH				, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 
+#if V2X_REV <= REV_12
 		ioport_configure_pin(EXT1_PIN_HUB_SDA				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);  //1 for NON_REM[1] USB hub Boot Strapping option
 		ioport_configure_pin(EXT1_PIN_HUB_SCL				, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//0 for CFG_SEL USB hub Boot Strapping option
+#endif
 
 		ioport_configure_pin(EXT1_PIN_ACL_RXD				, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_ACL_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
