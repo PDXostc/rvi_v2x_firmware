@@ -225,8 +225,13 @@ extern "C" {
 /** \name Signal pin definitions
  *  @{
  */
+#if V2X_REV <= REV_12
 #define EXT1_PIN_ACL_INT2                  IOPORT_CREATE_PIN(PORTA,2)
 #define EXT1_PIN_ACL_INT1                  IOPORT_CREATE_PIN(PORTA,3)
+#elif V2X_REV >= REV_20
+#define EXT1_PIN_ACL_INT2                  IOPORT_CREATE_PIN(PORTA,1)
+#define EXT1_PIN_ACL_INT1                  IOPORT_CREATE_PIN(PORTA,2)
+#endif
 #if V2X_REV <= REV_12
 #define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,4)
 #define EXT1_PIN_HUB_SUSPEND               IOPORT_CREATE_PIN(PORTA,5)
@@ -246,8 +251,10 @@ extern "C" {
 #define EXT1_PIN_HUB_SDA                   IOPORT_CREATE_PIN(PORTE,0)
 #define EXT1_PIN_HUB_SCL                   IOPORT_CREATE_PIN(PORTE,1)
 #endif
+#if V2X_REV <= REV_12
 #define EXT1_PIN_ACL_RXD                   IOPORT_CREATE_PIN(PORTE,2) //RX SIGNAL (PORT E RXD0) FROM SEQ TO FTDI FOR ACCEL AT INTERFACE
 #define EXT1_PIN_ACL_TXD                   IOPORT_CREATE_PIN(PORTE,3) //TX SIGNAL (PORT E TXD0) FROM SEQ TO FTDI FOR ACCEL AT INTERFACE
+#endif
 #define EXT1_PIN_SIM_WAKE                  IOPORT_CREATE_PIN(PORTD,0)
 #define EXT1_PIN_SIM_NETWORK               IOPORT_CREATE_PIN(PORTD,1)
 #define EXT1_PIN_SIM_TXD                   IOPORT_CREATE_PIN(PORTE,2) //TX SIGNAL (PORT D RXD0) FROM SIM MODULE
