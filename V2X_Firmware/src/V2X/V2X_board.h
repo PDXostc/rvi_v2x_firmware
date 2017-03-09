@@ -251,7 +251,11 @@ extern "C" {
 #define EXT1_PIN_SEQ_TXD                   IOPORT_CREATE_PIN(PORTD,7) //TX SIGNAL (PORT D TXD1) TO FTDI MODULE FOR SEQ AT INTERFACE, ALSO USB DP
 /** @} */
 
-
+/* FIXME: Is the following TWI definition incorrect, or irrelevant?
+ * Incorrect because (there may not actually be a TWI device on PORTA)?
+ * Irrelevant because we do not use TWI device>?
+ */
+ 
 /** \name TWI definitions
  *  @{
  */
