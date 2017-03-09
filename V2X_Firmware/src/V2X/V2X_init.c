@@ -53,7 +53,10 @@ void pin_init(void)
 		ioport_configure_pin(BUTTON_1_PIN					, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);  //NON_REM[1] USB hub Boot Strapping option
 
 		ioport_configure_pin(BUF0_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//blocks atmel serial path to CAN through buffer
+        /* only use FDTI buffer in previous revision */
+	#if V2X_REV <= REV_12
 		ioport_configure_pin(BUF1_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//enables FTDI serial path to CAN through buffer
+	#endif
 
 	#if V2X_REV <= REV_12
 		/* Revision 1.2:

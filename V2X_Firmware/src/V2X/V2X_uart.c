@@ -10,9 +10,16 @@
 void canbus_serial_routing(uint8_t source)
 {
 	gpio_set_pin_low(BUF0_PIN);
+	
+#if V2X_REV <= REV_12
+	/* use FTDI by default */
 	gpio_set_pin_low(BUF1_PIN);
 	if		(source == FTDI_ROUTING)	{gpio_set_pin_high(BUF1_PIN);}
 	else  /*(source == AVR_ROUTING)*/	{gpio_set_pin_high(BUF0_PIN);}
+#else
+	/* use Atmel */
+	gpio_set_pin_high(BUF0_PIN);
+#endif
 }
 
 void uart_config(uint8_t port, usb_cdc_line_coding_t * cfg)
