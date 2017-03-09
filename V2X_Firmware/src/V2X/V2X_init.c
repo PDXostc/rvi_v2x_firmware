@@ -88,9 +88,11 @@ void v2x_board_init(void)
 	ACL_init();								//configures, but does not start sampling
 	GSM_usart_init();						//starts direct serial channel to the SIM module
 	CAN_uart_start();						//starts direct serial channel to the ELM module
-	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI 
+	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI
 	udc_start();							//start stack and vbus monitoring
+#if V2X_REV <= REV_12
 	PWR_hub_start();						//connect the hub to the computer
+#endif
 
 	//autostart all systems
 	delay_ms(500);
@@ -108,6 +110,7 @@ void reset_processor(void) {
 			CCP = 0xd8; //enable write protected registers
 			RST_CTRL = true; //force SW reset
 		}
+#if V2X_REV <= REV_12
 		if (reset_flags & (1<<RESET_USB)) {
 			usb_tx_string_P(PSTR("USB restarting\r>"));
 			delay_s(3);
@@ -117,6 +120,7 @@ void reset_processor(void) {
 			delay_s(1);
 			reset_flags &= ~(1<<RESET_USB);
 		}
+#endif
 		if (reset_flags & (1<<RESET_CAN)) {
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN restarting\r>"));
@@ -137,7 +141,7 @@ void reset_processor(void) {
 			reset_flags = reset_flags & ~((1<<RESET_SYSTEM)|(1<<RESET_USB)|(1<<RESET_CAN)|(1<<RESET_GSM));
 		}
 	}
-	
+
 }
 
 void reset_trigger_USB (void) {
