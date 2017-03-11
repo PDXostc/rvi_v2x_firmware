@@ -11,6 +11,7 @@ uint8_t reset_flags = RESET_NONE;
 
 void pin_init(void)
 {
+	/* DELETEME: HUB_STATUS unnecessary without FTDI in the mix */
 		ioport_configure_pin(EXT1_PIN_HUB_STATUS			, IOPORT_DIR_INPUT						);
 #if V2X_REV <= REV_12
 		ioport_configure_pin(EXT1_PIN_HUB_SUSPEND			, IOPORT_DIR_INPUT						);	//NON_REM[0] USB hub Boot Strapping option, strapped by resistor
@@ -58,6 +59,7 @@ void pin_init(void)
 		ioport_configure_pin(BUTTON_0_PIN					, IOPORT_DIR_INPUT   					);
 		ioport_configure_pin(BUTTON_1_PIN					, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);  //NON_REM[1] USB hub Boot Strapping option
 
+/* REV_20: don't use this pin at all, let it default to input */
 		ioport_configure_pin(BUF0_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//blocks atmel serial path to CAN through buffer
         /* only use FDTI buffer in previous revision */
 	#if V2X_REV <= REV_12

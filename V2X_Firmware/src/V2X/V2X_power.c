@@ -10,6 +10,7 @@
 
 void PWR_init(void)
 {
+	/*FIXME: Need to drive high 3v3_EN signal here */
 	PWR_clear();							// Clear shift register
 	PWR_latch();							// Latch all internal registers to output
 	power_control_state = POWER_CONTROL_DEFAULT_VALUE;
@@ -34,7 +35,7 @@ void PWR_clear(void)
 void PWR_push(void) {  //uses shift_register_state to update the shift register
 #if V2X_REV <= REV_12
 /* With 2 shift registers, it is necessary to copy the power control values into
- * 2 packets, with MSB written first, so that the 2 byte sequence lands on the 
+ * 2 packets, with MSB written first, so that the 2 byte sequence lands on the
  * register outputs in the proper order.
  */
 	uint8_t data[2];
@@ -93,6 +94,8 @@ void PWR_is_5_needed (void) { //turn off 5v0 if host and can are off
 	}
 	PWR_push();
 }
+
+/* FIXME: Add similar logical checks for 4v1 vs 3v3 power controls */
 
 void PWR_can_stop (void) {
 	PWR_turn_off((1<<ENABLE_CAN_RESET));

@@ -325,6 +325,10 @@ void menu_power (void) {
 			break;
 #endif
 		case '4':  //4v
+		/* FIXME: ensure 3 comes on before turning off 4
+		 * add a func call for pwr_turn_off_4 that does the requisite checking
+		 * rather than setting bits directly here
+		 */
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
 			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
 			PWR_push();
@@ -339,6 +343,7 @@ void menu_power (void) {
 			PWR_turn_off((1<<ENABLE_5V0B));
 			PWR_is_5_needed();
 			break;
+/* FIXME: add total shutdown case. suicide all power supplies */
 		default:
 			menu_send_q();
 			break;
