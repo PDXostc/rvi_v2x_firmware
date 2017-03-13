@@ -157,6 +157,7 @@ extern "C" {
 #define BUTTON_COUNT 2
 
 
+#if V2X_REV == REV_12
 /* DELETEME: Quite possibly, the whole buffer switcheroo is not needed anymore,
  * can probably eliminate the whole buffer setup
  * */
@@ -183,31 +184,29 @@ extern "C" {
  * specifically by either the FDTI or the Atmel. Revision 2.0 removes the FDTI
  * chip.
  */
-#if V2X_REV == REV_12
-	/**
-	* \name Serial Buffer #1 definitions
-	*
-	* Makes FTDI active communicator with ELM/STN device
-	*
-	*  @{ */
-	#define BUF_1_NAME             "Buffer FTDI Active"
-	#define BUF_1_PIN              BUF1_PIN
-	#define BUF_1_ACTIVE           BUF1_ACTIVE
-	#define BUF_1_INACTIVE         BUF1_INACTIVE
-	/** @} */
+/**
+* \name Serial Buffer #1 definitions
+*
+* Makes FTDI active communicator with ELM/STN device
+*
+*  @{ */
+#define BUF_1_NAME             "Buffer FTDI Active"
+#define BUF_1_PIN              BUF1_PIN
+#define BUF_1_ACTIVE           BUF1_ACTIVE
+#define BUF_1_INACTIVE         BUF1_INACTIVE
+/** @} */
 
-	/** \name BUF1 definitions
-	*  @{ */
-	#define BUF1_PIN                   IOPORT_CREATE_PIN(PORTB, 3)
-	#define BUF1_ACTIVE                true
-	#define BUF1_INACTIVE              !BUF1_ACTIVE
-	/** @} */
+/** \name BUF1 definitions
+*  @{ */
+#define BUF1_PIN                   IOPORT_CREATE_PIN(PORTB, 3)
+#define BUF1_ACTIVE                true
+#define BUF1_INACTIVE              !BUF1_ACTIVE
+/** @} */
 
-	/** Number of on-board buttons */
-	/* DELETEME: this can probably just be eliminated */
-	#define BUFFER_COUNT 2
-#elif V2X_REV >= REV_20
-	#define BUFFER_COUNT 1
+/** Number of on-board buttons */
+/* DELETEME: this can probably just be eliminated */
+#define BUFFER_COUNT 2
+#define BUFFER_COUNT 1
 #endif
 
 /** \name CP0 definitions
@@ -248,7 +247,6 @@ extern "C" {
 #if V2X_REV <= REV_12
 #define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,4)
 #define EXT1_PIN_HUB_SUSPEND               IOPORT_CREATE_PIN(PORTA,5)
-#elif V2X_REV >= REV_20
 /* DELETEME: HUB_STATUS unnecessary without FTDI in the mix */
 #define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,3)
 #endif
@@ -294,6 +292,7 @@ extern "C" {
 #define TWI_DATA_LENGTH				8
 /** @} */
 
+#if V2X_REV <=	REV_12
 /*DELETEME: These are likely superfluous */
 /** \name Extension header #1 USART definitions
 *  @{
@@ -315,6 +314,7 @@ extern "C" {
  *  @{
  */
 #define EXT1_SPI_MODULE              &SPIC
+#endif
 
 /** @} */
 
@@ -381,14 +381,13 @@ enum power_sequence_outputs {
 #define SR_SPI				&SPIC
 //! @}
 
-/* FIXME: Pin definition comments in following are misleading, code is fine */
 #define  USART					USARTC0
 #define  USART_RX_Vect			USARTC0_RXC_vect
 #define  USART_DRE_Vect			USARTC0_DRE_vect
 #define  USART_SYSCLK			SYSCLK_USART0
 #define  USART_PORT				PORTC
-#define  USART_PORT_PIN_TX		(1<<3)  // PC3 (TXE0)
-#define  USART_PORT_PIN_RX		(1<<2)  // PC2 (RXE0)
+#define  USART_PORT_PIN_TX		(1<<3)  
+#define  USART_PORT_PIN_RX		(1<<2) 
 #define  USART_PORT_SYSCLK		SYSCLK_PORT_C
 
 #define  USART_BAUDRATE			9600
@@ -401,8 +400,8 @@ enum power_sequence_outputs {
 #define  USART_SIM_DRE_Vect     USARTD0_DRE_vect
 #define  USART_SIM_SYSCLK       SYSCLK_USART0
 #define  USART_SIM_PORT         PORTD
-#define  USART_SIM_PORT_PIN_TX  (1<<3)  // PC3 (TXE0)
-#define  USART_SIM_PORT_PIN_RX  (1<<2)  // PC2 (RXE0)
+#define  USART_SIM_PORT_PIN_TX  (1<<3)
+#define  USART_SIM_PORT_PIN_RX  (1<<2)
 #define  USART_SIM_PORT_SYSCLK  SYSCLK_PORT_D
 
 #define  USART_SIM_BAUDRATE		115200

@@ -11,9 +11,9 @@ uint8_t reset_flags = RESET_NONE;
 
 void pin_init(void)
 {
+#if V2X_REV <= REV_12
 	/* DELETEME: HUB_STATUS unnecessary without FTDI in the mix */
 		ioport_configure_pin(EXT1_PIN_HUB_STATUS			, IOPORT_DIR_INPUT						);
-#if V2X_REV <= REV_12
 		ioport_configure_pin(EXT1_PIN_HUB_SUSPEND			, IOPORT_DIR_INPUT						);	//NON_REM[0] USB hub Boot Strapping option, strapped by resistor
 #endif
 		ioport_configure_pin(EXT1_PIN_HOST_SHORT_CIRCUIT	, IOPORT_DIR_INPUT						);
@@ -59,10 +59,10 @@ void pin_init(void)
 		ioport_configure_pin(BUTTON_0_PIN					, IOPORT_DIR_INPUT   					);
 		ioport_configure_pin(BUTTON_1_PIN					, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);  //NON_REM[1] USB hub Boot Strapping option
 
+	#if V2X_REV <= REV_12
 /* REV_20: don't use this pin at all, let it default to input */
 		ioport_configure_pin(BUF0_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//blocks atmel serial path to CAN through buffer
         /* only use FDTI buffer in previous revision */
-	#if V2X_REV <= REV_12
 		ioport_configure_pin(BUF1_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);	//enables FTDI serial path to CAN through buffer
 	#endif
 
@@ -96,7 +96,10 @@ void v2x_board_init(void)
 	ACL_init();								//configures, but does not start sampling
 	GSM_usart_init();						//starts direct serial channel to the SIM module
 	CAN_uart_start();						//starts direct serial channel to the ELM module
+#if V2X_REV <= REV_12
+	/* Only applies to buffers. Not needed Rev 2.0 */
 	canbus_serial_routing(AVR_ROUTING);		//cause the serial 3-state buffer to route the serial path from the ELM to the FTDI
+#endif
 	udc_start();							//start stack and vbus monitoring
 #if V2X_REV <= REV_12
 	PWR_hub_start();						//connect the hub to the computer
