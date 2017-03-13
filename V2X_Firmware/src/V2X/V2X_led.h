@@ -9,6 +9,17 @@
 #ifndef V2X_LED_H_
 #define V2X_LED_H_
 
+#if V2X_REV >= REV_20
+/* Revision 2.0:
+ * LED pins have been remapped from the ADC (analog-digital) channel ports to 
+ * OC (output compare). Currently, the pins are driven completely in software, 
+ * on update, which is undesireable and inefficient.
+ * In the future, the LEDs should be driven by using PWM from Timer0, so that 
+ * updates are sent only when necessary, and the LEDs are driven by hardware
+ * peripheral.
+ */
+#endif
+
 /**
  * @def charge_pump_toggle
  * @brief Causes the pin driving the charge pump circuit to toggle state HIGH<>LOW
