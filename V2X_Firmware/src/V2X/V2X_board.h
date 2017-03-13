@@ -43,7 +43,7 @@ extern "C" {
 #if V2X_REV == REV_12
 	#define LED0_PIN                  IOPORT_CREATE_PIN(PORTB, 0)
 #elif V2X_REV >= REV_20
-	#define LED0_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
+#define LED0_PIN                  IOPORT_CREATE_PIN(PORTE, 2)
 #endif
 #define LED0_ACTIVE               true
 #define LED0_INACTIVE             !LED0_ACTIVE
@@ -55,19 +55,19 @@ extern "C" {
 #if V2X_REV == REV_12
 	#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
 #elif V2X_REV >= REV_20
-	#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 5)
+#define LED1_PIN                  IOPORT_CREATE_PIN(PORTE, 1)
 #endif
 #define LED1_ACTIVE               true
 #define LED1_INACTIVE             !LED0_ACTIVE
 /** @} */
 
 /** \name LED2 definitions
- *  net: SEQ_LED3 or "GPS" LED
+ *  net: SEQ_LED2 or "GPS" LED
  *  @{ */
 #if V2X_REV == REV_12
 	#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
 #elif V2X_REV >= REV_20
-	#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
+#define LED2_PIN                  IOPORT_CREATE_PIN(PORTE, 3)
 #endif
 #define LED2_ACTIVE               true
 #define LED2_INACTIVE             !LED0_ACTIVE
