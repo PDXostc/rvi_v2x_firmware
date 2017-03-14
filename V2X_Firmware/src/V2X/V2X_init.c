@@ -72,6 +72,8 @@ void pin_init(void)
 		 */
 		ioport_configure_pin(CHARGEPUMP_0_PIN				, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 	#endif
+	/* 3v3 pin init, low by default... */
+	ioport_configure_pin(PWR_3V3_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 }
 
 /* This function is meant to contain board-specific initialization code

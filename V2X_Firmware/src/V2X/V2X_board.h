@@ -37,6 +37,15 @@ extern "C" {
 #endif
 /** @} */
 
+/** \name 3v3 power pin definition
+ * Activate to maintain power to CPU
+ */
+#if V2X_REV >= REV_20
+#define PWR_3V3_PIN				  IOPORT_CREATE_PIN(PORTA, 4)
+#define PWR_3V3_ACTIVE			  true
+#define PWR_3V3_INACTIVE		  !3V3_ACTIVE
+#endif
+
 /** \name LED0 definitions
  *  net: SEQ_LED3 or "PWR" LED
  *  @{ */
@@ -386,8 +395,8 @@ enum power_sequence_outputs {
 #define  USART_DRE_Vect			USARTC0_DRE_vect
 #define  USART_SYSCLK			SYSCLK_USART0
 #define  USART_PORT				PORTC
-#define  USART_PORT_PIN_TX		(1<<3)  
-#define  USART_PORT_PIN_RX		(1<<2) 
+#define  USART_PORT_PIN_TX		(1<<3)
+#define  USART_PORT_PIN_RX		(1<<2)
 #define  USART_PORT_SYSCLK		SYSCLK_PORT_C
 
 #define  USART_BAUDRATE			9600
