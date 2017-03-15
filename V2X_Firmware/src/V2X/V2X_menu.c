@@ -330,8 +330,12 @@ void menu_power (void) {
 		 * rather than setting bits directly here
 		 */
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
+#if V2X_REV <= REV_12
 			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
 			PWR_push();
+#elif V2X_REV >= REV_20
+			PWR_4_stop();
+#endif
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Disabling 5V supply"));
@@ -339,11 +343,20 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
+		/* FIXME: Menu should not be calling power state bit manipulation directly
+		 * Manipulation of the host should be abstracted for both enable and disable
+		 * cases.
+		 */
 			usb_tx_string_PV(PSTR("Disabling Host power supply"));
 			PWR_turn_off((1<<ENABLE_5V0B));
 			PWR_is_5_needed();
 			break;
+#if V2X_REV >= REV_20
 /* FIXME: add total shutdown case. suicide all power supplies */
+		case 'a': // disable all. shutdown.
+			PWR_shutdown();
+			break;
+#endif
 		default:
 			menu_send_q();
 			break;
@@ -360,8 +373,12 @@ void menu_power (void) {
 #endif
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Enabling 4V supply"));
+#if V2X_REV <= REV_12
 			PWR_turn_on((1<<ENABLE_4V1));
 			PWR_push();
+#elif V2X_REV >= REV_20
+			PWR_4_start();
+#endif
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Enabling 5V supply"));
@@ -369,6 +386,10 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
+		/* FIXME: Menu should not be calling power state bit manipulation directly
+		 * Manipulation of the host should be abstracted for both enable and disable
+		 * cases.
+		 */
 			usb_tx_string_PV(PSTR("Enabling Host power supply"));
 			PWR_turn_on((1<<ENABLE_5V0B));
 			PWR_push();

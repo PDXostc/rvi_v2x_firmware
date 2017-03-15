@@ -10,10 +10,20 @@
 
 void PWR_init(void)
 {
-	/*FIXME: Need to drive high 3v3_EN signal here */
+#if V2X_REV >= REV_20
+
+	/* Need to drive high 3v3_EN signal here, to ensure CPU operation.
+	 * A later check will turn off 3v if we have chosen to enable 4v
+	 */
+	PWR_3_start();
+	#endif
 	PWR_clear();							// Clear shift register
 	PWR_latch();							// Latch all internal registers to output
 	power_control_state = POWER_CONTROL_DEFAULT_VALUE;
+	#if V2X_REV >= REV_20
+	/* Additional check, if 4v was enabled by default config, please disable 3v */
+	PWR_3_is_needed();
+	#endif
 	PWR_push();		//update shift register state
 	delay_ms(100);				//allow power to stabilize
 }
@@ -76,6 +86,86 @@ void PWR_hub_stop(void){
 }
 #endif
 
+#if V2X_REV >= REV_20
+/* 3 volt power pin manipulation
+ * Use with caution! 3v should only be enabled when not using 4v
+ * When transitioning to 3v power only, enable 3v immediately before disabling
+ * 4v.
+ */
+void PWR_3_start(void) {
+	/* TODO:
+	 * Set 3v3 pin high
+	 */
+	gpio_set_pin_high(PWR_3V3_PIN);
+}
+
+/* 3 volt power pin manipulation
+ * Use with caution! Please disable 3v immediately after enabling 4v.
+ * Disabling 3v AND 4v will result in power loss to CPU. V2X system will
+ * require manual restart.
+ */
+
+void PWR_3_stop(void) {
+	/* TODO:
+	 * Set 3v3 pin low
+	 */
+	gpio_set_pin_low(PWR_3V3_PIN);
+}
+
+void PWR_3_is_needed(void) {
+	/* Check to see if 3v should be switched off due to 4v being enabled */
+	if (power_control_state & (1<<ENABLE_4V1))
+	{
+		PWR_3_stop();
+	}
+}
+
+void PWR_4_start(void) {
+	/* TODO:
+	 * drop 3v pin
+	 * Enable 4v
+	 * push new config
+	 * wait for power to stabilize
+	 */
+	PWR_3_stop();
+	PWR_turn_on(1<<ENABLE_4V1);
+	PWR_push();
+}
+
+void PWR_4_stop(void) {
+	/* TODO:
+	 * (wait 3us?)
+	 * disable 4v
+	 * push new config
+	 * Enable 3v pin, to keep atmel alive
+	 */
+	PWR_turn_off((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));
+	PWR_push();
+	PWR_3_start();
+}
+
+/* FIXME: Kill case. Kill all power without holding 3v. This is the suicide case for
+ * manual restart
+ */
+
+void PWR_shutdown(void) {
+	/* TODO
+	 * this really will kill all power, because we mean to.
+	 */
+	PWR_turn_off((1<<ENABLE_4V1)|        \
+				 (1<<ENABLE_5V0)|        \
+				 (1<<ENABLE_5V0B)|       \
+				 (1<<ENABLE_CAN_SLEEP)|  \
+				 (1<<ENABLE_CAN_RESET)|  \
+				 (1<<ENABLE_SIM_PWR_ON)| \
+				 (1<<ENABLE_SIM_RESET)|  \
+				 (1<<ENABLE_SIM_WAKE));
+	PWR_push();
+	PWR_3_stop();
+}
+
+#endif
+
 void PWR_host_start(void) {
 	PWR_turn_on((1<<ENABLE_5V0B));
 	PWR_is_5_needed();
@@ -95,7 +185,9 @@ void PWR_is_5_needed (void) { //turn off 5v0 if host and can are off
 	PWR_push();
 }
 
-/* FIXME: Add similar logical checks for 4v1 vs 3v3 power controls */
+/* FIXME: Add similar logical checks for 4v1 vs 3v3 power controls
+ * power_is_4_needed, power_is_3_needed
+ */
 
 void PWR_can_stop (void) {
 	PWR_turn_off((1<<ENABLE_CAN_RESET));
@@ -109,13 +201,28 @@ void PWR_can_start (void) {
 };
 
 void PWR_gsm_stop(void) {
+	/* FIXME: Instead of calling power settings directly, call for power enabled
+	 * required, something along the lines of the power_is_4_needed
+	 */
+#if V2X_REV <= REV_12
 	PWR_turn_off((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));
+#elif V2X_REV >= REV_20
+	PWR_turn_off(1<<ENABLE_SIM_RESET);
+#endif
 	PWR_push();
 }
 
 void PWR_gsm_start(void) {
+	/* FIXME: Instead of calling power settings directly, call for power enabled
+	 * required, something along the lines of the power_is_4_needed
+	 */
+#if V2X_REV <= REV_12
 	PWR_turn_on((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));  //release the reset
 	PWR_push();
+#elif V2X_REV >= REV_20
+	PWR_turn_on(1<<ENABLE_SIM_RESET);
+	PWR_4_start();
+#endif
 	delay_ms(100);							//let power come up
 	PWR_turn_on((1<<ENABLE_SIM_PWR_ON));
 	PWR_push();
