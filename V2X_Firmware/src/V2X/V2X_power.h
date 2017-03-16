@@ -120,6 +120,45 @@ void PWR_hub_start(void);
 void PWR_hub_stop(void);
 #endif
 
+#if V2X_REV >= REV_20
+/**
+ * @def PWR_3_start
+ * @brief enable 3v pin
+ */
+void PWR_3_start(void);
+
+/**
+ * @def PWR_3_stop
+ * @brief disable 3v pin
+ */
+void PWR_3_stop(void);
+
+/**
+ * @def PWR_3_is_needed
+ * @brief check if 3v pin should be disabled
+ */
+void PWR_3_is_needed(void);
+
+/**
+ * @def PWR_4_start
+ * @brief Enable 4v power supply, disabling 3v pin
+ */
+void PWR_4_start(void);
+
+/**
+ * @def PWR_4_stop
+ * @brief Disable 4v power supply, after enabling 3v pin to keep CPU alive
+ */
+void PWR_4_stop(void);
+
+/**
+ * @def PWR_shutdown
+ * @brief Disable all power. Manual restart of board required.
+ */
+void PWR_shutdown(void);
+
+#endif
+
 /**
  * @def PWR_is_5_needed
  * @brief turns off 5v rail if unused

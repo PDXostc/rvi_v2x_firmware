@@ -3,29 +3,29 @@
  *
  * Created: 2/12/2016 10:34:41 AM
  *  Author: jbanks2
- */ 
+ */
 
 #include "V2X.h"
 
+#if V2X_REV <= REV_12
+/* DELETEME: Likely get rid of this entirely, like the aforementioned buffer cases */
 void canbus_serial_routing(uint8_t source)
 {
 	gpio_set_pin_low(BUF0_PIN);
-	
-#if V2X_REV <= REV_12
+
 	/* use FTDI by default */
 	gpio_set_pin_low(BUF1_PIN);
 	if		(source == FTDI_ROUTING)	{gpio_set_pin_high(BUF1_PIN);}
 	else  /*(source == AVR_ROUTING)*/	{gpio_set_pin_high(BUF0_PIN);}
-#else
 	/* use Atmel */
 	gpio_set_pin_high(BUF0_PIN);
-#endif
 }
+#endif
 
 void uart_config(uint8_t port, usb_cdc_line_coding_t * cfg)
 {
 	if (port != USB_CAN) {return;}
-	
+
 	uint8_t reg_ctrlc;
 	uint16_t bsel;
 
@@ -139,7 +139,7 @@ void uart_rx_notify(uint8_t port) //message received over USB
 				}
 // 			} else { //there was a special character
 // 				//run through the buffer until it is empty
-// 				while (udi_cdc_multi_is_rx_ready(port)) {  
+// 				while (udi_cdc_multi_is_rx_ready(port)) {
 // 					data = udi_cdc_multi_getc(port);
 // 				}
 			}
@@ -155,7 +155,7 @@ void uart_rx_notify(uint8_t port) //message received over USB
 				} else if (data == 'r' || data == 'R') {
 					reset_trigger_SYSTEM();
 				}
-				udi_cdc_multi_putc(port, data);	
+				udi_cdc_multi_putc(port, data);
 			}
 		}
 	}
@@ -166,8 +166,8 @@ ISR(USART_RX_Vect)
 	uint8_t value = USART.DATA;
 	if (CAN_is_controlled() || CAN_is_snooping() || usb_cdc_is_active(USB_CAN) == false) {
 		CAN_new_data(value);
-	} 
-	
+	}
+
 	if (usb_cdc_is_active(USB_CAN) == true){
 		//host is on, send over USB
 		if (0 != (USART.STATUS & (USART_FERR_bm | USART_BUFOVF_bm))) {
@@ -187,8 +187,8 @@ ISR(USART_DRE_Vect)
 {
 	if (CAN_is_controlled() || CAN_is_snooping() || !usb_cdc_is_active(USB_CAN) == true) { //can controller needs to send data
 		CAN_send_data();
-	} 
-	
+	}
+
 	if (usb_cdc_is_active(USB_CAN) == true){  //usb is in control
 		// Data from USB
 		if (udi_cdc_is_rx_ready()) {
