@@ -41,18 +41,18 @@ extern "C" {
  * Activate to maintain power to CPU
  */
 #if V2X_REV >= REV_20
-#define PWR_3V3_PIN				  IOPORT_CREATE_PIN(PORTA, 4)
+#define PWR_3V3_PIN				  IOPORT_CREATE_PIN(PORTA,4)
 #define PWR_3V3_ACTIVE			  true
-#define PWR_3V3_INACTIVE		  !3V3_ACTIVE
+#define PWR_3V3_INACTIVE		  !PWR_3V3_ACTIVE
 #endif
 
 /** \name LED0 definitions
  *  net: SEQ_LED3 or "PWR" LED
  *  @{ */
-#if V2X_REV == REV_12
-	#define LED0_PIN                  IOPORT_CREATE_PIN(PORTB, 0)
+#if V2X_REV <= REV_12
+#define LED0_PIN                  IOPORT_CREATE_PIN(PORTB,0)
 #elif V2X_REV >= REV_20
-#define LED0_PIN                  IOPORT_CREATE_PIN(PORTE, 2)
+#define LED0_PIN                  IOPORT_CREATE_PIN(PORTE,2)
 #endif
 #define LED0_ACTIVE               true
 #define LED0_INACTIVE             !LED0_ACTIVE
@@ -61,10 +61,10 @@ extern "C" {
 /** \name LED1 definitions
  *  net: SEQ_LED1 or "M2M" LED
  *  @{ */
-#if V2X_REV == REV_12
-	#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA, 6)
+#if V2X_REV <= REV_12
+#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA,6)
 #elif V2X_REV >= REV_20
-#define LED1_PIN                  IOPORT_CREATE_PIN(PORTE, 1)
+#define LED1_PIN                  IOPORT_CREATE_PIN(PORTE,1)
 #endif
 #define LED1_ACTIVE               true
 #define LED1_INACTIVE             !LED0_ACTIVE
@@ -73,10 +73,10 @@ extern "C" {
 /** \name LED2 definitions
  *  net: SEQ_LED2 or "GPS" LED
  *  @{ */
-#if V2X_REV == REV_12
-	#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA, 7)
+#if V2X_REV <= REV_12
+#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA,7)
 #elif V2X_REV >= REV_20
-#define LED2_PIN                  IOPORT_CREATE_PIN(PORTE, 3)
+#define LED2_PIN                  IOPORT_CREATE_PIN(PORTE,3)
 #endif
 #define LED2_ACTIVE               true
 #define LED2_INACTIVE             !LED0_ACTIVE
@@ -127,7 +127,7 @@ extern "C" {
 
 /** \name SW0 definitions
  *  @{ */
-#define SW0_PIN                   IOPORT_CREATE_PIN(PORTA, 0)
+#define SW0_PIN                   IOPORT_CREATE_PIN(PORTA,0)
 #define SW0_ACTIVE                true
 #define SW0_INACTIVE              !SW0_ACTIVE
 /** @} */
@@ -146,7 +146,7 @@ extern "C" {
 
 /** \name SW1 definitions
  *  @{ */
-#define SW1_PIN                   IOPORT_CREATE_PIN(PORTD, 5)
+#define SW1_PIN                   IOPORT_CREATE_PIN(PORTD,5)
 #define SW1_ACTIVE                FALSE
 #define SW1_INACTIVE              !SW1_ACTIVE
 /** @} */
@@ -184,7 +184,7 @@ extern "C" {
 
 /** \name BUF0 definitions
  *  @{ */
-#define BUF0_PIN                   IOPORT_CREATE_PIN(PORTB, 2)
+#define BUF0_PIN                   IOPORT_CREATE_PIN(PORTB,2)
 #define BUF0_ACTIVE                true
 #define BUF0_INACTIVE              !BUF0_ACTIVE
 /** @} */
@@ -207,7 +207,7 @@ extern "C" {
 
 /** \name BUF1 definitions
 *  @{ */
-#define BUF1_PIN                   IOPORT_CREATE_PIN(PORTB, 3)
+#define BUF1_PIN                   IOPORT_CREATE_PIN(PORTB,3)
 #define BUF1_ACTIVE                true
 #define BUF1_INACTIVE              !BUF1_ACTIVE
 /** @} */
@@ -220,7 +220,7 @@ extern "C" {
 
 /** \name CP0 definitions
  *  @{ */
-#define CP0_PIN                   IOPORT_CREATE_PIN(PORTA, 1)
+#define CP0_PIN                   IOPORT_CREATE_PIN(PORTA,1)
 #define CP0_ACTIVE                true
 #define CP0_INACTIVE              !CP0_ACTIVE
 /** @} */
@@ -257,8 +257,8 @@ extern "C" {
 #define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,4)
 #define EXT1_PIN_HUB_SUSPEND               IOPORT_CREATE_PIN(PORTA,5)
 /* DELETEME: HUB_STATUS unnecessary without FTDI in the mix */
-#define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,3)
 #endif
+#define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,3)
 #define EXT1_PIN_HOST_SHORT_CIRCUIT        IOPORT_CREATE_PIN(PORTB,1)
 #define EXT1_PIN_SR_CLEAR                  IOPORT_CREATE_PIN(PORTC,0)
 #define EXT1_PIN_SR_LATCH                  IOPORT_CREATE_PIN(PORTC,1)
@@ -283,6 +283,7 @@ extern "C" {
 #define EXT1_PIN_SIM_PWR                   IOPORT_CREATE_PIN(PORTD,4)
 #define EXT1_PIN_SEQ_RXD                   IOPORT_CREATE_PIN(PORTD,6) //RX SIGNAL (PORT D RXD1) FROM FTDI MODULE FOR SEQ AT INTERFACE, ALSO USB DM
 #define EXT1_PIN_SEQ_TXD                   IOPORT_CREATE_PIN(PORTD,7) //TX SIGNAL (PORT D TXD1) TO FTDI MODULE FOR SEQ AT INTERFACE, ALSO USB DP
+/* FIXME: Add definition for HUB_PWR_PRT1 pin, on PORTA,3 ?? */
 /** @} */
 
 /* FIXME: Is the following TWI definition incorrect, or irrelevant?
