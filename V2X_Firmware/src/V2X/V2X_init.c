@@ -16,6 +16,7 @@ void pin_init(void)
 		ioport_configure_pin(EXT1_PIN_HUB_STATUS			, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_HUB_SUSPEND			, IOPORT_DIR_INPUT						);	//NON_REM[0] USB hub Boot Strapping option, strapped by resistor
 #endif
+		ioport_configure_pin(EXT1_PIN_HUB_STATUS			, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_HOST_SHORT_CIRCUIT	, IOPORT_DIR_INPUT						);
 
 		ioport_configure_pin(EXT1_PIN_CAN_TXD				, IOPORT_DIR_INPUT						);
@@ -52,9 +53,17 @@ void pin_init(void)
 		ioport_configure_pin(EXT1_PIN_SEQ_RXD				, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_SEQ_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 
+#if 1
+//high here turns leds off because of inverse logic in rev 2.0
+		ioport_configure_pin(LED_0_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+		ioport_configure_pin(LED_1_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+		ioport_configure_pin(LED_2_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+#endif
+#if 0
 		ioport_configure_pin(LED_0_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 		ioport_configure_pin(LED_1_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 		ioport_configure_pin(LED_2_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
+#endif
 
 		ioport_configure_pin(BUTTON_0_PIN					, IOPORT_DIR_INPUT   					);
 		ioport_configure_pin(BUTTON_1_PIN					, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);  //NON_REM[1] USB hub Boot Strapping option
@@ -74,7 +83,11 @@ void pin_init(void)
 	#endif
 #if V2X_REV >= REV_20
 	/* 3v3 pin init, low by default... */
+	#if 1
 	ioport_configure_pin(PWR_3V3_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
+	#else
+	ioport_configure_pin(PWR_3V3_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+	#endif
 #endif
 
 }
@@ -97,7 +110,8 @@ void v2x_board_init(void)
 	eeprom_init();							//verifies eeprom safe for use
 	menu_init();							//loads menu settings
 	time_init();							//starts the RTC
-	button_init();							//init button stuffs
+	// FIXME: bug ? : Doesn't seem to allow past button check, disabling this allows for continuation
+	//button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling
 	GSM_usart_init();						//starts direct serial channel to the SIM module
 	CAN_uart_start();						//starts direct serial channel to the ELM module
@@ -112,8 +126,8 @@ void v2x_board_init(void)
 
 	//autostart all systems
 	delay_ms(500);
-	GSM_modem_init();
-	CAN_elm_init();
+	// GSM_modem_init();
+	// CAN_elm_init();
 	ACL_set_sample_on();
 	PWR_host_start();
 }
