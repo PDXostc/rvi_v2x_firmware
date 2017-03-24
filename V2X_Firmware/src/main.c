@@ -32,12 +32,12 @@ int main ()
 	v2x_board_init();	//configure pins and initial safe condition
 
 	while (1){
-		//sleepmgr_enter_sleep();		//go to sleep until interrupt
+		sleepmgr_enter_sleep();		//go to sleep until interrupt
 		#if V2X_REV <= REV_12
 			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		#endif
 		//FIXME: bug here of some kind, sleep/or wd might be resetting proc
-		//reset_processor();			//look for pending resets
+		reset_processor();			//look for pending resets
 		// FIXME: BUG HERE  not allowing progress past button check
 		//button_service();			//SCAN and report the button
 		#if V2X_REV <= REV_12
@@ -54,7 +54,5 @@ int main ()
 		#if V2X_REV <= REV_12
 			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		#endif
-		//use leds for debugging
-		led_update();
 	}
 }

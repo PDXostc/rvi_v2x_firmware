@@ -117,6 +117,11 @@ void uart_rx_notify(uint8_t port) //message received over USB
 	}else if (port == USB_CMD) {
 		while (udi_cdc_multi_is_rx_ready(port)) {  //is there data
  			data = udi_cdc_multi_getc(port);	//get 1 char of data
+#if 0
+			// DELETEME: // DEBUG: printing data as it comes
+			usb_cdc_send_byte(port, data);
+			usb_tx_string_P(PSTR("\r"));
+#endif
 // 			if (data == '?'						//allow '?'
 // 			||  data == '-'						//minus sign
 // 			||  data == '+'						//plus

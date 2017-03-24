@@ -10,12 +10,12 @@
 
 void PWR_init(void)
 {
-#if V2X_REV >= REV_20
+	#if V2X_REV >= REV_20
 
 	/* Need to drive high 3v3_EN signal here, to ensure CPU operation.
 	 * A later check will turn off 3v if we have chosen to enable 4v
 	 */
-	PWR_3_start();
+	PWR_3_start(); 
 	#endif
 	PWR_clear();							// Clear shift register
 	PWR_latch();							// Latch all internal registers to output
@@ -226,7 +226,9 @@ void PWR_gsm_start(void) {
 	delay_ms(100);							//let power come up
 	PWR_turn_on((1<<ENABLE_SIM_PWR_ON));
 	PWR_push();
-	delay_ms(150);							//let chip detect
+	//adjusting power wait due to manual for simchip
+	//delay_ms(150);							//let chip detect
+	delay_ms(550);
 	PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
 	PWR_push();					//clear the start bit
 }
