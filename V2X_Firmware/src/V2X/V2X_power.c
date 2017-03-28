@@ -56,7 +56,7 @@ void PWR_push(void) {  //uses shift_register_state to update the shift register
 	/* We should be able to send the single byte to the single shift register,
 	 * as long as the bit order has been respected.
 	 */
-	spi_write_packet(SR_SPI, power_control_state, 1);
+	spi_write_packet(SR_SPI, &power_control_state, 1);
 #endif
 	PWR_latch();
 }
