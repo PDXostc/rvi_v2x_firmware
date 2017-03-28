@@ -199,7 +199,12 @@ void GSM_control_start (char * responce_buffer){
 			usb_tx_string_P(PSTR("SIM5320A device detected\r>"));
 			job_set_timeout(SYS_GSM, 2);
 			GSM_subsequence_state = GSM_subssequence_5;  //got expected response, go to next step
-		} else if (strcmp_P(responce_buffer, PSTR("OK")) == 0){	//did not see matching device ID
+		} else if (strcmp_P(responce_buffer, PSTR("Model: SIMCOM_SIM7100A")) == 0) { //got new version of simcom chip
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("SIM7100A device detected\r>"));
+			job_set_timeout(SYS_GSM, 2);
+			GSM_subsequence_state = GSM_subssequence_5;  //got expected response, go to next step
+		}	else if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {	//did not see matching device ID
 			GSM_subsequence_state = GSM_subssequence_FAIL;
 			job_clear_timeout(SYS_GSM);
 			GSM_control(responce_buffer);

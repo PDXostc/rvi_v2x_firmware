@@ -3,7 +3,7 @@
  *
  * Created: 2/12/2016 11:01:18 AM
  *  Author: jbanks2
- */ 
+ */
 
 
 #ifndef V2X_GSM_H_
@@ -11,20 +11,20 @@
 
 /**
  * @def simcard_status
- * @brief detection of SIMCARD by socket switch 
- * returns "true" if SIMCARD installed 
+ * @brief detection of SIMCARD by socket switch
+ * returns "true" if SIMCARD installed
  **/
 inline static bool simcard_status(void) {return 1-ioport_get_pin_level(SW1_PIN);}
 	/**
  * @def sim_power_status
- * @brief detection of SIMCARD by socket switch 
- * returns "true" if SIMCARD installed 
+ * @brief detection of SIM module by pin
+ * returns "true" if SIM module is powered
  **/
 inline static bool sim_power_status(void) {return ioport_get_pin_level(EXT1_PIN_SIM_PWR);}
 /**
  * @def sim_net_status
- * @brief detection of SIMCARD by socket switch 
- * returns "true" if SIMCARD installed 
+ * @brief detection of SIM network status pin
+ * returns "true" if SIM network pin detected
  **/
 inline static bool sim_net_status(void) {return ioport_get_pin_level(EXT1_PIN_SIM_NETWORK);}
 
@@ -87,7 +87,7 @@ enum GSM_sequence_states {
 	GSM_state_time_get,
 	GSM_state_wake_host
 	};
-	
+
 /**
  * @def GSM_sequence_states
  * @brief generic switch for moving through control substates
@@ -105,7 +105,7 @@ enum GSM_subsequence_states {
 	GSM_subssequence_10,
 	GSM_subssequence_FAIL
 	};
-	
+
 /**
  * @def GSM_control
  * @brief head of the controller sequencer, sends calls into corect module
