@@ -126,7 +126,7 @@ void v2x_board_init(void)
 
 	//autostart all systems
 	delay_ms(500);
-	GSM_modem_init();
+	//GSM_modem_init();
 	CAN_elm_init();
 	ACL_set_sample_on();
 	PWR_host_start();
