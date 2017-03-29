@@ -49,7 +49,7 @@ volatile SHIFT_REGISTER_TYPE power_control_state;
 									(0<<ENABLE_SIM_VBUS)|   \
 									(0<<ENABLE_FTDI_RESET)
 #elif V2X_REV >= REV_20
-#define POWER_CONTROL_DEFAULT_VALUE (0<<ENABLE_4V1)|        \
+#define POWER_CONTROL_DEFAULT_VALUE (1<<ENABLE_4V1)|        \
 									(0<<ENABLE_5V0)|        \
 									(0<<ENABLE_5V0B)|       \
 									(0<<ENABLE_CAN_SLEEP)|  \
