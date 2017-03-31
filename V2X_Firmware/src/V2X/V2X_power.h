@@ -191,14 +191,20 @@ void PWR_can_start (void);
 
 /**
  * @def GSM_start
- * @brief sends a sequence to enable the SIM5320 module
+ * @brief sends a sequence to enable the SIM module
  */
 void PWR_gsm_start(void);
 
 /**
- * @def power_sim_reset
- * @brief sends a sequence to disable the SIM5320 module
+ * @def PWR_gsm_stop
+ * @brief sends a sequence to disable the SIM module
  */
 void PWR_gsm_stop(void);
+
+/**
+ * @def power_sim_reset
+ * @brief Forces reset of the SIM module. Please use sparingly, with caution.
+ */
+void PWR_gsm_reset(void);
 
 #endif /* V2X_DRIVERS_H_ */

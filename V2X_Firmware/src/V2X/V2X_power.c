@@ -232,3 +232,12 @@ void PWR_gsm_start(void) {
 	PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
 	PWR_push();					//clear the start bit
 }
+
+/* Force GSM reset. Please use with caution */
+void PWR_gsm_reset(void) {
+	PWR_turn_off(1<<ENABLE_SIM_RESET);
+	PWR_push();
+	delay_ms(50);
+	PWR_turn_on(1<<ENABLE_SIM_RESET);
+	PWR_push();
+}
