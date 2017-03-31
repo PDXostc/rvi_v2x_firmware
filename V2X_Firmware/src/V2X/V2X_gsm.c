@@ -302,7 +302,14 @@ void GSM_time_sync (char * responce_buffer) {
 		break;
 	case GSM_subssequence_2:
 		for (int i = 0; i < 10; i++) {stng[i] = responce_buffer[i];} //move first 10 to compare
+		// format for this string is altered in simcom version
+		// 5320a: "+CGPSINFO:,,,,,,,,"  == [10] ','
+		// 7100a: "+CGPSINFO: ,,,,,,,," == [11] ','
+#if SIMCOM == SIMCOM_SIM5320A
 		if (strcmp_P(stng, PSTR("+CGPSINFO:")) == 0 && responce_buffer[10] != ',') {
+#elif SIMCOM == SIMCOM_SIM7100A
+		if (strcmp_P(stng, PSTR("+CGPSINFO:")) == 0 && responce_buffer[11] != ',') {
+#endif
 			GSM_parse_gps_info(responce_buffer);
 			GSM_subsequence_state = GSM_subssequence_3;
 			job_set_timeout(SYS_GSM, 2);
