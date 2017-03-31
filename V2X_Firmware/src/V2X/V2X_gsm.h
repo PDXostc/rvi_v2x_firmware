@@ -173,4 +173,9 @@ void GSM_control_fail (void);
  */
 char * GSM_get_imei (void);
 
+/**
+ *@def GSM_power_off
+ *@brief send a shutdown command to the gsm
+ */
+void GSM_command_power_off(void);
 #endif /* V2X_GSM_H_ */

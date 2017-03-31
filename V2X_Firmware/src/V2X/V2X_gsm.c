@@ -386,3 +386,8 @@ void GSM_control_fail (void) {
 char * GSM_get_imei (void) {
 	return &imei;
 }
+
+void GSM_command_power_off(void) {
+	CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CPOF\r")); //compose message
+	CTL_mark_for_processing(&GSM, BUFFER_OUT);
+}
