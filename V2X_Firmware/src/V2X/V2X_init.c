@@ -49,7 +49,7 @@ void pin_init(void)
 		//ioport_configure_pin(EXT1_PIN_SIM_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 		//ioport_configure_pin(EXT1_PIN_SIM_RXD				, IOPORT_DIR_INPUT						);
 
-		ioport_configure_pin(EXT1_PIN_SIM_PWR				, IOPORT_DIR_INPUT	  					);
+		ioport_configure_pin(EXT1_PIN_SIM_PWR				, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_SEQ_RXD				, IOPORT_DIR_INPUT						);
 		ioport_configure_pin(EXT1_PIN_SEQ_TXD				, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 
@@ -126,7 +126,7 @@ void v2x_board_init(void)
 
 	//autostart all systems
 	delay_ms(500);
-	//GSM_modem_init();
+	GSM_modem_init();
 	CAN_elm_init();
 	ACL_set_sample_on();
 	PWR_host_start();
