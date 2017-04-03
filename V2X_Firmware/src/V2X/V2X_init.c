@@ -110,8 +110,7 @@ void v2x_board_init(void)
 	eeprom_init();							//verifies eeprom safe for use
 	menu_init();							//loads menu settings
 	time_init();							//starts the RTC
-	// FIXME: bug ? : Doesn't seem to allow past button check, disabling this allows for continuation
-	//button_init();							//init button stuffs
+	button_init();							//init button stuffs
 	ACL_init();								//configures, but does not start sampling
 	GSM_usart_init();						//starts direct serial channel to the SIM module
 	CAN_uart_start();						//starts direct serial channel to the ELM module
