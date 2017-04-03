@@ -111,17 +111,41 @@ void GSM_control (char * responce_buffer) {
 
 void GSM_control_check (char * responce_buffer){
 	switch (GSM_subsequence_state) {
+	/*This power check is actually not optimal for supporting both board versions
+	/* ...In Rev20 the SIM is not the only thing on the 4v rail, so we can't rely
+	/*on the operational convention of it being disabled/enabled as a check
+	/* for the SIM's absolute state
+	/*
+	/* Works fine for Rev1.2, needs help on Rev2.0.
+	 */
 	case GSM_subssequence_1:  //check module power
-		if (PWR_query((1<<ENABLE_4V1))) { //is the module power on?
-			GSM_subsequence_state = GSM_subssequence_3; 
+#if V2X_REV <= REV_12
+		if (PWR_query((1<<ENABLE_4V1)) && sim_power_status()) { //is the module power on?
+			GSM_subsequence_state = GSM_subssequence_3;
 			GSM_control_check(responce_buffer);
 		} else { //if not power it up
 			usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
 			PWR_gsm_start();
+#if SIMCOM == SIMCOM_SIM5320A
 			GSM_subsequence_state = GSM_subssequence_2;
 			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start
+#elif SIMCOM == SIMCOM_SIM7100A
+			GSM_subsequence_state = GSM_subssequence_3; //skip 2, 7100a doesn't appear to have "START"
+			job_set_timeout(SYS_GSM, 25); //give SIM module 25 seconds to start
+#endif
 		}
+#elif V2X_REV >= REV_20
+			usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
+			PWR_gsm_start();
+			GSM_subsequence_state = GSM_subssequence_3;
+			job_set_timeout(SYS_GSM, 20); //give SIM module 10 seconds to start
+#endif
 		break;
+#if SIMCOM == SIMCOM_SIM5320A
+	/* 7100a does not appear to send the START message, so has real trouble
+	/* with this step. This appears to be why just sending the machine to subsequence_3
+	/* has been more reliable with the new version
+	 */
 	case GSM_subssequence_2: //Module clean boot, look for "start"
 		if (strcmp_P(responce_buffer, PSTR("START")) == 0) {
 			GSM_subsequence_state = GSM_subssequence_3;  //got expected response, go to next step
@@ -129,7 +153,8 @@ void GSM_control_check (char * responce_buffer){
 		}
 		job_check_fail(SYS_GSM);
 		break;
-	case GSM_subssequence_3: //check for SIM power LED state
+#endif
+	case GSM_subssequence_3: //check for SIM power state
 		if (sim_power_status()) {
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("GSM is powered\r>"));
@@ -138,10 +163,9 @@ void GSM_control_check (char * responce_buffer){
 		} else { //try a reset
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("GSM rebooting\r>"));
-			PWR_gsm_stop();
 			PWR_gsm_start();
-			GSM_subsequence_state = GSM_subssequence_2;
-			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start
+			GSM_subsequence_state = GSM_subssequence_3; // Check for power again
+			job_set_timeout(SYS_GSM, 20); //give SIM module 20 seconds to start
 		}
 		break;
 	case GSM_subssequence_6: //check for command responce
@@ -213,7 +237,7 @@ void GSM_control_start (char * responce_buffer){
 		break;
 	case GSM_subssequence_5:
 		clear_buffer(stng);
-        /* FIXME: operational divergence SIMCOM 5320a vs 7100a 
+        /* Operational divergence SIMCOM 5320a vs 7100a
 		 * 5320a stores prints out "IMEI: ..."
 		 * 7100a prints out "IMEISV: ..."
 		 */
