@@ -42,6 +42,7 @@ extern "C" {
 #define SIMCOM_SIM5320A		(0)
 #define SIMCOM_SIM7100A		(1)
 #define SIMCOM 				SIMCOM_SIM7100A
+//#define SIMCOM 				SIMCOM_SIM5320A
 
 /** \name 3v3 power pin definition
  * Activate to maintain power to CPU
