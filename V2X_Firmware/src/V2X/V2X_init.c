@@ -161,9 +161,8 @@ void reset_processor(void) {
 		if (reset_flags & (1<<RESET_GSM)) {
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("GSM restarting\r>"));
-			PWR_gsm_stop();
-			// delay_ms(100);
-			//FIXME: longer hold for gsm restart
+			// Forces reset of GSM
+			PWR_gsm_reset();
 			delay_ms(500);
 			GSM_modem_init();
 			reset_flags &= ~(1<<RESET_GSM);

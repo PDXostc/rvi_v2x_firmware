@@ -288,7 +288,7 @@ void menu_modem (void) {
 		break;
 	case 'r':  //reset
 		reset_trigger_GSM();
-		usb_tx_string_PV(PSTR("GSM restarting"));
+		usb_tx_string_PV(PSTR("GSM RESET"));
 		break;
 	case 'q':
 		menu_modem_status();
@@ -303,7 +303,7 @@ void menu_modem (void) {
  		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rX: AT Command Pass through\r"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: RESET. Emergency use.\rI: Subsystem Information\rQ: Query status\rX: AT Command Pass through\r"));
 		break;
 	}
 }
