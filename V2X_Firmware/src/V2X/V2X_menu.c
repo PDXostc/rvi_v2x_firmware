@@ -3,7 +3,7 @@
  *
  * Created: 2/23/2016 9:00:14 AM
  *  Author: jbanks2
- */ 
+ */
 
 #include "V2X.h"
 #include "ctype.h"
@@ -17,20 +17,63 @@ void menu_init(void) {
 }
 
 void menu_add_to_command(char value) {
+#if 0
+	usb_tx_string_P(PSTR("menu add got char: \r"));
+	usb_cdc_send_byte(USB_CMD, value);
+#endif
 	if (value == 8 || value == 0x7f) {//if backspace or delete
 		int leng = strlen(CMD_buffer); //get buffer sting length
 		if (leng > 0) {	//if length not 0
 			CMD_buffer[leng-1] = '\0';	//null out the last char
 		}
 	} else if (value > 0x20 && value < 0x7E ) {		//if in ascii set
-		strcat(CMD_buffer, &value);					//store to buffer
+#if 0
+		usb_tx_string_P(PSTR("About to concat this char into cmd buffer: \r"));
+		usb_cdc_send_byte(USB_CMD, value);
+#endif
+		char char_str[2] = {'?','\0'};
+		char_str[0] = value;
+		strcat(CMD_buffer, char_str);					//store to buffer
+#if 0
+		// DELETEME: sanity check on strcat function
+		// strcat(CMD_buffer, "X");
+		// strcat(CMD_buffer, 0x25);
+		// DELETEME: print what is going to be added to the command
+		usb_tx_string_P(PSTR("Added character to command, here is the new buffer: \r"));
+
+
+		// force lookup?
+		char* cmd_temp_ptr = CMD_buffer;
+		char temp_char = CMD_buffer[1];
+		//print new buffer we just augmented
+		for (int i = 0; i < 15; i++)
+		{
+			usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);
+		}
+#endif
+
 	}
 }
 
 void menu_main(void) {
+#if 0
+	// DELETEME: printing raw command received
+	usb_tx_string_P(PSTR("MENU GOT COMMAND RAW: \r"));
+	for (int i = 0; i < 15; i++)
+	{
+		usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);
+	}
+#endif
 	for(int i = 0; i < 4; i++){
 		CMD_buffer[i] = tolower(CMD_buffer[i]);
 	}
+#if 0
+	// DELETEME: /* reprint buffer for testing */
+	usb_tx_string_P(PSTR("Got command: \r"));
+	for(int i = 0; i < 10; i++){
+		usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);
+	}
+#endif
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
 		switch(CMD_buffer[2]) {
 			case 'i': //information
@@ -73,7 +116,7 @@ void menu_main(void) {
 	}else{
 			usb_tx_string_PV(PSTR("All commands start VX\r"));
 	}
-	clear_buffer(CMD_buffer);	//clear the buffer for next command	
+	clear_buffer(CMD_buffer);	//clear the buffer for next command
 	menu_send_n_st();
 }
 
@@ -105,7 +148,7 @@ void menu_accel (void) {
 	case 's':  //sample rate
  		speed = atoi(CMD_buffer+4);
 		if (speed > 3199) {
-			ACL_set_rate(ACL_RATE_3200);	
+			ACL_set_rate(ACL_RATE_3200);
 			usb_tx_string_PV(PSTR("Set to 3200Hz"));
 		}else if (speed > 1599) {
 			ACL_set_rate(ACL_RATE_1600);
@@ -140,7 +183,7 @@ void menu_accel (void) {
 		}else if (speed > 0) {
 			ACL_set_rate(ACL_RATE_1);
 			usb_tx_string_PV(PSTR("Set to 1Hz"));
- 		}else {	
+ 		}else {
 			usb_tx_string_P(PSTR("ERROR: Out of range, try again."));
 		}
 		break;
@@ -161,7 +204,7 @@ void menu_accel (void) {
 			usb_tx_string_PV(PSTR("+/-2G Range"));
 		}else {menu_send_out_of_range();}
 		break;
-		
+
 	case 'x':
 	case 'y':
 	case 'z':
@@ -207,12 +250,12 @@ void menu_accel (void) {
 			} else {
 				ACL_take_sample(sample);
 			}
-			ACL_data_to_string(sample, CMD_buffer); 
+			ACL_data_to_string(sample, CMD_buffer);
 			for (int i = 0; i < strlen(CMD_buffer); i++)
 				{usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);}
 		} else {
 			usb_tx_string_P(PSTR("ERROR: Not currently sampling, use VXAE\r"));}
-		
+
 		break;
 	case 'f':
 		if (CMD_buffer[4] == '0') {
@@ -225,7 +268,7 @@ void menu_accel (void) {
 		}
 		else {menu_send_q();}
 		break;
-	case '?':  
+	case '?':
 	default:
 		usb_tx_string_P(PSTR("*** Accelerometer Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rG: Get last Sample\rSn: Set sample rate in HZ (1, 3, 6, 12, 25, 50, 100, 200, 400, 800)\rWn: Set \"G\" Range (2, 4, 8, 16)\rFn: Full range (1: full 0: 10bit)\rXn: Set X offset (+/-127)\rYn: Set Y offset\rZn: Set Z offset\r"));
 		break;
@@ -233,9 +276,9 @@ void menu_accel (void) {
 }
 
 void menu_modem (void) {
-	int i; 
+	int i;
 	switch (CMD_buffer[3]) {
-	case 'd':  
+	case 'd':
 		PWR_gsm_stop(); //disable
 		usb_tx_string_PV(PSTR("GSM is off\r"));
 		break;
@@ -245,7 +288,7 @@ void menu_modem (void) {
 		break;
 	case 'r':  //reset
 		reset_trigger_GSM();
-		usb_tx_string_PV(PSTR("GSM restarting"));
+		usb_tx_string_PV(PSTR("GSM RESET"));
 		break;
 	case 'q':
 		menu_modem_status();
@@ -260,7 +303,7 @@ void menu_modem (void) {
  		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: Restart\rI: Subsystem Information\rQ: Query status\rX: AT Command Pass through\r"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\rE: Enable\rD: Disable\rR: RESET. Emergency use.\rI: Subsystem Information\rQ: Query status\rX: AT Command Pass through\r"));
 		break;
 	}
 }
@@ -290,7 +333,7 @@ void menu_can (void) {
 		break;
 	case 'x': //pass command
 		strcat_P(CMD_buffer, PSTR("\r"));
-		
+
 		CAN_add_string_to_buffer(BUFFER_OUT, CMD_buffer+4);
 		CAN_mark_for_processing(BUFFER_OUT);
 		CAN_start_snoop();
@@ -317,15 +360,25 @@ void menu_power (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable power
 		switch (CMD_buffer[4]) {
+#if V2X_REV <= REV_12
 		case '3':  //3v
 			usb_tx_string_PV(PSTR("Disabling 3V supply"));
 			PWR_turn_off((1<<ENABLE_3V3));
 			PWR_push();
 			break;
+#endif
 		case '4':  //4v
+		/* FIXME: ensure 3 comes on before turning off 4
+		 * add a func call for pwr_turn_off_4 that does the requisite checking
+		 * rather than setting bits directly here
+		 */
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
+#if V2X_REV <= REV_12
 			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
 			PWR_push();
+#elif V2X_REV >= REV_20
+			PWR_4_stop();
+#endif
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Disabling 5V supply"));
@@ -333,10 +386,20 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
+		/* FIXME: Menu should not be calling power state bit manipulation directly
+		 * Manipulation of the host should be abstracted for both enable and disable
+		 * cases.
+		 */
 			usb_tx_string_PV(PSTR("Disabling Host power supply"));
 			PWR_turn_off((1<<ENABLE_5V0B));
 			PWR_is_5_needed();
 			break;
+#if V2X_REV >= REV_20
+/* FIXME: add total shutdown case. suicide all power supplies */
+		case 'a': // disable all. shutdown.
+			PWR_shutdown();
+			break;
+#endif
 		default:
 			menu_send_q();
 			break;
@@ -344,15 +407,21 @@ void menu_power (void) {
 		break; //disable power
 	case 'e':  //enable power
 		switch (CMD_buffer[4]) {
+#if V2X_REV <= REV_12
 		case '3':  //3v
 			usb_tx_string_PV(PSTR("Enabling 3V supply"));
 			PWR_turn_on((1<<ENABLE_3V3));
 			PWR_push();
 			break;
+#endif
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Enabling 4V supply"));
+#if V2X_REV <= REV_12
 			PWR_turn_on((1<<ENABLE_4V1));
 			PWR_push();
+#elif V2X_REV >= REV_20
+			PWR_4_start();
+#endif
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Enabling 5V supply"));
@@ -360,6 +429,10 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
+		/* FIXME: Menu should not be calling power state bit manipulation directly
+		 * Manipulation of the host should be abstracted for both enable and disable
+		 * cases.
+		 */
 			usb_tx_string_PV(PSTR("Enabling Host power supply"));
 			PWR_turn_on((1<<ENABLE_5V0B));
 			PWR_push();
@@ -369,7 +442,7 @@ void menu_power (void) {
 			break;
 		}
 		break;  //enable power
-	case 'r':  
+	case 'r':
 		PWR_turn_off(~POWER_CONTROL_DEFAULT_VALUE);
 		PWR_turn_on(POWER_CONTROL_DEFAULT_VALUE);
 		PWR_push();
@@ -455,7 +528,7 @@ void menu_send_n(void) {usb_tx_string_P(PSTR("\r"));
 }
 
 void menu_send_n_st(void) {usb_tx_string_P(PSTR("\r>"));
-}			
+}
 
 void menu_send_out_of_range(void) {usb_tx_string_P(PSTR("ERROR: out of range\r"));
 }
@@ -465,10 +538,10 @@ void menu_send_GSM(void) {usb_tx_string_P(PSTR("GSM>:"));
 
 void menu_send_CTL(void) {usb_tx_string_P(PSTR("CTL>:"));
 }
-	
+
 void menu_send_CAN(void) {usb_tx_string_P(PSTR("CAN>:"));
 }
-	
+
 void menu_send_BTN(void) {usb_tx_string_P(PSTR("BTN>:"));
 }
 
@@ -476,7 +549,7 @@ Bool menu_verbose(void) {
 	return verbose;
 }
 
-void menu_print_int(long value) {	
+void menu_print_int(long value) {
 	char c_buf[13];
 	ltoa(value, c_buf, 10);
 	int i = 0;  //clear the pointer
@@ -508,7 +581,9 @@ void menu_lockup (void) {
 	usb_cdc_send_string(USB_ACL, msg);
 	usb_cdc_send_string(USB_CAN, msg);
 	delay_s(1);
+#if V2X_REV <= REV_12
 	PWR_hub_stop();
+#endif
 	delay_s(1);
 	RST_CTRL = true; //force SW reset
 }
@@ -560,10 +635,12 @@ void menu_can_status(void) {
 }
 
 void menu_power_status(void) {
+#if V2X_REV <= REV_12
 	usb_tx_string_P(PSTR("3V3="));
 	if (PWR_query((1<<ENABLE_3V3)))
 			{menu_send_1();}
 	else	{menu_send_0();}
+#endif
 	usb_tx_string_P(PSTR("4V1="));
 	if (PWR_query((1<<ENABLE_4V1)))
 			{menu_send_1();}
@@ -587,14 +664,14 @@ void menu_timer_status (void) {
 			{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("UTC="));
-	menu_print_int(time_get());		
+	menu_print_int(time_get());
 	menu_send_n();
 	usb_tx_string_P(PSTR("H24="));
 	if (time_is_current())
 			{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("ALM="));
-	menu_print_int(time_alarm_get());		
+	menu_print_int(time_alarm_get());
 	menu_send_n();
 	usb_tx_string_P(PSTR("ALS="));
 	if (time_alarm_active())
