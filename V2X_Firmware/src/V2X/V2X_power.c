@@ -93,9 +93,6 @@ void PWR_hub_stop(void){
  * 4v.
  */
 void PWR_3_start(void) {
-	/* TODO:
-	 * Set 3v3 pin high
-	 */
 	gpio_set_pin_high(PWR_3V3_PIN);
 }
 
@@ -106,9 +103,6 @@ void PWR_3_start(void) {
  */
 
 void PWR_3_stop(void) {
-	/* TODO:
-	 * Set 3v3 pin low
-	 */
 	gpio_set_pin_low(PWR_3V3_PIN);
 }
 
@@ -121,33 +115,18 @@ void PWR_3_is_needed(void) {
 }
 
 void PWR_4_start(void) {
-	/* TODO:
-	 * drop 3v pin
-	 * Enable 4v
-	 * push new config
-	 * wait for power to stabilize
-	 */
 	PWR_3_stop();
 	PWR_turn_on(1<<ENABLE_4V1);
 	PWR_push();
 }
 
 void PWR_4_stop(void) {
-	/* TODO:
-	 * (wait 3us?)
-	 * disable 4v
-	 * push new config
-	 * Enable 3v pin, to keep atmel alive
-	 */
 	PWR_turn_off((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));
 	PWR_push();
 	PWR_3_start();
 }
 
 void PWR_shutdown(void) {
-	/* TODO
-	 * this really will kill all power, because we mean to.
-	 */
 	PWR_turn_off((1<<ENABLE_4V1)|        \
 				 (1<<ENABLE_5V0)|        \
 				 (1<<ENABLE_5V0B)|       \
