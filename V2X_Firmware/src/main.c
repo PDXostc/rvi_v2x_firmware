@@ -36,10 +36,8 @@ int main ()
 		#if V2X_REV <= REV_12
 			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		#endif
-		//FIXME: bug here of some kind, sleep/or wd might be resetting proc
 		reset_processor();			//look for pending resets
-		// FIXME: BUG HERE  not allowing progress past button check
-		//button_service();			//SCAN and report the button
+		button_service();			//SCAN and report the button
 		#if V2X_REV <= REV_12
 			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		#endif
