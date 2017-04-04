@@ -333,10 +333,6 @@ void menu_power (void) {
 			break;
 #endif
 		case '4':  //4v
-		/* FIXME: ensure 3 comes on before turning off 4
-		 * add a func call for pwr_turn_off_4 that does the requisite checking
-		 * rather than setting bits directly here
-		 */
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
 #if V2X_REV <= REV_12
 			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
@@ -351,15 +347,10 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
-		/* FIXME: Menu should not be calling power state bit manipulation directly
-		 * Manipulation of the host should be abstracted for both enable and disable
-		 * cases.
-		 */
 			usb_tx_string_PV(PSTR("Disabling Host power supply"));
 			PWR_host_stop();
 			break;
 #if V2X_REV >= REV_20
-/* FIXME: add total shutdown case. suicide all power supplies */
 		case 'a': // disable all. shutdown.
 			PWR_shutdown();
 			break;
@@ -393,10 +384,6 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
-		/* FIXME: Menu should not be calling power state bit manipulation directly
-		 * Manipulation of the host should be abstracted for both enable and disable
-		 * cases.
-		 */
 			usb_tx_string_PV(PSTR("Enabling Host power supply"));
 			PWR_host_start();
 			break;

@@ -144,10 +144,6 @@ void PWR_4_stop(void) {
 	PWR_3_start();
 }
 
-/* FIXME: Kill case. Kill all power without holding 3v. This is the suicide case for
- * manual restart
- */
-
 void PWR_shutdown(void) {
 	/* TODO
 	 * this really will kill all power, because we mean to.
@@ -201,9 +197,6 @@ void PWR_can_start (void) {
 };
 
 void PWR_gsm_stop(void) {
-	/* FIXME: Instead of calling power settings directly, call for power enabled
-	 * required, something along the lines of the power_is_4_needed
-	 */
 #if V2X_REV <= REV_12
 	//PWR_turn_off((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));
 	// FIXME: testing performance of just disabling power pin on old board...
@@ -230,9 +223,6 @@ void PWR_gsm_stop(void) {
 }
 
 void PWR_gsm_start(void) {
-	/* FIXME: Instead of calling power settings directly, call for power enabled
-	 * required, something along the lines of the power_is_4_needed
-	 */
 #if V2X_REV <= REV_12
 	//FIXME: Trying one extra measure to get the sim to respond using only the power pin...
 	PWR_turn_off(1<<ENABLE_SIM_RESET);
