@@ -332,6 +332,14 @@ void menu_power (void) {
 			PWR_push();
 			break;
 #endif
+		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
+		 * while the power ouptut is properly disabled
+		 */
+		case '3':
+			usb_tx_string_PV(PSTR("Disabling 3v pin"));
+			PWR_3_stop();
+			break;
+			
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
 #if V2X_REV <= REV_12
@@ -369,6 +377,14 @@ void menu_power (void) {
 			PWR_push();
 			break;
 #endif
+		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
+		 * while the power ouptut is properly disabled
+		 */
+		case '3':
+			usb_tx_string_PV(PSTR("Enabling 3v pin"));
+			PWR_3_start();
+			break;
+			
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Enabling 4V supply"));
 #if V2X_REV <= REV_12
@@ -591,6 +607,10 @@ void menu_power_status(void) {
 			{menu_send_1();}
 	else	{menu_send_0();}
 #endif
+	usb_tx_string_P(PSTR("3V3="));
+	if (ioport_get_pin_level(PWR_3V3_PIN)==true)
+			{menu_send_1();} 
+	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("4V1="));
 	if (PWR_query((1<<ENABLE_4V1)))
 			{menu_send_1();}
