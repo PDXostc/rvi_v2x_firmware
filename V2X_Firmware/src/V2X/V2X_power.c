@@ -93,9 +93,6 @@ void PWR_hub_stop(void){
  * 4v.
  */
 void PWR_3_start(void) {
-	/* TODO:
-	 * Set 3v3 pin high
-	 */
 	gpio_set_pin_high(PWR_3V3_PIN);
 }
 
@@ -106,9 +103,6 @@ void PWR_3_start(void) {
  */
 
 void PWR_3_stop(void) {
-	/* TODO:
-	 * Set 3v3 pin low
-	 */
 	gpio_set_pin_low(PWR_3V3_PIN);
 }
 
@@ -121,37 +115,18 @@ void PWR_3_is_needed(void) {
 }
 
 void PWR_4_start(void) {
-	/* TODO:
-	 * drop 3v pin
-	 * Enable 4v
-	 * push new config
-	 * wait for power to stabilize
-	 */
 	PWR_3_stop();
 	PWR_turn_on(1<<ENABLE_4V1);
 	PWR_push();
 }
 
 void PWR_4_stop(void) {
-	/* TODO:
-	 * (wait 3us?)
-	 * disable 4v
-	 * push new config
-	 * Enable 3v pin, to keep atmel alive
-	 */
 	PWR_turn_off((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));
 	PWR_push();
 	PWR_3_start();
 }
 
-/* FIXME: Kill case. Kill all power without holding 3v. This is the suicide case for
- * manual restart
- */
-
 void PWR_shutdown(void) {
-	/* TODO
-	 * this really will kill all power, because we mean to.
-	 */
 	PWR_turn_off((1<<ENABLE_4V1)|        \
 				 (1<<ENABLE_5V0)|        \
 				 (1<<ENABLE_5V0B)|       \
@@ -185,10 +160,6 @@ void PWR_is_5_needed (void) { //turn off 5v0 if host and can are off
 	PWR_push();
 }
 
-/* FIXME: Add similar logical checks for 4v1 vs 3v3 power controls
- * power_is_4_needed, power_is_3_needed
- */
-
 void PWR_can_stop (void) {
 	PWR_turn_off((1<<ENABLE_CAN_RESET));
 	PWR_is_5_needed();
@@ -201,38 +172,17 @@ void PWR_can_start (void) {
 };
 
 void PWR_gsm_stop(void) {
-	/* FIXME: Instead of calling power settings directly, call for power enabled
-	 * required, something along the lines of the power_is_4_needed
-	 */
 #if V2X_REV <= REV_12
-	//PWR_turn_off((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));
-	// FIXME: testing performance of just disabling power pin on old board...
-	// somehow this pin is not actually shutting down the simcom. manual says
-	// power off should take place many seconds after holding it down...
-	// NOTE: testing that the old wasn't just shutting down due to lack of power...
-	// PWR_turn_off(1<<ENABLE_4V1);
 	GSM_command_power_off();
 	PWR_turn_on(1<<ENABLE_SIM_PWR_ON);
 #elif V2X_REV >= REV_20
-	//FIXME: Documentation indicates that the RESET pin is perhaps not ideal for
-	// normal use
-	//PWR_turn_off(1<<ENABLE_SIM_RESET);
-	//PWR_turn_off(1<<ENABLE_SIM_PWR_ON);
-	// FIXME: Trying to send a power off command to simcom instead
-	GSM_command_power_off();
-	// FIXME: might need a delay, or some way to check if the has shut off, and if
-	// not, then hold power low or resort to reset
-	// Also, please verify that this works on the Rev2.0 prototype properly:
-	// Should be the same board logic as the Rev1.2 case, but test each:
-	//PWR_turn_on(1<<ENABLE_SIM_PWR_ON);
+	// GSM_command_power_off();
+	PWR_turn_on(1<<ENABLE_SIM_PWR_ON);
 #endif
 	PWR_push();
 }
 
 void PWR_gsm_start(void) {
-	/* FIXME: Instead of calling power settings directly, call for power enabled
-	 * required, something along the lines of the power_is_4_needed
-	 */
 #if V2X_REV <= REV_12
 	//FIXME: Trying one extra measure to get the sim to respond using only the power pin...
 	PWR_turn_off(1<<ENABLE_SIM_RESET);
@@ -240,14 +190,6 @@ void PWR_gsm_start(void) {
 	delay_ms(500);
 	PWR_turn_on((1<<ENABLE_SIM_RESET)|(1<<ENABLE_4V1));  //release the reset
 	PWR_push();
-
-	//NOTE: If the power pin is our means of manipulating the power state of the sim...
-	// then we will want to add one extra check to see the state we last set
-	// because the activation sequence requires an initial high-drop-high, the
-	// pin might have to be verified as being high first...
-	// NOTE: We really should make accommodations for the fact that the logic is
-	// reversed on this particular setting
-	// 	if (PWR_query(1<<ENABLE_SIM_PWR_ON))
 	if (sim_power_status())
 	{
 		PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
@@ -258,16 +200,6 @@ void PWR_gsm_start(void) {
 	PWR_turn_on(1<<ENABLE_SIM_RESET);
 	PWR_4_start();
 #endif
-	// FIXME: add greater delay to accommodate the 7100a?
-	// delay_ms(100);							//let power come up
-	//
-
-	//NOTE: If the power pin is our means of manipulating the power state of the sim...
-	// then we will want to add one extra check to see the state we last set
-	// because the activation sequence requires an initial high-drop-high, the
-	// pin might have to be verified as being high first...
-	// NOTE: We really should make accommodations for the fact that the logic is
-	// reversed on this particular setting
  	if (PWR_query(1<<ENABLE_SIM_PWR_ON))
 	{
 		PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
@@ -277,8 +209,6 @@ void PWR_gsm_start(void) {
 
 	PWR_turn_on((1<<ENABLE_SIM_PWR_ON));
 	PWR_push();
-	//adjusting power wait due to manual for simchip
-	//delay_ms(150);							//let chip detect
 	delay_ms(250);
 	PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
 	PWR_push();					//clear the start bit

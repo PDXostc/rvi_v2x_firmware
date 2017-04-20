@@ -17,68 +17,33 @@ void menu_init(void) {
 }
 
 void menu_add_to_command(char value) {
-#if 0
-	usb_tx_string_P(PSTR("menu add got char: \r"));
-	usb_cdc_send_byte(USB_CMD, value);
-#endif
 	if (value == 8 || value == 0x7f) {//if backspace or delete
 		int leng = strlen(CMD_buffer); //get buffer sting length
 		if (leng > 0) {	//if length not 0
 			CMD_buffer[leng-1] = '\0';	//null out the last char
 		}
 	} else if (value > 0x20 && value < 0x7E ) {		//if in ascii set
-#if 0
-		usb_tx_string_P(PSTR("About to concat this char into cmd buffer: \r"));
-		usb_cdc_send_byte(USB_CMD, value);
-#endif
 		char char_str[2] = {'?','\0'};
 		char_str[0] = value;
 		strcat(CMD_buffer, char_str);					//store to buffer
-#if 0
-		// DELETEME: sanity check on strcat function
-		// strcat(CMD_buffer, "X");
-		// strcat(CMD_buffer, 0x25);
-		// DELETEME: print what is going to be added to the command
-		usb_tx_string_P(PSTR("Added character to command, here is the new buffer: \r"));
-
-
-		// force lookup?
-		char* cmd_temp_ptr = CMD_buffer;
-		char temp_char = CMD_buffer[1];
-		//print new buffer we just augmented
-		for (int i = 0; i < 15; i++)
-		{
-			usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);
-		}
-#endif
 
 	}
 }
 
 void menu_main(void) {
-#if 0
-	// DELETEME: printing raw command received
-	usb_tx_string_P(PSTR("MENU GOT COMMAND RAW: \r"));
-	for (int i = 0; i < 15; i++)
-	{
-		usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);
-	}
-#endif
 	for(int i = 0; i < 4; i++){
 		CMD_buffer[i] = tolower(CMD_buffer[i]);
 	}
-#if 0
-	// DELETEME: /* reprint buffer for testing */
-	usb_tx_string_P(PSTR("Got command: \r"));
-	for(int i = 0; i < 10; i++){
-		usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);
-	}
-#endif
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
 		switch(CMD_buffer[2]) {
 			case 'i': //information
+#if V2X_REV <= REV_12
 				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\rOpen source hardware and software\rHW Rev1.2 \rSW Rev0.1\r"));
 				break;
+#elif V2X_REV >= REV_20
+				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\rOpen source hardware and software\rHW Rev1.2 \rSW Rev0.1\r"));
+				break;
+#endif
 			case 'j': //Jaguar
 				usb_tx_string_P(PSTR("\r\r   ,ggp@@@@mgg,,\r,$Q$(`S@@$;g$$$$$@$@@gg,\r;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r                                    *$@@L ```T$W~)%g,\r                                      *%@gg,,,,,    5/Sw,     ,\r                                          ```` ` `9g `9g,``*^|'\r                                                    `#g,`)h\r\r   Developed at Jaguar Land Rover OSCT. Portland OR 2016\r"));
 				break;
@@ -280,7 +245,7 @@ void menu_modem (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':
 		PWR_gsm_stop(); //disable
-		usb_tx_string_PV(PSTR("GSM is off\r"));
+		usb_tx_string_PV(PSTR("GSM shutdown\r"));
 		break;
 	case 'e':  //enable modem
 		usb_tx_string_PV(PSTR("GSM Start pending"));
@@ -294,7 +259,7 @@ void menu_modem (void) {
 		menu_modem_status();
 		break;
 	case 'i':
-		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G GSM modem + GPS receiver by SIMCOM\r"));
+		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G or SIM7100a 4G GSM modem + GPS receiver by SIMCOM\r"));
 		break;
 	case 'x':
 		strcat_P(CMD_buffer, PSTR("\r\n"));  //put these char at the end of the string
@@ -367,11 +332,15 @@ void menu_power (void) {
 			PWR_push();
 			break;
 #endif
-		case '4':  //4v
-		/* FIXME: ensure 3 comes on before turning off 4
-		 * add a func call for pwr_turn_off_4 that does the requisite checking
-		 * rather than setting bits directly here
+		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
+		 * while the power ouptut is properly disabled
 		 */
+		case '3':
+			usb_tx_string_PV(PSTR("Disabling 3v pin"));
+			PWR_3_stop();
+			break;
+			
+		case '4':  //4v
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
 #if V2X_REV <= REV_12
 			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
@@ -386,16 +355,10 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
-		/* FIXME: Menu should not be calling power state bit manipulation directly
-		 * Manipulation of the host should be abstracted for both enable and disable
-		 * cases.
-		 */
 			usb_tx_string_PV(PSTR("Disabling Host power supply"));
-			PWR_turn_off((1<<ENABLE_5V0B));
-			PWR_is_5_needed();
+			PWR_host_stop();
 			break;
 #if V2X_REV >= REV_20
-/* FIXME: add total shutdown case. suicide all power supplies */
 		case 'a': // disable all. shutdown.
 			PWR_shutdown();
 			break;
@@ -414,6 +377,14 @@ void menu_power (void) {
 			PWR_push();
 			break;
 #endif
+		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
+		 * while the power ouptut is properly disabled
+		 */
+		case '3':
+			usb_tx_string_PV(PSTR("Enabling 3v pin"));
+			PWR_3_start();
+			break;
+			
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Enabling 4V supply"));
 #if V2X_REV <= REV_12
@@ -429,13 +400,8 @@ void menu_power (void) {
 			PWR_push();
 			break;
 		case 'h':  //host
-		/* FIXME: Menu should not be calling power state bit manipulation directly
-		 * Manipulation of the host should be abstracted for both enable and disable
-		 * cases.
-		 */
 			usb_tx_string_PV(PSTR("Enabling Host power supply"));
-			PWR_turn_on((1<<ENABLE_5V0B));
-			PWR_push();
+			PWR_host_start();
 			break;
 		default:
 			menu_send_q();
@@ -453,7 +419,7 @@ void menu_power (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Power Menu ***\rEn: Enable power supply (3, 4, 5, H)\rDn: Disable power supply (3, 4, 5, H)\rR: Reset to defaults\rQ: Query status\r"));
+		usb_tx_string_P(PSTR("*** Power Menu ***\rEn: Enable power supply (3, 4, 5, H)\rDn: Disable power supply (3, 4, 5, H, A(ll)\rR: Reset to defaults\rQ: Query status\r"));
 		break;
 	}
 }
@@ -641,6 +607,10 @@ void menu_power_status(void) {
 			{menu_send_1();}
 	else	{menu_send_0();}
 #endif
+	usb_tx_string_P(PSTR("3V3="));
+	if (ioport_get_pin_level(PWR_3V3_PIN)==true)
+			{menu_send_1();} 
+	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("4V1="));
 	if (PWR_query((1<<ENABLE_4V1)))
 			{menu_send_1();}
