@@ -52,5 +52,6 @@ int main ()
 		#if V2X_REV <= REV_12
 			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		#endif
+		led_update();
 	}
 }
