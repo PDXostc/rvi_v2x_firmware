@@ -76,7 +76,7 @@ void pin_init(void)
 	#endif
 #if V2X_REV >= REV_20
 	/* 3v3 pin init, low by default... */
-	ioport_configure_pin(PWR_3V3_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
+	ioport_configure_pin(PWR_3V3_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
 #endif
 
 }
