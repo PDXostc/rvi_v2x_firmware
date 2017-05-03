@@ -125,8 +125,8 @@ void reset_processor(void) {
 		if (reset_flags & (1<<RESET_SYSTEM)) {
 			usb_tx_string_P(PSTR("V2X restarting\rPlease close this window\r>"));
 			delay_s(3);
-			CCP = 0xd8; //enable write protected registers
-			RST_CTRL = true; //force SW reset
+			// use write protected inteface to software reset
+			ccp_write_io((uint8_t *)&RST.CTRL, RST_SWRST_bm);
 		}
 #if V2X_REV <= REV_12
 		if (reset_flags & (1<<RESET_USB)) {
