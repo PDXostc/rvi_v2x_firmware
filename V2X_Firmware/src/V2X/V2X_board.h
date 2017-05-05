@@ -137,6 +137,7 @@ extern "C" {
 #define SW0_PIN                   IOPORT_CREATE_PIN(PORTA,0)
 #define SW0_ACTIVE                true
 #define SW0_INACTIVE              !SW0_ACTIVE
+#define SW0_INT_VECT_0			  PORTA_INT0_vect
 /** @} */
 
 /**
