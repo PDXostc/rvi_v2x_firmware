@@ -351,7 +351,8 @@ void menu_power (void) {
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Disabling 5V supply"));
-			PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
+			// PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
+			PWR_5_stop();
 			PWR_push();
 			break;
 		case 'h':  //host
