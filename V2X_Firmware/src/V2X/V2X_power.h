@@ -184,6 +184,12 @@ void PWR_host_start(void);
 void PWR_host_stop(void);
 
 /**
+ * @def PWR_5_stop
+ * @brief disables the 5v completely
+*/
+void PWR_5_stop(void);
+
+/**
  * @def PWR_can_stop
  * @brief disables the ELM with hardware reset pin turns off 5v rail if unused
 */
