@@ -90,7 +90,7 @@ void handle_button_check(int sec) {
 		// maybe we'd like to force the leds to update here, just in case...
 		led_1_off();
 		led_2_off();
-	} else if (sec > 1)
+	} else if (sec >= 1)
 	{
 		// full power mode
 		PWR_4_start();

@@ -37,7 +37,6 @@ int main ()
 			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		#endif
 		reset_processor();			//look for pending resets
-		button_service();			//SCAN and report the button
 		#if V2X_REV <= REV_12
 			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
 		#endif
