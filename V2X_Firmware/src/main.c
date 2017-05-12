@@ -54,7 +54,7 @@ int main ()
 		led_update();
 	}
 }
-
+#if V2X_REV >= REV_20
 /* Interrupt service routine for our button, on currently found on PORTA0
  * Because this pin is shared with other interesting pins, namely 3v, we
  * have to be careful about what we do with the interrupt.
@@ -109,3 +109,4 @@ ISR(SW0_INT_VECT_0)
 	}
 
 }
+#endif

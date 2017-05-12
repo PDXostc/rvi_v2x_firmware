@@ -41,7 +41,7 @@ void menu_main(void) {
 				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\rOpen source hardware and software\rHW Rev1.2 \rSW Rev0.1\r"));
 				break;
 #elif V2X_REV >= REV_20
-				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\rOpen source hardware and software\rHW Rev1.2 \rSW Rev0.1\r"));
+				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\rOpen source hardware and software\rHW Rev2.0 \rSW Rev0.2\r"));
 				break;
 #endif
 			case 'j': //Jaguar
@@ -332,6 +332,7 @@ void menu_power (void) {
 			PWR_push();
 			break;
 #endif
+#if V2X_REV >= REV_20
 		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
 		 * while the power ouptut is properly disabled
 		 */
@@ -339,7 +340,8 @@ void menu_power (void) {
 			usb_tx_string_PV(PSTR("Disabling 3v pin"));
 			PWR_3_stop();
 			break;
-			
+#endif
+
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
 #if V2X_REV <= REV_12
@@ -378,6 +380,7 @@ void menu_power (void) {
 			PWR_push();
 			break;
 #endif
+#if V2X_REV >= REV_20
 		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
 		 * while the power ouptut is properly disabled
 		 */
@@ -385,7 +388,8 @@ void menu_power (void) {
 			usb_tx_string_PV(PSTR("Enabling 3v pin"));
 			PWR_3_start();
 			break;
-			
+#endif
+
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Enabling 4V supply"));
 #if V2X_REV <= REV_12
@@ -608,10 +612,12 @@ void menu_power_status(void) {
 			{menu_send_1();}
 	else	{menu_send_0();}
 #endif
+#if V2X_REV >= REV_20
 	usb_tx_string_P(PSTR("3V3="));
 	if (ioport_get_pin_level(PWR_3V3_PIN)==true)
-			{menu_send_1();} 
+			{menu_send_1();}
 	else	{menu_send_0();}
+#endif
 	usb_tx_string_P(PSTR("4V1="));
 	if (PWR_query((1<<ENABLE_4V1)))
 			{menu_send_1();}

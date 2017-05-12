@@ -69,6 +69,7 @@ void button_reset_delta(void)
 	button_delta = 0;
 }
 
+#if V2X_REV >= REV_20
 void handle_button_check(int sec) {
 	if (sec >= 5)
 	{
@@ -103,3 +104,4 @@ void handle_button_check(int sec) {
 	}
 	button_reset_delta();
 }
+#endif
