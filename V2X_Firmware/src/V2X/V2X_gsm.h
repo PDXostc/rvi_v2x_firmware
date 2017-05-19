@@ -154,6 +154,13 @@ void GSM_time_job (void);
 void GSM_time_sync  (char * responce_buffer);
 
 /**
+ * @def GSM_command_enable_gps_auto
+ * @brief send command to enable gps auto start in SIMCOM
+ * @param enable integer 0/1 to disable/enable respectively
+ */
+void GSM_command_enable_gps_auto(int enable);
+
+/**
  * @def GSM_parse_gps_info
  * @brief takes GPS string parses into usable sections
  * @param *responce_buffer pointer to the buffer to be analysed

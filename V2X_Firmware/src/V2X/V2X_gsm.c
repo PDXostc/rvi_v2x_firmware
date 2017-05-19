@@ -415,3 +415,18 @@ void GSM_command_power_off(void) {
 	CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CPOF\r")); //compose message
 	CTL_mark_for_processing(&GSM, BUFFER_OUT);
 }
+
+void GSM_command_enable_gps_auto(int enable) {
+	switch(enable) {
+		case 0:
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSAUTO=0\r")); //compose message
+		break;
+		
+		case 1:
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSAUTO=1\r")); //compose message
+		break;
+		
+		default:
+		break;
+	}
+}
