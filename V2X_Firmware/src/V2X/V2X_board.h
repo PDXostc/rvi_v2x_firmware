@@ -44,6 +44,10 @@ extern "C" {
 //#define SIMCOM 				SIMCOM_SIM7100A
 #define SIMCOM 				SIMCOM_SIM5320A
 
+/* Configure SIMCOM to start the GPS automatically, without explicit instruction
+ */
+#define GPS_AUTO
+
 /** \name 3v3 power pin definition
  * Activate to maintain power to CPU
  */
