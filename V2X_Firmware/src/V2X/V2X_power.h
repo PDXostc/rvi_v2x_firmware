@@ -160,6 +160,12 @@ void PWR_shutdown(void);
 #endif
 
 /**
+ * @def	PWR_5_stop
+ * @brief stop 5v rail
+ */
+void PWR_5_stop (void);
+
+/**
  * @def PWR_is_5_needed
  * @brief turns off 5v rail if unused
  */
@@ -176,6 +182,12 @@ void PWR_host_start(void);
  * @brief turns off power to host and 5v rail if unused
  */
 void PWR_host_stop(void);
+
+/**
+ * @def PWR_5_stop
+ * @brief disables the 5v completely
+*/
+void PWR_5_stop(void);
 
 /**
  * @def PWR_can_stop

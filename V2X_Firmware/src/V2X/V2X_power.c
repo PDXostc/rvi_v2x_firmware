@@ -107,7 +107,12 @@ void PWR_3_stop(void) {
 }
 
 void PWR_3_is_needed(void) {
-	/* Check to see if 3v should be switched off due to 4v being enabled */
+	/* Check to see if 3v should be switched off due to 4v being enabled
+	 * One might expect that we'd provide for turning 3v on here as well.
+	 * Testing has shown however, that manipulation of the 3v is timing critical,
+	 * and should take place exactly when we mean it to. This is intended only
+	 * as a safety check to ensure the 4v and 3v don't fight.
+	 * */
 	if (power_control_state & (1<<ENABLE_4V1))
 	{
 		PWR_3_stop();
@@ -149,6 +154,11 @@ void PWR_host_start(void) {
 void PWR_host_stop(void){
 	PWR_turn_off((1<<ENABLE_5V0B));
 	PWR_is_5_needed();
+}
+
+void PWR_5_stop (void) {
+	PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
+	PWR_push();
 }
 
 void PWR_is_5_needed (void) { //turn off 5v0 if host and can are off

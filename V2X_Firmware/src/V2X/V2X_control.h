@@ -55,7 +55,8 @@ enum system_switch {
 	SYS_CAN = 0,	//used for direct control of CAN
 	SYS_GSM,		//used for direct control of GSM
 	SYS_CAN_CTL,	//used for CTL passthrough of CAN
-	SYS_CTL			//stand alone sequence jobs, wake host, etc.
+	SYS_CTL,			//stand alone sequence jobs, wake host, etc.
+	SYS_PWR
 };
 
 /**
