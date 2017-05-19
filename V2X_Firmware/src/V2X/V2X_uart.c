@@ -127,7 +127,8 @@ void uart_rx_notify(uint8_t port) //message received over USB
 // 			|| (data >= '0' && data <= '9') 	//numbers
 // 			|| (data >= 'A' && data <= 'Z') 	//capitals
 // 			|| (data >= 'a' && data <= 'z')) {	//lower case
-	 		if (data >= 0x20 && data <= 0x7F || data == '\r' || data == 8) {
+//
+	 		if (data >= 0x20 && data <= 0x7F || data == '\r' || data == '\n' || data == 8) {
 				if (!udi_cdc_multi_is_tx_ready(port)) {		//is TX ready
  					udi_cdc_multi_signal_overrun(port);		//no
  				} else {udi_cdc_multi_putc(port, data);}	//push char to loop back
@@ -137,11 +138,11 @@ void uart_rx_notify(uint8_t port) //message received over USB
 				} else { //was a standard character that should be stored in the buffer
 					menu_add_to_command(data);
 				}
-// 			} else { //there was a special character
-// 				//run through the buffer until it is empty
-// 				while (udi_cdc_multi_is_rx_ready(port)) {
-// 					data = udi_cdc_multi_getc(port);
-// 				}
+ 			} else { //there was a special character
+ 				//run through the buffer until it is empty
+ 				while (udi_cdc_multi_is_rx_ready(port)) {
+ 					data = udi_cdc_multi_getc(port);
+ 				}
 			}
 		}
 	}else if (port == USB_ACL) { //loop back
