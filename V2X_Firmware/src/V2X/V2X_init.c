@@ -146,6 +146,17 @@ void reset_processor(void) {
 			reset_flags &= ~(1<<RESET_USB);
 		}
 #endif
+		//DEBUG: FIXME:
+		// Trying to implement some kind of USB reset that won't bring down the house but might keep
+		// control port happy on Linux...
+		if (reset_flags & (1<<RESET_USB))
+		{
+			usb_tx_string_P(PSTR("::Reset USB Called::\r\n"));
+			udd_detach();
+			delay_s(1);
+			udd_attach();
+			reset_flags &= ~(1<<RESET_USB);
+		}
 		if (reset_flags & (1<<RESET_CAN)) {
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN restarting\r>"));
