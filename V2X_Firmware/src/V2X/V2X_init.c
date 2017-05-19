@@ -125,6 +125,10 @@ void v2x_board_init(void)
 	CAN_elm_init();
 	ACL_set_sample_on();
 	PWR_host_start();
+#ifdef GPS_AUTO
+	//send gps auto start command
+	GSM_command_enable_gps_auto(1);
+#endif
 }
 
 void reset_processor(void) {
