@@ -17,9 +17,9 @@ GENIVI Smart-Cities project.
         * GENIVI Yocto image
         * Smart Cities application
 * Hardware setup
-    * cable connection
-    * case enclosure and mounting
-    * sim card insertion instructions
+    * Cable connection
+    * Case enclosure and mounting
+    * Sim card insertion instructions
 * Startup procedure
     * Power requirements
         * Battery warning
@@ -82,9 +82,12 @@ Need:
       Antenna". Incorrectly reversing this connection will inhibit GPS signal,
       and should be one of the first things to check if no GPS signal is
       observed.
-3. Connect USB cable from port on board marked (Host PWR) to host computer micro usb power supply port. This will supply power to host computer (Raspberry Pi or other).
-4. Connect micro USB from port on board marked (Host DATA) to free USB port on host computer. This is the line
-   of communication between the board and the host.
+3. Connect USB cable from port on board marked (Host PWR) to host computer micro
+   usb power supply port. This will supply power to host computer (Raspberry Pi
+   or other).
+4. Connect micro USB from port on board marked (Host DATA) to free USB port on
+   host computer. This is the line of communication between the board and the
+   host.
 
 ### Case enclosure and mounting
 
@@ -100,9 +103,17 @@ Please insert SIM card so that
 
 ## Startup procedure
 
+1. Press red button. The driver is configured to bring all components to full
+   power. Please allow some seconds for host computer start and application
+   initialization.
+
 ### Power requirements
 
+V2X requires constant 12v power supply to sustain operation. Very informal testing shows average draw of ~0.15 amps during normal operation, with no host computer connected. When V2X is supplying power to a host such as a Raspberry Pi 3 with attached touch screen, power draw is ~0.6 amps.
+
 #### Battery warning
+
+>As noted above, the V2X firmware does not yet support low power / standby state. If left powered when vehicle is off, the vehicle battery could be drained significantly. Please power off the V2X (and host computer) when disengaging the vehicle.
 
 ### Nominal light states
 
