@@ -7,7 +7,14 @@ GENIVI Smart-Cities project.
 
 ## Contents
 * Requirements for nominal operation
+    * Power / OBD
+    * GPS / network antenna
+    * SIM card
 * Requirements for smart-cities
+    * Host computer
+        * Raspberry Pi
+        * GENIVI Yocto image
+        * Smart Cities application
 * Startup procedure
     * Cable connection
     * Power requirements
@@ -16,6 +23,7 @@ GENIVI Smart-Cities project.
     * Nominal smart cities
 * Shutdown procedure
     * Button power off
+        * Button failure or fallback procedure
     * Command options for power off (see also command set)
 * Runtime operation
     * Vehicle safety notice
@@ -24,5 +32,5 @@ GENIVI Smart-Cities project.
     * Toubleshooting
 * V2X Command set
 * Firmware upgrade
-    - Tools
-    - Procedure 
+    - Tools required
+    - Procedure
