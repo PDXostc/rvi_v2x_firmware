@@ -152,6 +152,14 @@ ejected partially from the slot.
 When the host comes on line and connects to the V2X, the lights (red, blue,
 green) on board should be visible.
 
+[NOT YET IMPLEMENTED]In addition status indicators for GPS signal and connection to the RVI server should display green. 
+
+If the GPS signal is red, check the connection and/or move the vehicle to a location with clear view of the sky. 
+
+If the RVI indicator is red, check that the SIM card is properly installed and activated. If it is yellow, contact [TBD] to verify that the RVI server is up and running. 
+
+[TODO - Ask Tasha to add additional info and pics once implemented]
+
 ### Power requirements <a name="power-requirements"></a>
 
 V2X requires constant 12v power supply to sustain operation. Very informal
@@ -288,3 +296,10 @@ to upgrade the firmware; instead development tools are required.
 >TODO: Atmel Studio programming route
 
 >TODO: AVR Dude programming route
+
+## FAQ
+
+Q: Why does the OBU occasionally take longer to boot or appear to reboot several times when starting up
+A: There is an issue with the graphics compositor in the GENIVI Development Platform and it occasionally does not load properly. Normally, this would cause a command line to appear instead of the GUI. We have created a workaround to detect this condition and reload the compositor.  A bug has been logged.
+
+
