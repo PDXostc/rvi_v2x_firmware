@@ -55,6 +55,7 @@ GENIVI Smart-Cities project.
 
 The Vehicle-to-Everything (V2X) board is a telemetry aggregation and delivery
 device. It provides access to:
+
 * Accelerometer
 * CAN/OBD interface via STN110/ELM327
 * GPS (requires antenna)
@@ -65,7 +66,7 @@ device. It provides access to:
 Configuration and operation can be handled manually, but the device is intended
 to be complemented by a host computer for automated operation.
 
-## Requiremments for Nominal V2X Operation <a name="requirements-v2x"></a>
+## Requirements for Nominal V2X Operation <a name="requirements-v2x"></a>
 
 ### Power / OBD <a name="requirements-power"></a>
 
@@ -85,16 +86,6 @@ GPS and cellular network connections require a combination GPS/GSM 3g antenna.
 
 Celllar network connectivity requires a properly provisioned SIM card.
 
-## Requirements for smart-cities <a name="requirements-smart-cities"></a>
-
-### Host computer <a name="requirements-host-computer"></a>
-
-#### Raspberry Pi <a name="requirements-raspberry-pi"></a>
-
-#### GENIVI Yocto image <a name="requirements-yocto"></a>
-
-#### Smart Cities application <a name="requirements-smart-cities-application"></a>
-  
 ## Hardware setup <a name="hardware-setup"></a>
 
 > TODO: links to external hardware required
@@ -103,6 +94,7 @@ Celllar network connectivity requires a properly provisioned SIM card.
 > likely easier to do so before connecting cables.
 
 Need:
+
 * V2X Board
 * OBDII to serial cable
 * GPS/GSM antenna
@@ -127,9 +119,15 @@ Need:
    host computer. This is the line of communication between the board and the
    host.
 
+> TODO: Pictures!
+
 ### Case enclosure and mounting <a name="case-enclosure-and-mounting"></a>
 
+> TODO: Pictures!
+
 ### Sim card insertion instructions <a name="sim-card-instructions"></a>
+
+> TODO: Pictures!
 
 Proper SIM card alignment is critical to cellular network operation.
 
@@ -165,7 +163,7 @@ state. If left powered when vehicle is off, the vehicle battery could be drained
 significantly. Please power off the V2X (and host computer) when disengaging the
 vehicle.
 
-## Nominal light states <a name="nominal-light-states"></a>
+### Nominal light states <a name="nominal-light-states"></a>
 
 Currently, the firmware drives the three on board LEDs respective to GSM modem
 status.
@@ -177,10 +175,10 @@ status.
 * Blue: GSM power status.
     - Active: SIMCOM chipset is powered
 
-Green: GSM network state.
-* Steady: no network operator registered.
-* 800ms blink: operator selected, no network connection dialed.
-* 200ms blink: network connction dialed.
+* Green: GSM network state.
+    - Steady: no network operator registered.
+    - 800ms blink: operator selected, no network connection dialed.
+    - 200ms blink: network connction dialed.
 
 A steady green light likely indicates that the signal quality is not sufficient
 to register and attach to the desired network operator.
@@ -194,11 +192,6 @@ issue.
 
 If the lights are not visible, this should indicate the device is not powered.
 
-### Nominal smart cities <a name="nominal-smart-cities"></a>
-
-The Smart Cities application should initialize automatically after host system
-start.
-
 ## Shutdown procedure <a name="shutdown-procedure"></a>
 
 Shutdown is currently handled by cutting power to systems; there are multiple
@@ -209,6 +202,7 @@ methods available.
 The button on the V2X board can be used to control the power states.
 
 Hold button for longer than N seconds and release.
+
 * \> 1 second: Turn on all board components (including Host)
 * \> 3 seconds: Turn off all board components (including Host), only Atmel CPU
   will retain power
@@ -234,6 +228,11 @@ reconnect. Use the button repower the system.
 >TODO: Describe contacting the V2X control port, and commands that can be used
 for power state manipulation.
 
+### Nominal smart cities <a name="nominal-smart-cities"></a>
+
+The Smart Cities application should initialize automatically after host system
+start.
+
 ## V2X Interface and Control<a name="runtime-operation"></a>
 
 > TODO: com/serial port description
@@ -245,7 +244,7 @@ depend on the operating system of the host computer.
 ### Micro controller / command port
 
 
-### Communication ports arrangement
+### Communication ports 
 
 > Depending on operating system, arrangement of the virtual ports is at the
 > mercy of whatever order they are mounted in. This means that the serial port
@@ -254,6 +253,7 @@ depend on the operating system of the host computer.
 > port aliases.
 
 The common port mounting arrangement observed in Linux:
+
 * `/dev/ttyACM0` -> STN110/ELM327 CAN chip
 * `/dev/ttyACM1` -> V2X control port (VX command set)
 * `/dev/ttyACM2` -> Accelerometer data stream (and secret reset back channel)
@@ -263,14 +263,89 @@ The common port mounting arrangement observed in Linux:
   internet connection)
 * `/dev/ttyUSB3` -> SIMCOM AT control (AT command set)
 
-
-
-### Smart-cities interaction <a name="smart-cities-interaction"></a>
 ### Verification <a name="verification"></a>
 ### Toubleshooting <a name="troubleshooting"></a>
 ## V2X Command set <a name="v2x-command-set"></a>
 
 >TODO: Include V2X command set
+
+| VXAD |		A |	D |		Disable the accelerometer	--	"OK" |  \
+
+| VXAE |		A |	E |		Enable the accelerometer	--	"OK" |  \
+
+| VXAI |		A |	I |		Accelerometer device information	--	Description of device used |  \
+
+| VXAQ |		A |	Q |		Accelerometer state query	--	"ACL=x" 1=on 0=off |  \
+
+| VXAR |		A |	R |		Restart the Accelerometer	--	"OK" |  \
+
+| VXASxxxx |	A |	Sxxxx |	Change the sample rate to xxx	1,3,6,12,25,50,100,200,400,800,1600,3200	Number confirmed |  \
+
+| VXAXxxxx |	A |	Xxxxx |	Accelerometer X axis offset (zero)	-127 to 127	Number confirmed |  \
+
+| VXAYxxxx |	A |	Yxxxx |	Accelerometer Y axis offset (zero)	-127 to 127	Number confirmed |  \
+
+| VXAZxxxx |	A |	Zxxxx |	Accelerometer Z axis offset (zero)	-127 to 127	Number confirmed |  \
+
+| VXAG |		A |	G |		Get single Accelerometer sample	--	XYZT |  \
+
+| VXARxx |		A |	Rxx |	Set G-range 	2, 4, 8, 16	Number confirmed |  \
+
+| VXCD |		C |	D |		Disable the CAN interface	--	"OK" |  \
+
+| VXCE |		C |	E |		Enable the CAN interface	--	"OK" |  \
+
+| VXCI |		C |	I |		CANbus device information	--	Description of device used |  \
+
+| VXCQ |		C |	Q |		CAN state information	--	"CAN=x" 1=on 0=off |  \
+
+| VXCR |		C |	R |		Restart the CAN	--	"OK" |  \
+
+| VXI |			I |			V2X | Device Information	--	Specifies HW and SW revs |  \
+
+| VXMD |		M |	D |		Disable the Modem	--	"OK" |  \
+
+| VXME |		M |	E |		Enable the Modem	--	"OK" |  \
+
+| VXMI |		M |	I |		Modem device information	--	Description of device used |  \
+
+| VXMQ |		M |	Q |		Modem state query	--	"SIMPWR=x, SIMNET=x" 1=on 0=off |  \
+
+| VXMR |		M |	R |		Rerestart the Modem	--	"OK" |  \
+
+| VXPD3 |		P |	D3 |	Disable the 3V power supply		"OK" |  \
+
+| VXPD4 |		P |	D4 |	Disable the 4V power supply		"OK" |  \
+
+| VXPD5 |		P |	D5 |	Disable the 5V power supply		"OK" |  \
+
+| VXPDH |		P |	DH |	Disable the Host power port		"OK" |  \
+
+| VXPDDx |		P |	DDx |	Disable host with delay	x: seconds	Number confirmed |  \
+
+| VXPE3 |		P |	E3 |	Enable the 3V power supply		"OK" |  \
+
+| VXPE4 |		P |	E4 |	Enable the 4V power supply		"OK" |  \
+
+| VXPE5 |		P |	E5 |	Enable the 5V power supply		"OK" |  \
+
+| VXPEH |		P |	EH |	Enable the Host power port		"OK" |  \
+
+| VXPQ |		P |	Q |		Power state query		"3V3=x, 4V1=x, 5V0=x, HOST=x" 1=on 0=off |  \
+
+| VXW |			W |			Wake | up event query		  \
+
+| VXQ |			Q |			Whole | system status query		All other query results rolled into one |  \
+
+| VXTD |		T |	D |		disable wakeup timers 		  \
+
+| VXTWxxxxx |	T |			Wxxxxx |	Wakeup timer set for xxxxx seconds from now		 |  \
+
+| VXR |			R |			V2X | board reset		  \
+
+| VXS |			S |			SIMCARD | check		"SIMCARD=x" 1=in 0=out |  \
+
+
 
 ## Firmware upgrade <a name="firmware-upgrade"></a>
 
@@ -279,12 +354,70 @@ The common port mounting arrangement observed in Linux:
 The V2X firmware is in ongoing development. Unfortunately there is no easy way
 to upgrade the firmware; instead development tools are required.
 
+Using a hardware programmer and a software utility, the V2X device can be
+flashed with new firmware.
+
 ### Tools required <a name="firmware-tools-required"></a>
+
+#### Programmer/Debugger
+
+A plethora of hardware programming/debugger solutions are available. The AVR
+Dragon is one such device.
+
+[AVR Dragon product page](http://www.atmel.com/tools/avrdragon.aspx)
 
 >TODO: AVR Dragon or compatible debugging board
 
-### Procedure <a name="firmware-procedure"></a>
+### Programmer Connection to the V2X Board
 
->TODO: Atmel Studio programming route
+#### Example: AVR Dragon
 
->TODO: AVR Dude programming route
+* Connect one end of the programming ribbon cable to the Dragon board on the set
+  of pins marked *1 ISP 5*. Ensure that the red stripe on the ribbon is aligned
+  with the *1* on the pin port.
+* Connect the other end of the cable to the set of pins marked *PDI* on top of
+  the V2X board. Align the connector so that the red stripe is closest to the
+  bottom corner nearest the *PDI* marking.
+
+> TODO: image of proper connection
+
+To check if the cable has been correctly connected and aligned, use programming
+software to read the voltage of the device while the board is powered. The
+voltage should read **3.2v**.
+
+### Firmware Upgrade Procedure <a name="firmware-procedure"></a>
+
+#### Atmel Studio
+
+> A full reiteration of the programming instructions for the board are currently
+> out of scope of this document.
+
+Atmel Studio supports an easy programming interface for loading firmware .hex
+files onto the board.
+
+[Atmel Studio Programming Dialog
+documentation](http://www.atmel.com/webdoc/atmelstudio/atmelstudio.AVRStudio.ProgrammingDialog.Introduction.html)
+
+#### AVRDUDE
+
+AVRDude is a cross platform (Linux/Windows) programming software utility.
+
+
+[AVRDUDE Documentation](http://nongnu.askapache.com/avrdude/avrdude-doc-6.3.pdf)
+
+Please read the above documentation for details and options for using AVRDUDE.
+
+Ultimately, the usage will boil down to something like this:
+
+```
+avrdude -p x128a4u -c <programmer-id> -e -U flash:w:<file-name>.hex
+```
+## Links and Resources
+
+
+
+[v2x-board-connected-top]: [v2x-board-connected-under]:
+[v2x-connections-facing]: [v2x-dragon-v2x-connected]:
+[v2x-dragon-v2x-connected-detail]: [v2x-lights-on]:
+[v2x-sim-card-alignment-under]: [v2x-sim-card-ejected]: [v2x-obd-connection]:
+[v2x-mounted-enclosure]:
