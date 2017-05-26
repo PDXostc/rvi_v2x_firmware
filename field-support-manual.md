@@ -150,6 +150,18 @@ ejected partially from the slot.
 When the host comes on line and connects to the V2X, the lights (red, blue,
 green) on board should be visible.
 
+In addition, the color of  the time and date lines under the GENIVI logo
+indicate the status of GPS and RVI, respectively.
+
+When GPS is active, the text displaying the time will be white. If the time is
+displayed in pink text, GPS is in an error status. Check the connection or move
+the vehicle to a location with a clear view of the sky.
+
+When RVI is active, the date will be displayed in white text. If the date text
+is pink, check that the SIM card is properly installed and activated. If the
+date text is blue, contact [TBD] to verify that the RVI server is up and
+running.
+
 ### Power requirements <a name="power-requirements"></a>
 
 V2X requires constant 12v power supply to sustain operation. Very informal
