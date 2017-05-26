@@ -210,6 +210,20 @@ issue.
 
 If the lights are not visible, this should indicate the device is not powered.
 
+### Smart Cities Application
+
+In addition, the color of the time and date lines under the GENIVI logo
+indicate the status of GPS and RVI, respectively.
+
+When GPS is active, the text displaying the time will be white. If the time is
+displayed in pink text, GPS is in an error status. Check the connection or move
+the vehicle to a location with a clear view of the sky.
+
+When RVI is active, the date will be displayed in white text. If the date text
+is pink, check that the SIM card is properly installed and activated. If the
+date text is blue, contact [TBD] to verify that the RVI server is up and
+running.
+
 ## Shutdown procedure <a name="shutdown-procedure"></a>
 
 Shutdown is currently handled by cutting power to systems; there are multiple
