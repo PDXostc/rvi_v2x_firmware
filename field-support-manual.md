@@ -158,7 +158,7 @@ computer connected. When V2X is supplying power to a host such as a Raspberry Pi
 3 with attached touch screen, power draw is ~0.6 amps.
 
 > #### Battery warning <a name="battery-warning"></a>
->As noted above, the V2X firmware does not yet support low power / standby
+> As noted above, the V2X firmware does not yet support low power / standby
 state. If left powered when vehicle is off, the vehicle battery could be drained
 significantly. Please power off the V2X (and host computer) when disengaging the
 vehicle.
@@ -215,7 +215,7 @@ Hold button for longer than N seconds and release.
 
 V2X board supports a command set over a USB-serial port.
 
->TODO: Later section with details on using command set for power management and
+> TODO: Later section with details on using command set for power management and
 troubleshooting.
 
 ### When all else fails <a name="when-fails"></a>
@@ -225,7 +225,7 @@ reconnect. Use the button repower the system.
 
 ### Command options for power off (see also command set) <a name="command-power-off"></a>
 
->TODO: Describe contacting the V2X control port, and commands that can be used
+> TODO: Describe contacting the V2X control port, and commands that can be used
 for power state manipulation.
 
 ### Nominal smart cities <a name="nominal-smart-cities"></a>
@@ -267,95 +267,69 @@ The common port mounting arrangement observed in Linux:
 ### Toubleshooting <a name="troubleshooting"></a>
 ## V2X Command set <a name="v2x-command-set"></a>
 
->TODO: Include V2X command set
+> TODO: Include V2X command set
 
-| VXAD |		A |	D |		Disable the accelerometer	--	"OK" |  \
-
-| VXAE |		A |	E |		Enable the accelerometer	--	"OK" |  \
-
-| VXAI |		A |	I |		Accelerometer device information	--	Description of device used |  \
-
-| VXAQ |		A |	Q |		Accelerometer state query	--	"ACL=x" 1=on 0=off |  \
-
-| VXAR |		A |	R |		Restart the Accelerometer	--	"OK" |  \
-
-| VXASxxxx |	A |	Sxxxx |	Change the sample rate to xxx	1,3,6,12,25,50,100,200,400,800,1600,3200	Number confirmed |  \
-
-| VXAXxxxx |	A |	Xxxxx |	Accelerometer X axis offset (zero)	-127 to 127	Number confirmed |  \
-
-| VXAYxxxx |	A |	Yxxxx |	Accelerometer Y axis offset (zero)	-127 to 127	Number confirmed |  \
-
-| VXAZxxxx |	A |	Zxxxx |	Accelerometer Z axis offset (zero)	-127 to 127	Number confirmed |  \
-
-| VXAG |		A |	G |		Get single Accelerometer sample	--	XYZT |  \
-
-| VXARxx |		A |	Rxx |	Set G-range 	2, 4, 8, 16	Number confirmed |  \
-
-| VXCD |		C |	D |		Disable the CAN interface	--	"OK" |  \
-
-| VXCE |		C |	E |		Enable the CAN interface	--	"OK" |  \
-
-| VXCI |		C |	I |		CANbus device information	--	Description of device used |  \
-
-| VXCQ |		C |	Q |		CAN state information	--	"CAN=x" 1=on 0=off |  \
-
-| VXCR |		C |	R |		Restart the CAN	--	"OK" |  \
-
-| VXI |			I |			V2X | Device Information	--	Specifies HW and SW revs |  \
-
-| VXMD |		M |	D |		Disable the Modem	--	"OK" |  \
-
-| VXME |		M |	E |		Enable the Modem	--	"OK" |  \
-
-| VXMI |		M |	I |		Modem device information	--	Description of device used |  \
-
-| VXMQ |		M |	Q |		Modem state query	--	"SIMPWR=x, SIMNET=x" 1=on 0=off |  \
-
-| VXMR |		M |	R |		Rerestart the Modem	--	"OK" |  \
-
-| VXPD3 |		P |	D3 |	Disable the 3V power supply		"OK" |  \
-
-| VXPD4 |		P |	D4 |	Disable the 4V power supply		"OK" |  \
-
-| VXPD5 |		P |	D5 |	Disable the 5V power supply		"OK" |  \
-
-| VXPDH |		P |	DH |	Disable the Host power port		"OK" |  \
-
-| VXPDDx |		P |	DDx |	Disable host with delay	x: seconds	Number confirmed |  \
-
-| VXPE3 |		P |	E3 |	Enable the 3V power supply		"OK" |  \
-
-| VXPE4 |		P |	E4 |	Enable the 4V power supply		"OK" |  \
-
-| VXPE5 |		P |	E5 |	Enable the 5V power supply		"OK" |  \
-
-| VXPEH |		P |	EH |	Enable the Host power port		"OK" |  \
-
-| VXPQ |		P |	Q |		Power state query		"3V3=x, 4V1=x, 5V0=x, HOST=x" 1=on 0=off |  \
-
-| VXW |			W |			Wake | up event query		  \
-
-| VXQ |			Q |			Whole | system status query		All other query results rolled into one |  \
-
-| VXTD |		T |	D |		disable wakeup timers 		  \
-
-| VXTWxxxxx |	T |			Wxxxxx |	Wakeup timer set for xxxxx seconds from now		 |  \
-
-| VXR |			R |			V2X | board reset		  \
-
-| VXS |			S |			SIMCARD | check		"SIMCARD=x" 1=in 0=out |  \
-
-
+|  Command     | Submodule | Action | Description                    |
+|--------------|-----------|--------|--------------------------------|
+| VXAD         | A         |  D     | Disable the accelerometer   
+| VXAE         | A         |  E     | Enable the accelerometer    
+| VXAI         | A         |  I     | Accelerometer device information
+| VXAQ         | A         |  Q     | Accelerometer state query   
+| VXAR         | A         |  R     | Restart the Accelerometer   
+| VXASxxx      | A         | Sxxxx  | Change the sample rate to xxx   1,3,6,12,25,50,100,200,400,800,1600,3200
+| VXAXxxx      | A         | Xxxxx  | Accelerometer X axis offset (zero)  -127 to 127 Number confirmed    
+| VXAYxxx      | A         | Yxxxx  | Accelerometer Y axis offset (zero)  -127 to 127 Number confirmed    
+| VXAZxxx      | A         | Zxxxx  | Accelerometer Z axis offset (zero)  -127 to 127 Number confirmed    
+| VXAG         | A         |  G     | Get single Accelerometer sample 
+| VXARxx       | A         | Rxx    | Set G-range 
+| VXCD         | C         |  D     | Disable the CAN interface   
+| VXCE         | C         |  E     | Enable the CAN interface    
+| VXCI         | C         |  I     | CANbus device information   
+| VXCQ         | C         |  Q     | CAN state information 
+| VXCR         | C         |  R     | Restart the CAN 
+| VXI          | I         |        | V2X   Device Information 
+| VXMD         | M         |  D     | Disable the Modem   
+| VXME         | M         |  E     | Enable the Modem    
+| VXMI         | M         |  I     | Modem device information  
+| VXMQ         | M         |  Q     | Modem state query   
+| VXMR         | M         |  R     | Rerestart the Modem 
+| VXPD3        | P         | D3     | Disable the 3V power supply
+| VXPD4        | P         | D4     | Disable the 4V power supply
+| VXPD5        | P         | D5     | Disable the 5V power supply
+| VXPDH        | P         | DH     | Disable the Host power port
+| VXPDDx       | P         | DDx    | Disable host with delay x: seconds
+| VXPE3        | P         | E3     | Enable the 3V power supply 
+| VXPE4        | P         | E4     | Enable the 4V power supply 
+| VXPE5        | P         | E5     | Enable the 5V power supply 
+| VXPEH        | P         | EH     | Enable the Host power port 
+| VXPQ         | P         | Q      | Power state query       "3V3=x, 4V1=x, 5V0=x, HOST=x" 1=on 0=off    
+| VXW          | W         |        | Wake   up event query         
+| VXQ          | Q         |        | Whole   system status query     All other query results rolled into one    
+| VXTD         | T         |    D   | disable wakeup timers         
+| VXTWxxxx     | x         |        | Wxxxxx      Wakeup timer set for xxxxx seconds from now         
+| VXR          | R         |        | V2X   board reset         
+| VXS          | S         |        | SIMCARD   check     "SIMCARD=x" 1=in 0=out    
 
 ## Firmware upgrade <a name="firmware-upgrade"></a>
 
 > TODO: section should describe firmware, locations, etc, as well as tools.
 
-The V2X firmware is in ongoing development. Unfortunately there is no easy way
+The V2X firmware is in ongoing development. Unfortunately there is no easy (or remote) way
 to upgrade the firmware; instead development tools are required.
 
 Using a hardware programmer and a software utility, the V2X device can be
 flashed with new firmware.
+
+> Recent firmware releases should be available on the repo.
+
+> TODO: Make releases available and link to them here.
+
+If you wish to compile an image from source, firmware image should be compiled into a *.hex* format. 
+The AVR toolchain is available for
+[Linux](http://www.atmel.com/toolsATMELAVRTOOLCHAINFORLINUX.aspx),
+[Windows](http://www.atmel.com/tools/atmelavrtoolchainforwindows.aspx),
+and comes bundled in 
+[Atmel Studio](http://www.atmel.com/microsite/atmel-studio/). 
 
 ### Tools required <a name="firmware-tools-required"></a>
 
@@ -366,7 +340,7 @@ Dragon is one such device.
 
 [AVR Dragon product page](http://www.atmel.com/tools/avrdragon.aspx)
 
->TODO: AVR Dragon or compatible debugging board
+> TODO: AVR Dragon or compatible debugging board
 
 ### Programmer Connection to the V2X Board
 
