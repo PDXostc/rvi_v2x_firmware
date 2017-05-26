@@ -160,8 +160,8 @@ computer connected. When V2X is supplying power to a host such as a Raspberry Pi
 > #### Battery warning <a name="battery-warning"></a>
 >As noted above, the V2X firmware does not yet support low power / standby
 state. If left powered when vehicle is off, the vehicle battery could be drained
-significantly. Please power off the V2X (and host computer) when disengaging the
-vehicle.
+significantly. Please power off the V2X when disengaging the vehicle. Note that
+powering off the V2X will also power off the host computer.
 
 ### Nominal light states <a name="nominal-light-states"></a>
 
