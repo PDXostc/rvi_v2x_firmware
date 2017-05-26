@@ -212,8 +212,8 @@ If the lights are not visible, this should indicate the device is not powered.
 
 ### Smart Cities Application
 
-In addition, the color of the time and date lines under the GENIVI logo
-indicate the status of GPS and RVI, respectively.
+In addition, the color of the time and date lines under the GENIVI logo indicate
+the status of GPS and RVI, respectively.
 
 When GPS is active, the text displaying the time will be white. If the time is
 displayed in pink text, GPS is in an error status. Check the connection or move
@@ -296,24 +296,32 @@ The common port mounting arrangement observed in Linux:
 
 #### Windows <a name="communication-ports-windows"></a>
 
-On Windows, the arrangement is slightly less intuitive, and the ports require a driver to be installed. The requisite files, *atmel_devices_cdc.cat* and *atmel_devices_cdc.inf* are available in the Atmel Software Framework, 
-[on Atmel's site](http://www.atmel.com/tools/avrsoftwareframework.aspx),
-[Microchip](http://www.atmel.com/tools/avrsoftwareframework.aspx),
-or bundled with Atmel Studio.
+On Windows, the arrangement is slightly less intuitive, and the ports require a
+driver to be installed. The requisite files, *atmel_devices_cdc.cat* and
+*atmel_devices_cdc.inf* are available in the Atmel Software Framework, [on
+Atmel's site](http://www.atmel.com/tools/avrsoftwareframework.aspx),
+[Microchip](http://www.atmel.com/tools/avrsoftwareframework.aspx), or bundled
+with Atmel Studio.
 
-Communication with the SIMCOM chip requires drivers appropriate to the operating system version. Repository is available [here](http://simcom.ee/documents/?dir=SIM5320).
+Communication with the SIMCOM chip requires drivers appropriate to the operating
+system version. Repository is available
+[here](http://simcom.ee/documents/?dir=SIM5320).
 
-Common port mounting arrangement observed in Windows (designated by name, as COM<x> is determined at runtime:
+Common port mounting arrangement observed in Windows (designated by name, as
+COM<x> is determined at runtime:
 
 * `Ports (COM & LPT)`
 * ->`Communication Device Class ASF example3, COM1` -> STN110/ELM327 CAN chip
-* ->`Communication Device Class ASF example3, COM2` -> V2X control port (VX command set)
-* ->`Communication Device Class ASF example3, COM3` -> Accelerometer data stream (and secret reset back channel)
+* ->`Communication Device Class ASF example3, COM2` -> V2X control port (VX
+  command set)
+* ->`Communication Device Class ASF example3, COM3` -> Accelerometer data stream
+  (and secret reset back channel)
 * ->`Qualcomm HS-USB Diagnostics 9000` -> SIMCOM diagnostic port (unused)
 * ->`Qualcomm HS-USB NMEA 9000` -> GPS stream
 * ->`Sim Tech HS-USB AT Port 9000` -> SIMCOM AT control (AT command set)
 * `Modems`
-* ->`Qualcomm HS-USB Modem 9000` -> GSM modem AT command port (PPP dialer should use this for
+* ->`Qualcomm HS-USB Modem 9000` -> GSM modem AT command port (PPP dialer should
+  use this for
 
 ### Verification <a name="verification"></a>
 ### Toubleshooting <a name="troubleshooting"></a>
@@ -451,3 +459,11 @@ avrdude -p x128a4u -c <programmer-id> -e -U flash:w:<file-name>.hex
 [v2x-dragon-v2x-connected-detail]: [v2x-lights-on]:
 [v2x-sim-card-alignment-under]: [v2x-sim-card-ejected]: [v2x-obd-connection]:
 [v2x-mounted-enclosure]:
+
+## FAQ
+
+*Q*: Why does the OBU occasionally take longer to boot or appear to reboot several times when starting up
+
+*A*: There is an issue with the graphics compositor in the GENIVI Development Platform and it occasionally does not load properly. Normally, this would cause a command line to appear instead of the GUI. We have created a workaround to detect this condition and reload the compositor.  A bug has been logged.
+
+
