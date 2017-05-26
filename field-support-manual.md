@@ -459,3 +459,11 @@ avrdude -p x128a4u -c <programmer-id> -e -U flash:w:<file-name>.hex
 [v2x-dragon-v2x-connected-detail]: [v2x-lights-on]:
 [v2x-sim-card-alignment-under]: [v2x-sim-card-ejected]: [v2x-obd-connection]:
 [v2x-mounted-enclosure]:
+
+## FAQ
+
+*Q*: Why does the OBU occasionally take longer to boot or appear to reboot several times when starting up
+
+*A*: There is an issue with the graphics compositor in the GENIVI Development Platform and it occasionally does not load properly. Normally, this would cause a command line to appear instead of the GUI. We have created a workaround to detect this condition and reload the compositor.  A bug has been logged.
+
+
