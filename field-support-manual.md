@@ -40,16 +40,23 @@ GENIVI Smart-Cities project.
         * [Button failure or fallback procedure](#button-failure)
     * [When all else fails](#when-fails)
     * [Command options for power off (see also command set)](#command-power-off)
-* [Runtime operation](#runtime-operation)
-    * [Vehicle safety notice](#vehicle-safety-notice)
+* [V2X Interface and Control](#runtime-operation)
+    * [Communication Ports](#communication-ports)
+        * [Linux](#communication-ports-linux)
+        * [Windows](#communication-ports-windows)
     * [Smart-cities interaction](#smart-cities-interaction)
     * [Cellular](#cellular-operations)
     * [Verification](#verification)
     * [Toubleshooting](#troubleshooting)
 * [V2X Command set](#v2x-command-set)
 * [Firmware upgrade](#firmware-upgrade)
-    - [Tools required](#firmware-tools-required)
-    - [Procedure](#firmware-procedure)
+    * [Tools required](#firmware-tools-required)
+        * [Programmer/Debugger](#tools-programmer)
+    * [Programmer Connection](#programmer-connection)
+        * [Example: AVR Dragon](#programmer-connection-dragon)
+    * [Procedure](#firmware-procedure)
+        * [Atmel Studio](#firmware-atmel-studio)
+        * [AVRDUDE](#firmware-avrdude)
 
 ## V2X Board Description <a name="v2x-board-description"></a>
 
@@ -85,6 +92,17 @@ GPS and cellular network connections require a combination GPS/GSM 3g antenna.
 ### SIM card <a name="requirements-sim"></a>
 
 Celllar network connectivity requires a properly provisioned SIM card.
+
+
+## Requirements for Smart Cities <a name="requirements-smart-cities"></a>
+
+### Host Computer <a name="requirements-host-computer"></a>
+
+#### Raspberry Pi <a name="requirements-raspberry-pi"></a>
+
+#### GENIVI Yocto image <a name="requirements-yocto"></a>
+
+#### Smart Cities application <a name="requirements-smart-cities-application"></a>
 
 ## Hardware setup <a name="hardware-setup"></a>
 
@@ -233,7 +251,7 @@ for power state manipulation.
 The Smart Cities application should initialize automatically after host system
 start.
 
-## V2X Interface and Control<a name="runtime-operation"></a>
+## V2X Interface and Control <a name="runtime-operation"></a>
 
 > TODO: com/serial port description
 
@@ -241,16 +259,15 @@ A host computer can communicate with the components on board the device, via the
 virtual ports mounted over USB. The exact arrangement and details of these ports
 depend on the operating system of the host computer.
 
-### Micro controller / command port
-
-
-### Communication ports 
+### Communication ports <a name="communication-ports"></a> 
 
 > Depending on operating system, arrangement of the virtual ports is at the
 > mercy of whatever order they are mounted in. This means that the serial port
 > for a particular device may not remain consistent. It is encouraged for the
 > host computer to use a rules system (like `udev` in Linux) to map consistent
 > port aliases.
+
+#### Linux <a name="communication-ports-linux"></a> 
 
 The common port mounting arrangement observed in Linux:
 
@@ -262,6 +279,27 @@ The common port mounting arrangement observed in Linux:
 * `/dev/ttyUSB2` -> GSM modem AT command port (PPP dialer should use this for
   internet connection)
 * `/dev/ttyUSB3` -> SIMCOM AT control (AT command set)
+
+#### Windows <a name="communication-ports-windows"></a>
+
+On Windows, the arrangement is slightly less intuitive, and the ports require a driver to be installed. The requisite files, *atmel_devices_cdc.cat* and *atmel_devices_cdc.inf* are available in the Atmel Software Framework, 
+[on Atmel's site](http://www.atmel.com/tools/avrsoftwareframework.aspx),
+[Microchip](http://www.atmel.com/tools/avrsoftwareframework.aspx),
+or bundled with Atmel Studio.
+
+Communication with the SIMCOM chip requires drivers appropriate to the operating system version. Repository is available [here](http://simcom.ee/documents/?dir=SIM5320).
+
+Common port mounting arrangement observed in Windows (designated by name, as COM<x> is determined at runtime:
+
+* `Ports (COM & LPT)`
+* ->`Communication Device Class ASF example3, COM1` -> STN110/ELM327 CAN chip
+* ->`Communication Device Class ASF example3, COM2` -> V2X control port (VX command set)
+* ->`Communication Device Class ASF example3, COM3` -> Accelerometer data stream (and secret reset back channel)
+* ->`Qualcomm HS-USB Diagnostics 9000` -> SIMCOM diagnostic port (unused)
+* ->`Qualcomm HS-USB NMEA 9000` -> GPS stream
+* ->`Sim Tech HS-USB AT Port 9000` -> SIMCOM AT control (AT command set)
+* `Modems`
+* ->`Qualcomm HS-USB Modem 9000` -> GSM modem AT command port (PPP dialer should use this for
 
 ### Verification <a name="verification"></a>
 ### Toubleshooting <a name="troubleshooting"></a>
@@ -314,8 +352,8 @@ The common port mounting arrangement observed in Linux:
 
 > TODO: section should describe firmware, locations, etc, as well as tools.
 
-The V2X firmware is in ongoing development. Unfortunately there is no easy (or remote) way
-to upgrade the firmware; instead development tools are required.
+The V2X firmware is in ongoing development. Unfortunately there is no easy (or
+remote) way to upgrade the firmware; instead development tools are required.
 
 Using a hardware programmer and a software utility, the V2X device can be
 flashed with new firmware.
@@ -324,16 +362,15 @@ flashed with new firmware.
 
 > TODO: Make releases available and link to them here.
 
-If you wish to compile an image from source, firmware image should be compiled into a *.hex* format. 
-The AVR toolchain is available for
+If you wish to compile an image from source, firmware image should be compiled
+into a *.hex* format. The AVR toolchain is available for
 [Linux](http://www.atmel.com/toolsATMELAVRTOOLCHAINFORLINUX.aspx),
-[Windows](http://www.atmel.com/tools/atmelavrtoolchainforwindows.aspx),
-and comes bundled in 
-[Atmel Studio](http://www.atmel.com/microsite/atmel-studio/). 
+[Windows](http://www.atmel.com/tools/atmelavrtoolchainforwindows.aspx), and
+comes bundled in [Atmel Studio](http://www.atmel.com/microsite/atmel-studio/).
 
 ### Tools required <a name="firmware-tools-required"></a>
 
-#### Programmer/Debugger
+#### Programmer/Debugger <a name="tools-programmer"></a>
 
 A plethora of hardware programming/debugger solutions are available. The AVR
 Dragon is one such device.
@@ -342,9 +379,9 @@ Dragon is one such device.
 
 > TODO: AVR Dragon or compatible debugging board
 
-### Programmer Connection to the V2X Board
+### Programmer Connection to the V2X Board <a name="programmer-connection"></a>
 
-#### Example: AVR Dragon
+#### Example: AVR Dragon <a name="programmer-connection-dragon"></a>
 
 * Connect one end of the programming ribbon cable to the Dragon board on the set
   of pins marked *1 ISP 5*. Ensure that the red stripe on the ribbon is aligned
@@ -361,7 +398,12 @@ voltage should read **3.2v**.
 
 ### Firmware Upgrade Procedure <a name="firmware-procedure"></a>
 
-#### Atmel Studio
+> During the flashing process, power must be maintained to the board. A constant
+> 12v power supply is required. In the current hardware revision, the 4v rail
+> must be held high by pressing and holding the button prior to and during the
+> flashing process.
+
+#### Atmel Studio <a name="firmware-atmel-studio"></a>
 
 > A full reiteration of the programming instructions for the board are currently
 > out of scope of this document.
@@ -372,7 +414,7 @@ files onto the board.
 [Atmel Studio Programming Dialog
 documentation](http://www.atmel.com/webdoc/atmelstudio/atmelstudio.AVRStudio.ProgrammingDialog.Introduction.html)
 
-#### AVRDUDE
+#### AVRDUDE <a name="firmware-avrdude"></a>
 
 AVRDude is a cross platform (Linux/Windows) programming software utility.
 
@@ -386,7 +428,7 @@ Ultimately, the usage will boil down to something like this:
 ```
 avrdude -p x128a4u -c <programmer-id> -e -U flash:w:<file-name>.hex
 ```
-## Links and Resources
+## Links and Resources <a name="links-resources"></a>
 
 
 
