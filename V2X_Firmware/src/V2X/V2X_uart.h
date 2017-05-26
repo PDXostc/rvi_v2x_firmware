@@ -3,7 +3,7 @@
  *
  * Created: 2/12/2016 10:34:20 AM
  *  Author: jbanks2
- */ 
+ */
 
 
 #ifndef V2X_UART_H_
@@ -14,8 +14,10 @@
  * @brief The two states the serial buffer can have
  **/
 enum buffer_routing{
-	AVR_ROUTING = 0,
-	FTDI_ROUTING
+	AVR_ROUTING = 0
+#if V2X_REV <= REV_12
+	, FTDI_ROUTING
+#endif
 	};
 
 /**

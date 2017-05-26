@@ -165,6 +165,13 @@ void job_coordinator (void) {
 	if (job_check_timeout(SYS_CAN_CTL)) {
 		CAN_stop_snoop();
 	}
+#if V2X_REV >= REV_20
+	if (job_check_timeout(SYS_PWR))
+	{
+		handle_button_check(button_get_delta());
+		job_clear_timeout(SYS_PWR);
+	}
+#endif
 	//more jobs to add
 	//compare GPS coordinates to trigger alarm/host
 	//compare ACL data to trigger alarm/host

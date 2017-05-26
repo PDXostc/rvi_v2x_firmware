@@ -3,7 +3,7 @@
  *
  * Created: 2/12/2016 11:01:08 AM
  *  Author: jbanks2
- */ 
+ */
 
 #include "V2X.h"
 
@@ -64,7 +64,7 @@ ISR(USART_SIM_RX_Vect)
 }
 
 ISR(USART_SIM_DRE_Vect)
-{		
+{
 	if (CTL_bytes_to_send(&GSM, BUFFER_OUT)) { //if bytes left to send
 		USART_SIM.DATA = CTL_next_byte(&GSM, BUFFER_OUT);
 	} else { //clean up
@@ -111,25 +111,50 @@ void GSM_control (char * responce_buffer) {
 
 void GSM_control_check (char * responce_buffer){
 	switch (GSM_subsequence_state) {
+	/*This power check is actually not optimal for supporting both board versions
+	/* ...In Rev20 the SIM is not the only thing on the 4v rail, so we can't rely
+	/*on the operational convention of it being disabled/enabled as a check
+	/* for the SIM's absolute state
+	/*
+	/* Works fine for Rev1.2, needs help on Rev2.0.
+	 */
 	case GSM_subssequence_1:  //check module power
-		if (PWR_query((1<<ENABLE_4V1))) { //is the module power on?
-			GSM_subsequence_state = GSM_subssequence_3; 
+#if V2X_REV <= REV_12
+		if (PWR_query((1<<ENABLE_4V1)) && sim_power_status()) { //is the module power on?
+			GSM_subsequence_state = GSM_subssequence_3;
 			GSM_control_check(responce_buffer);
 		} else { //if not power it up
 			usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
 			PWR_gsm_start();
+#if SIMCOM == SIMCOM_SIM5320A
 			GSM_subsequence_state = GSM_subssequence_2;
 			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start
+#elif SIMCOM == SIMCOM_SIM7100A
+			GSM_subsequence_state = GSM_subssequence_3; //skip 2, 7100a doesn't appear to have "START"
+			job_set_timeout(SYS_GSM, 25); //give SIM module 25 seconds to start
+#endif
 		}
+#elif V2X_REV >= REV_20
+			usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
+			PWR_gsm_start();
+			GSM_subsequence_state = GSM_subssequence_3;
+			job_set_timeout(SYS_GSM, 20); //give SIM module 10 seconds to start
+#endif
 		break;
+#if SIMCOM == SIMCOM_SIM5320A
+	/* 7100a does not appear to send the START message, so has real trouble
+	/* with this step. This appears to be why just sending the machine to subsequence_3
+	/* has been more reliable with the new version
+	 */
 	case GSM_subssequence_2: //Module clean boot, look for "start"
 		if (strcmp_P(responce_buffer, PSTR("START")) == 0) {
 			GSM_subsequence_state = GSM_subssequence_3;  //got expected response, go to next step
 			GSM_control_check(responce_buffer);
-		} 
+		}
 		job_check_fail(SYS_GSM);
 		break;
-	case GSM_subssequence_3: //check for SIM power LED state
+#endif
+	case GSM_subssequence_3: //check for SIM power state
 		if (sim_power_status()) {
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("GSM is powered\r>"));
@@ -138,10 +163,9 @@ void GSM_control_check (char * responce_buffer){
 		} else { //try a reset
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("GSM rebooting\r>"));
-			PWR_gsm_stop(); 
 			PWR_gsm_start();
-			GSM_subsequence_state = GSM_subssequence_2;
-			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start
+			GSM_subsequence_state = GSM_subssequence_3; // Check for power again
+			job_set_timeout(SYS_GSM, 20); //give SIM module 20 seconds to start
 		}
 		break;
 	case GSM_subssequence_6: //check for command responce
@@ -157,7 +181,7 @@ void GSM_control_check (char * responce_buffer){
 			GSM_subsequence_state = GSM_subssequence_1;  //got expected response, go to next step
 			GSM_sequence_state = GSM_state_start;
 			GSM_control(responce_buffer); //start next state
-		} 
+		}
 		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_FAIL:
@@ -184,8 +208,8 @@ void GSM_control_start (char * responce_buffer){
 			usb_tx_string_P(PSTR("GSM Echo off\r>"));
 			GSM_subsequence_state = GSM_subssequence_3; //move to response state
 			GSM_control(responce_buffer);
-		} 
-		job_check_fail(SYS_GSM);		
+		}
+		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_3:
 		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("ATI\r")); //compose message
@@ -199,7 +223,12 @@ void GSM_control_start (char * responce_buffer){
 			usb_tx_string_P(PSTR("SIM5320A device detected\r>"));
 			job_set_timeout(SYS_GSM, 2);
 			GSM_subsequence_state = GSM_subssequence_5;  //got expected response, go to next step
-		} else if (strcmp_P(responce_buffer, PSTR("OK")) == 0){	//did not see matching device ID
+		} else if (strcmp_P(responce_buffer, PSTR("Model: SIMCOM_SIM7100A")) == 0) { //got new version of simcom chip
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("SIM7100A device detected\r>"));
+			job_set_timeout(SYS_GSM, 2);
+			GSM_subsequence_state = GSM_subssequence_5;  //got expected response, go to next step
+		}	else if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {	//did not see matching device ID
 			GSM_subsequence_state = GSM_subssequence_FAIL;
 			job_clear_timeout(SYS_GSM);
 			GSM_control(responce_buffer);
@@ -208,6 +237,11 @@ void GSM_control_start (char * responce_buffer){
 		break;
 	case GSM_subssequence_5:
 		clear_buffer(stng);
+        /* Operational divergence SIMCOM 5320a vs 7100a
+		 * 5320a stores prints out "IMEI: ..."
+		 * 7100a prints out "IMEISV: ..."
+		 */
+#if SIMCOM == SIMCOM_SIM5320A
 		for (int i = 0; i < 5; i++) {stng[i] = responce_buffer[i];} //move first 4 to compare
 		if (strcmp_P(stng, PSTR("IMEI:")) == 0) {
 			clear_buffer(imei);
@@ -218,6 +252,18 @@ void GSM_control_start (char * responce_buffer){
 			job_set_timeout(SYS_GSM, 2);
 			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
 		}
+#elif SIMCOM == SIMCOM_SIM7100A
+		for (int i = 0; i < 7; i++) {stng[i] = responce_buffer[i];} //move first 6 to compare
+		if (strcmp_P(stng, PSTR("IMEISV:")) == 0) {
+			clear_buffer(imei);
+			strcat(imei, responce_buffer+8);
+			menu_send_CTL();
+			usb_tx_string_P(PSTR("IMEISV captured "));
+			menu_send_n_st();
+			job_set_timeout(SYS_GSM, 2);
+			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
+		}
+#endif
 		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_6:
@@ -280,7 +326,14 @@ void GSM_time_sync (char * responce_buffer) {
 		break;
 	case GSM_subssequence_2:
 		for (int i = 0; i < 10; i++) {stng[i] = responce_buffer[i];} //move first 10 to compare
+		// format for this string is altered in simcom version
+		// 5320a: "+CGPSINFO:,,,,,,,,"  == [10] ','
+		// 7100a: "+CGPSINFO: ,,,,,,,," == [11] ','
+#if SIMCOM == SIMCOM_SIM5320A
 		if (strcmp_P(stng, PSTR("+CGPSINFO:")) == 0 && responce_buffer[10] != ',') {
+#elif SIMCOM == SIMCOM_SIM7100A
+		if (strcmp_P(stng, PSTR("+CGPSINFO:")) == 0 && responce_buffer[11] != ',') {
+#endif
 			GSM_parse_gps_info(responce_buffer);
 			GSM_subsequence_state = GSM_subssequence_3;
 			job_set_timeout(SYS_GSM, 2);
@@ -290,7 +343,7 @@ void GSM_time_sync (char * responce_buffer) {
 	case GSM_subssequence_3:
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
 			GSM_sequence_state = GSM_state_idle;
-			
+
 			job_clear_timeout(SYS_GSM);
 		}
 		job_check_fail(SYS_GSM);
@@ -309,11 +362,11 @@ void show_buffer(char * buffer) {
 	usb_tx_string_P(PSTR("\""));
 	usb_cdc_send_string(USB_CMD, buffer);
 	usb_tx_string_P(PSTR("\""));
-	
+
 }
 
 void GSM_parse_gps_info (char * responce_buffer) {
-	
+
 	char * start_ptr = strchr(responce_buffer, ':') + 1;
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		latitude[i] = start_ptr[i];	//copy lat string
@@ -340,13 +393,13 @@ void GSM_parse_gps_info (char * responce_buffer) {
 	for (int i = 0; start_ptr[i] != ','; i++) {
 		time[i] = start_ptr[i];	//copy time string
 	}
-			
+
 	if (atoi(date) != 0) { //this logic wont work on Jan 1 2100
 		time_set_by_strings(date, time);
 		menu_send_CTL();
 		usb_tx_string_P(PSTR("GPS time sync @ "));
 		time_print_human_readable();
-		menu_send_n_st();	
+		menu_send_n_st();
 	}
 }
 
@@ -356,4 +409,24 @@ void GSM_control_fail (void) {
 
 char * GSM_get_imei (void) {
 	return &imei;
+}
+
+void GSM_command_power_off(void) {
+	CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CPOF\r")); //compose message
+	CTL_mark_for_processing(&GSM, BUFFER_OUT);
+}
+
+void GSM_command_enable_gps_auto(int enable) {
+	switch(enable) {
+		case 0:
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSAUTO=0\r")); //compose message
+		break;
+		
+		case 1:
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSAUTO=1\r")); //compose message
+		break;
+		
+		default:
+		break;
+	}
 }

@@ -1,11 +1,11 @@
 /**
- * \file clock_conf.h
+ * \file conf_usb.h
  *
  * \brief Initial firmware for V2X bring up
  *
  * Author: Jesse Banks (jbanks2)
  * 
- * Usage: move this file to src/config/clock_conf.h by replacing the existing file.
+ * Usage: move this file to src/config/conf_usb.h by replacing the existing file.
  */
 
 #ifndef _CONF_USB_H_
