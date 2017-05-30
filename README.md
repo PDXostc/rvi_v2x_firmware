@@ -1,4 +1,7 @@
 # rvi_v2x_firmware
+
+## Description
+
 This repo contains the firmware source and  design files for the JLR OSTC V2X
 project, an open source hardware device equipped with
 * CAN/OBD2 interface
@@ -14,8 +17,8 @@ development through the joint efforts of
 Hardware repo can be found at
 [https://github.com/PDXostc/rvi_v2x_hardware](https://github.com/PDXostc/rvi_v2x_hardware).
 
-> At the time of writing, current firmware version 0.2 (link to tag here) is 
-> intended to be used with the hardware 2.0 release (link to tag here).
+> At the time of writing, current [firmware version 0.2](insert-link-here)
+> intended to be used with the [hardware 2.1 release](https://github.com/PDXostc/rvi_v2x_hardware/commit/71e0d74038f05f68dc1f46546d6cc1ff5eac84f3).
 
 Usage profile suggests pairing with a RaspberryPi host with 
 [RVI node](https://github.com/GENIVI/rvi_lib) 
@@ -26,6 +29,12 @@ and
 [GENIVI Smart Cities application](https://github.com/GENIVI/meta-smart-cities-pilot). 
 Use of this software is not required for operation, but can provide a certain 
 reference implementation.
+
+## Installation
+
+Please see the [*V2X-project-setup.pdf*](V2X-project-setup.pdf) for instructions
+on correctly setting up the project in the Atmel environment and with the 
+[Atmel Software Framework](http://www.atmel.com/tools/avrsoftwareframework.aspx).
 
 Tips for use in the field can be found in the [Support Manual](field-support-manual.md), 
 located in this repo.
@@ -39,6 +48,8 @@ Tools in use:
   viewer](https://www.foxitsoftware.com/products/pdf-reader/)
 * [V2X development hardware](https://github.com/PDXostc/rvi_v2x_hardware), OSTC
   prototype device
+
+## Contributors
 
 Primary Development by Jesse Banks - jbanks2@jaguarlandrover.com.
 
