@@ -1,5 +1,7 @@
 # V2X Field Support Documentation
 
+> Work in progress. Some entries may be incomplete or missing.
+
 This documentation is intended to cover common V2X board use cases in the field.
 
 Please note that the documentation will include some information specific to the
