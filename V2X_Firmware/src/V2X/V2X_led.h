@@ -20,53 +20,6 @@
  */
 #endif
 
-#if V2X_REV <= REV_12
-/**
- * @def charge_pump_toggle
- * @brief Causes the pin driving the charge pump circuit to toggle state HIGH<>LOW
- **/
-inline static void charge_pump_toggle(void) {gpio_toggle_pin(CHARGEPUMP_0_PIN); }
-#endif
-
-#if V2X_REV <= REV_12
-/**
- * @def led_0_on
- * @brief Causes the pin driving the RED POWER LED to turn ON
- **/
-inline static void led_0_on		(void) {gpio_set_pin_high(LED_0_PIN);	}
-
-/**
- * @def led_0_off
- * @brief Causes the pin driving the RED POWER LED to turn OFF
- **/
-inline static void led_0_off	(void) {gpio_set_pin_low(LED_0_PIN);	}
-
-/**
- * @def led_1_on
- * @brief Causes the pin driving the GREEN GSM LED to turn ON
- **/
-inline static void led_1_on		(void) {gpio_set_pin_high(LED_1_PIN);	}
-
-/**
- * @def led_1_off
- * @brief Causes the pin driving the GREEN GSM LED to turn OFF
- **/
-inline static void led_1_off	(void) {gpio_set_pin_low(LED_1_PIN);	}
-
-/**
- * @def led_2_on
- * @brief Causes the pin driving the BLUE GPS LED to turn ON
- **/
-inline static void led_2_on		(void) {gpio_set_pin_high(LED_2_PIN);	}
-
-/**
- * @def led_2_off
- * @brief Causes the pin driving the BLUE GPS LED to turn OFF
- **/
-inline static void led_2_off	(void) {gpio_set_pin_low(LED_2_PIN);	}
-
-#elif V2X_REV >= REV_20
-
 /**
  * @def led_0_on
  * @brief Causes the pin driving the RED POWER LED to turn ON
@@ -102,8 +55,6 @@ inline static void led_2_on		(void) {gpio_set_pin_low(LED_2_PIN);	}
  * @brief Causes the pin driving the BLUE GPS LED to turn OFF
  **/
 inline static void led_2_off	(void) {gpio_set_pin_high(LED_2_PIN);	}
-
-#endif
 
 /**
  * @def led_update
