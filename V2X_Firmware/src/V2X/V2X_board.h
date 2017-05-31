@@ -29,12 +29,8 @@ extern "C" {
 #define V2X_REV		(REV_20)
 
 /** Name string macro */
-#if V2X_REV == REV_12
-	#define BOARD_NAME 				  "RVI_V2X_Version_1.2"
-#elif V2X_REV >= REV_20
 /* REV20: board name change */
-	#define BOARD_NAME                "RVI_V2X_Version_2.0"
-#endif
+#define BOARD_NAME                "RVI_V2X_Version_2.0"
 /** @} */
 
 /* Defines for SIMCOM GSM chip on board. Compile time choice.
@@ -60,11 +56,7 @@ extern "C" {
 /** \name LED0 definitions
  *  net: SEQ_LED3 or "PWR" LED
  *  @{ */
-#if V2X_REV <= REV_12
-#define LED0_PIN                  IOPORT_CREATE_PIN(PORTB,0)
-#elif V2X_REV >= REV_20
 #define LED0_PIN                  IOPORT_CREATE_PIN(PORTE,2)
-#endif
 #define LED0_ACTIVE               true
 #define LED0_INACTIVE             !LED0_ACTIVE
 /** @} */
@@ -72,11 +64,7 @@ extern "C" {
 /** \name LED1 definitions
  *  net: SEQ_LED1 or "M2M" LED
  *  @{ */
-#if V2X_REV <= REV_12
-#define LED1_PIN                  IOPORT_CREATE_PIN(PORTA,6)
-#elif V2X_REV >= REV_20
 #define LED1_PIN                  IOPORT_CREATE_PIN(PORTE,1)
-#endif
 #define LED1_ACTIVE               true
 #define LED1_INACTIVE             !LED0_ACTIVE
 /** @} */
@@ -84,11 +72,7 @@ extern "C" {
 /** \name LED2 definitions
  *  net: SEQ_LED2 or "GPS" LED
  *  @{ */
-#if V2X_REV <= REV_12
-#define LED2_PIN                  IOPORT_CREATE_PIN(PORTA,7)
-#elif V2X_REV >= REV_20
 #define LED2_PIN                  IOPORT_CREATE_PIN(PORTE,3)
-#endif
 #define LED2_ACTIVE               true
 #define LED2_INACTIVE             !LED0_ACTIVE
 /** @} */
@@ -177,59 +161,6 @@ extern "C" {
 
 #define BUTTON_COUNT 2
 
-
-#if V2X_REV == REV_12
-/* DELETEME: Quite possibly, the whole buffer switcheroo is not needed anymore,
- * can probably eliminate the whole buffer setup
- * */
-/**
- * \name Serial Buffer #0 definitions
- *
- * Makes Atmel active communicator with ELM/STN device
- *
- *  @{ */
-#define BUF_0_NAME             "Buffer SEQ Active"
-#define BUF_0_PIN              BUF0_PIN
-#define BUF_0_ACTIVE           BUF0_ACTIVE
-#define BUF_0_INACTIVE         BUF0_INACTIVE
-/** @} */
-
-/** \name BUF0 definitions
- *  @{ */
-#define BUF0_PIN                   IOPORT_CREATE_PIN(PORTB,2)
-#define BUF0_ACTIVE                true
-#define BUF0_INACTIVE              !BUF0_ACTIVE
-/** @} */
-
-/* Revision 1.2 uses FTDI chip for primary routing. Control must be selected
- * specifically by either the FDTI or the Atmel. Revision 2.0 removes the FDTI
- * chip.
- */
-/**
-* \name Serial Buffer #1 definitions
-*
-* Makes FTDI active communicator with ELM/STN device
-*
-*  @{ */
-#define BUF_1_NAME             "Buffer FTDI Active"
-#define BUF_1_PIN              BUF1_PIN
-#define BUF_1_ACTIVE           BUF1_ACTIVE
-#define BUF_1_INACTIVE         BUF1_INACTIVE
-/** @} */
-
-/** \name BUF1 definitions
-*  @{ */
-#define BUF1_PIN                   IOPORT_CREATE_PIN(PORTB,3)
-#define BUF1_ACTIVE                true
-#define BUF1_INACTIVE              !BUF1_ACTIVE
-/** @} */
-
-/** Number of on-board buttons */
-/* DELETEME: this can probably just be eliminated */
-#define BUFFER_COUNT 2
-#define BUFFER_COUNT 1
-#endif
-
 /** \name CP0 definitions
  *  @{ */
 #define CP0_PIN                   IOPORT_CREATE_PIN(PORTA,1)
@@ -237,39 +168,11 @@ extern "C" {
 #define CP0_INACTIVE              !CP0_ACTIVE
 /** @} */
 
-#if V2X_REV <= REV_12
-/**
- * \name Charge Pump #0 definitions
- *
- * LED power supply charge pump pin
- * must be toggled >10khz to activate blue LED
- *
- *  @{ */
-#define CHARGEPUMP_0_NAME             "Charge Pump"
-#define CHARGEPUMP_0_PIN              CP0_PIN
-#define CHARGEPUMP_0_ACTIVE           CP0_ACTIVE
-#define CHARGEPUMP_0_INACTIVE         CP0_INACTIVE
-/** @} */
-
-/** Number of on-board buttons */
-#define CHARGEPUMP_COUNT 1
-#endif
-
 /** \name Signal pin definitions
  *  @{
  */
-#if V2X_REV <= REV_12
-#define EXT1_PIN_ACL_INT2                  IOPORT_CREATE_PIN(PORTA,2)
-#define EXT1_PIN_ACL_INT1                  IOPORT_CREATE_PIN(PORTA,3)
-#elif V2X_REV >= REV_20
 #define EXT1_PIN_ACL_INT2                  IOPORT_CREATE_PIN(PORTA,1)
 #define EXT1_PIN_ACL_INT1                  IOPORT_CREATE_PIN(PORTA,2)
-#endif
-#if V2X_REV <= REV_12
-#define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,4)
-#define EXT1_PIN_HUB_SUSPEND               IOPORT_CREATE_PIN(PORTA,5)
-/* DELETEME: HUB_STATUS unnecessary without FTDI in the mix */
-#endif
 #define EXT1_PIN_HUB_STATUS                IOPORT_CREATE_PIN(PORTA,3)
 #define EXT1_PIN_HOST_SHORT_CIRCUIT        IOPORT_CREATE_PIN(PORTB,1)
 #define EXT1_PIN_SR_CLEAR                  IOPORT_CREATE_PIN(PORTC,0)
@@ -280,14 +183,6 @@ extern "C" {
 #define EXT1_PIN_SPI_MOSI                  IOPORT_CREATE_PIN(PORTC,5)
 #define EXT1_PIN_SPI_MISO                  IOPORT_CREATE_PIN(PORTC,6)
 #define EXT1_PIN_SPI_SCK                   IOPORT_CREATE_PIN(PORTC,7)
-#if V2X_REV <= REV_12
-#define EXT1_PIN_HUB_SDA                   IOPORT_CREATE_PIN(PORTE,0)
-#define EXT1_PIN_HUB_SCL                   IOPORT_CREATE_PIN(PORTE,1)
-#endif
-#if V2X_REV <= REV_12
-#define EXT1_PIN_ACL_RXD                   IOPORT_CREATE_PIN(PORTE,2) //RX SIGNAL (PORT E RXD0) FROM SEQ TO FTDI FOR ACCEL AT INTERFACE
-#define EXT1_PIN_ACL_TXD                   IOPORT_CREATE_PIN(PORTE,3) //TX SIGNAL (PORT E TXD0) FROM SEQ TO FTDI FOR ACCEL AT INTERFACE
-#endif
 #define EXT1_PIN_SIM_WAKE                  IOPORT_CREATE_PIN(PORTD,0)
 #define EXT1_PIN_SIM_NETWORK               IOPORT_CREATE_PIN(PORTD,1)
 #define EXT1_PIN_SIM_TXD                   IOPORT_CREATE_PIN(PORTE,2) //TX SIGNAL (PORT D RXD0) FROM SIM MODULE
@@ -314,30 +209,6 @@ extern "C" {
 #define TWI_DATA_LENGTH				8
 /** @} */
 
-#if V2X_REV <=	REV_12
-/*DELETEME: These are likely superfluous */
-/** \name Extension header #1 USART definitions
-*  @{
-*/
-#define EXT1_CAN_USART              &USARTC0
-#define EXT1_SIM_USART              &USARTD0
-#define EXT1_SEQ_USART              &USARTD1
-#define EXT1_ACL_USART              &USARTE0
-/** @} */
-
-/*DELETEME: Doubly superfluous */
- /** \name Extension header #1 SPI definitions
- *  @{
- */
-#define EXT1_SPI_MODULE              &SPIC
-
-/** @} */
-/** \name Extension header #2 SPI definitions
- *  @{
- */
-#define EXT1_SPI_MODULE              &SPIC
-#endif
-
 /** @} */
 
 /*! \name SPI Connections of external ADXL345 Accelerometer
@@ -362,29 +233,6 @@ extern "C" {
  * This is used for power and reset sequencing
  *
  */
-#if V2X_REV <= REV_12
-/* Revision 1.2 features two shift registers, accommodating a 16 bit field for
- * the following power signals. Note: order is relevant!
- */
-enum power_sequence_outputs {
-	ENABLE_3V3			= 0,
-	ENABLE_3V3B			,
-	ENABLE_3V3C			,
-	ENABLE_3V3D			,
-	ENABLE_4V1			,
-	ENABLE_5V0			,
-	ENABLE_5V0B			,
-	ENABLE_SIM_WAKE		,
-	ENABLE_HUB			,
-	ENABLE_CAN_SLEEP	,
-	ENABLE_CAN_RESET	,
-	ENABLE_SIM_PWR_ON	,
-	ENABLE_SIM_RESET	,
-	ENABLE_SIM_RF_OFF	,
-	ENABLE_SIM_VBUS		,
-	ENABLE_FTDI_RESET
-};
-#elif V2X_REV >= REV_20
 /* Revision 2.0 uses only a single shift register, accommodating an 8 bit field
  * for the following power signals. Note: order is relevant!
  */
@@ -398,7 +246,6 @@ enum power_sequence_outputs {
 	 , ENABLE_SIM_RESET
 	 , ENABLE_SIM_WAKE
  };
-#endif
 
 #define SR_SPI				&SPIC
 //! @}
