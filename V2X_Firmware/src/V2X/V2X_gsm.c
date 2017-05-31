@@ -119,27 +119,10 @@ void GSM_control_check (char * responce_buffer){
 	/* Works fine for Rev1.2, needs help on Rev2.0.
 	 */
 	case GSM_subssequence_1:  //check module power
-#if V2X_REV <= REV_12
-		if (PWR_query((1<<ENABLE_4V1)) && sim_power_status()) { //is the module power on?
-			GSM_subsequence_state = GSM_subssequence_3;
-			GSM_control_check(responce_buffer);
-		} else { //if not power it up
-			usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
-			PWR_gsm_start();
-#if SIMCOM == SIMCOM_SIM5320A
-			GSM_subsequence_state = GSM_subssequence_2;
-			job_set_timeout(SYS_GSM, 10); //give SIM module 10 seconds to start
-#elif SIMCOM == SIMCOM_SIM7100A
-			GSM_subsequence_state = GSM_subssequence_3; //skip 2, 7100a doesn't appear to have "START"
-			job_set_timeout(SYS_GSM, 25); //give SIM module 25 seconds to start
-#endif
-		}
-#elif V2X_REV >= REV_20
-			usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
-			PWR_gsm_start();
-			GSM_subsequence_state = GSM_subssequence_3;
-			job_set_timeout(SYS_GSM, 20); //give SIM module 10 seconds to start
-#endif
+		usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r"));  //does not need end of string, exits through menu
+		PWR_gsm_start();
+		GSM_subsequence_state = GSM_subssequence_3;
+		job_set_timeout(SYS_GSM, 20); //give SIM module 10 seconds to start
 		break;
 #if SIMCOM == SIMCOM_SIM5320A
 	/* 7100a does not appear to send the START message, so has real trouble
