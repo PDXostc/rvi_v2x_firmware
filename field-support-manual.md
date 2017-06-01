@@ -32,6 +32,7 @@ GENIVI Smart-Cities project.
     * [Cable connection](#cable-connection)
     * [Case enclosure and mounting](#case-enclosure-and-mounting)
     * [Sim card insertion instructions](#sim-card-instructions)
+    * [Bench Power Supply](#bench-power-supply)
 * [Startup procedure](#startup-procedure)
     * [Power requirements](#power-requirements)
         * [Battery warning](#battery-warning)
@@ -160,6 +161,43 @@ To remove the card, push in until the spring lock releases, and the card will be
 ejected partially from the slot.
 
 >TODO: Do we need a diagram for this?
+
+### Bench Power Supply <a name="bench-power-supply"></a>
+
+In lieu of an OBD2 connection, the V2X can be powered by any cable that meets the 
+power pinout requirements of the OBD2->DB9 standard.
+
+The V2X requires power through the DB9 connection. For bench testing, we use a
+simple spliced cable, terminated DB9 at the V2X board and using either: positive
+and ground wires running to a bench supply; barrel jack from wall supply. In
+either case please ensure a 12v constant supply.
+
+Our simple cable terminates on the DB9 end with
+* *Power* - pin 9
+* *GND* - pin 3
+
+Note that the above configuration is just a power supply and will of course not 
+support any CAN traffic.
+
+The standard can be found [here](http://affon.narod.ru/CAN/DS102.pdf). For 
+full pinout table see section *6.2.2 Mechanical Parameters*.
+
+**Pinning:**
+
+| Pin | Signal   | Description                        |
+|-----|--------  |-------------                       |
+| 1   | -        | Reserved                           |
+| 2   | CAN_L    | CAN_L bus line (dominant low)      |
+| 3   | CAN_GND  | CAN ground                         |
+| 4   | -        | Reserved                           |
+| 5   | CAN_SHLD | optional CAN shield                |
+| 6   | GND      | optional CAN ground                |
+| 7   | CAN_H    | CAN_H bus line (dominant high)     |
+| 8   | -        | Reserved (error line)              |
+| 9   | CAN_V+   | optional CAN external supply *(1)* |
+
+*(1) Not at all optional, in our bench supply case. 12v goes here.*
+
 
 ## Startup procedure <a name="startup-procedure"></a>
 
