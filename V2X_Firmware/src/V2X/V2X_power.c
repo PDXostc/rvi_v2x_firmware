@@ -10,20 +10,15 @@
 
 void PWR_init(void)
 {
-	#if V2X_REV >= REV_20
-
 	/* Need to drive high 3v3_EN signal here, to ensure CPU operation.
 	 * A later check will turn off 3v if we have chosen to enable 4v
 	 */
 	PWR_3_start();
-	#endif
 	PWR_clear();							// Clear shift register
 	PWR_latch();							// Latch all internal registers to output
 	power_control_state = POWER_CONTROL_DEFAULT_VALUE;
-	#if V2X_REV >= REV_20
 	/* Additional check, if 4v was enabled by default config, please disable 3v */
 	PWR_3_is_needed();
-	#endif
 	PWR_push();		//update shift register state
 	delay_ms(100);				//allow power to stabilize
 }
