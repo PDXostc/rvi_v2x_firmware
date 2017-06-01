@@ -47,11 +47,9 @@ extern "C" {
 /** \name 3v3 power pin definition
  * Activate to maintain power to CPU
  */
-#if V2X_REV >= REV_20
 #define PWR_3V3_PIN				  IOPORT_CREATE_PIN(PORTA,4)
 #define PWR_3V3_ACTIVE			  true
 #define PWR_3V3_INACTIVE		  !PWR_3V3_ACTIVE
-#endif
 
 /** \name LED0 definitions
  *  net: SEQ_LED3 or "PWR" LED
