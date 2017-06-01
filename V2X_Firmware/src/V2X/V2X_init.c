@@ -43,11 +43,8 @@ void pin_init(void)
 		ioport_configure_pin(BUTTON_0_PIN					, IOPORT_DIR_INPUT  | IOPORT_SENSE_FALLING);
 		ioport_configure_pin(BUTTON_1_PIN					, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);  //NON_REM[1] USB hub Boot Strapping option
 
-#if V2X_REV >= REV_20
 	/* 3v3 pin init, low by default... */
 	ioport_configure_pin(PWR_3V3_PIN						, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
-#endif
-
 }
 
 void enable_v2x_interrupts(void) {
