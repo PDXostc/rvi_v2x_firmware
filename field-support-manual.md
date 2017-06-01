@@ -127,7 +127,7 @@ Need:
 2. Connect GPS/GSM antenna cables.
     > Typical configuration requires attaching
     >* "gold" head to port marked "**GPS Antenna**"
-    >* "silver" head to port marked "**3g Cellula Network Antenna**"
+    >* "silver" head to port marked "**3g Cellular Network Antenna**"
 
     > Incorrectly reversing this connection will inhibit GPS signal, and should
       be one of the first things to check if no GPS signal is observed.
@@ -190,7 +190,7 @@ status.
 
 * Red: SIM card insertion status.
     - Active: SIM card is inserted (properly)
-    - Inactive: SIM card missing or instered improperly
+    - Inactive: SIM card missing or inserted improperly
 
 * Blue: GSM power status.
     - Active: SIMCOM chipset is powered
@@ -205,7 +205,7 @@ to register and attach to the desired network operator.
 
 > Please note: A bug currently exists in the driver that can produce a state
 where the LEDs are not updated with the correct frequency if the host has not
-actively communicated with the host for some time. Until this issue is resolved,
+actively communicated with the board for some time. Until this issue is resolved,
 the host should use a scripted means of occaisionally contacting the V2X control
 port. The distro built for Smart Cities contains a work around service for this
 issue.
