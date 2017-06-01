@@ -174,30 +174,26 @@ either case please ensure a 12v constant supply.
 
 Our simple cable terminates on the DB9 end with
 * *Power* - pin 9
-* *GND* - pin 3
+* *GND* - pin 2
 
 Note that the above configuration is just a power supply and will of course not 
 support any CAN traffic.
 
-The standard can be found [here](http://affon.narod.ru/CAN/DS102.pdf). For 
-full pinout table see section *6.2.2 Mechanical Parameters*.
+For full pinout, refer to the table below.
 
 **Pinning:**
 
-| Pin | Signal   | Description                        |
-|-----|--------  |-------------                       |
-| 1   | -        | Reserved                           |
-| 2   | CAN_L    | CAN_L bus line (dominant low)      |
-| 3   | CAN_GND  | CAN ground                         |
-| 4   | -        | Reserved                           |
-| 5   | CAN_SHLD | optional CAN shield                |
-| 6   | GND      | optional CAN ground                |
-| 7   | CAN_H    | CAN_H bus line (dominant high)     |
-| 8   | -        | Reserved (error line)              |
-| 9   | CAN_V+   | optional CAN external supply *(1)* |
-
-*(1) Not at all optional, in our bench supply case. 12v goes here.*
-
+| Pin Description  | OBDII | DB9 |
+|----------------- |-------|-----|
+| J1850 BUS+       | 2     | 7   |
+| Chassis Ground   | 4     | 2   |
+| Signal Ground    | 5     | 1   |
+| CAN High J-2284  | 6     | 3   |
+| ISO 9141-2 K Line| 7     | 4   |
+| J1850 BUS-       | 10    | 6   |
+| CAN Low J-2284   | 14    | 5   |
+| ISO 9141-2 L Line| 15    | 8   |
+| Battery Power    | 16    | 9   |
 
 ## Startup procedure <a name="startup-procedure"></a>
 
