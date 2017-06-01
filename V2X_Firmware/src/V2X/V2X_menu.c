@@ -336,11 +336,9 @@ void menu_power (void) {
 			usb_tx_string_PV(PSTR("Disabling Host power supply"));
 			PWR_host_stop();
 			break;
-#if V2X_REV >= REV_20
 		case 'a': // disable all. shutdown.
 			PWR_shutdown();
 			break;
-#endif
 		default:
 			menu_send_q();
 			break;
