@@ -37,13 +37,8 @@ void menu_main(void) {
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
 		switch(CMD_buffer[2]) {
 			case 'i': //information
-#if V2X_REV <= REV_12
-				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\r\nOpen source hardware and software\r\nHW Rev1.2 \r\nSW Rev0.1\r\n"));
-				break;
-#elif V2X_REV >= REV_20
 				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\r\nOpen source hardware and software\r\nHW Rev2.0 \r\nSW Rev0.2\r\n"));
 				break;
-#endif
 			case 'j': //Jaguar
 				usb_tx_string_P(PSTR("\r\n\r\n   ,ggp@@@@mgg,,\r\n,$Q$(`S@@$;g$$$$$@$@@gg,\r\n;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r\n  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r\n    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r\n         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r\n         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r\n                                    *$@@L ```T$W~)%g,\r\n                                      *%@gg,,,,,    5/Sw,     ,\r\n                                          ```` ` `9g `9g,``*^|'\r\n                                                    `#g,`)h\r\n\r\n   Developed at Jaguar Land Rover OSCT. Portland OR 2016\r\n"));
 				break;
@@ -326,31 +321,10 @@ void menu_power (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable power
 		switch (CMD_buffer[4]) {
-#if V2X_REV <= REV_12
-		case '3':  //3v
-			usb_tx_string_PV(PSTR("Disabling 3V supply"));
-			PWR_turn_off((1<<ENABLE_3V3));
-			PWR_push();
-			break;
-#endif
-#if V2X_REV >= REV_20
-		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
-		 * while the power ouptut is properly disabled
-		 */
-		case '3':
-			usb_tx_string_PV(PSTR("Disabling 3v pin"));
-			PWR_3_stop();
-			break;
-#endif
 
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Disabling 4V supply"));
-#if V2X_REV <= REV_12
-			PWR_turn_off((1<<ENABLE_4V1)|(1<<ENABLE_SIM_RESET));
-			PWR_push();
-#elif V2X_REV >= REV_20
 			PWR_4_stop();
-#endif
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Disabling 5V supply"));
@@ -362,11 +336,9 @@ void menu_power (void) {
 			usb_tx_string_PV(PSTR("Disabling Host power supply"));
 			PWR_host_stop();
 			break;
-#if V2X_REV >= REV_20
 		case 'a': // disable all. shutdown.
 			PWR_shutdown();
 			break;
-#endif
 		default:
 			menu_send_q();
 			break;
@@ -374,31 +346,10 @@ void menu_power (void) {
 		break; //disable power
 	case 'e':  //enable power
 		switch (CMD_buffer[4]) {
-#if V2X_REV <= REV_12
-		case '3':  //3v
-			usb_tx_string_PV(PSTR("Enabling 3V supply"));
-			PWR_turn_on((1<<ENABLE_3V3));
-			PWR_push();
-			break;
-#endif
-#if V2X_REV >= REV_20
-		/* DEBUG: DELETEME: Explicit test of 3v switching for use ONLY DURING TESTING
-		 * while the power ouptut is properly disabled
-		 */
-		case '3':
-			usb_tx_string_PV(PSTR("Enabling 3v pin"));
-			PWR_3_start();
-			break;
-#endif
 
 		case '4':  //4v
 			usb_tx_string_PV(PSTR("Enabling 4V supply"));
-#if V2X_REV <= REV_12
-			PWR_turn_on((1<<ENABLE_4V1));
-			PWR_push();
-#elif V2X_REV >= REV_20
 			PWR_4_start();
-#endif
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Enabling 5V supply"));
@@ -425,7 +376,7 @@ void menu_power (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\n"));
+		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (4, 5, H)\r\nDn: Disable power supply (4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\n"));
 		break;
 	}
 }
@@ -553,10 +504,6 @@ void menu_lockup (void) {
 	usb_cdc_send_string(USB_ACL, msg);
 	usb_cdc_send_string(USB_CAN, msg);
 	delay_s(1);
-#if V2X_REV <= REV_12
-	PWR_hub_stop();
-#endif
-	delay_s(1);
 	RST_CTRL = true; //force SW reset
 }
 
@@ -607,18 +554,10 @@ void menu_can_status(void) {
 }
 
 void menu_power_status(void) {
-#if V2X_REV <= REV_12
-	usb_tx_string_P(PSTR("3V3="));
-	if (PWR_query((1<<ENABLE_3V3)))
-			{menu_send_1();}
-	else	{menu_send_0();}
-#endif
-#if V2X_REV >= REV_20
 	usb_tx_string_P(PSTR("3V3="));
 	if (ioport_get_pin_level(PWR_3V3_PIN)==true)
 			{menu_send_1();}
 	else	{menu_send_0();}
-#endif
 	usb_tx_string_P(PSTR("4V1="));
 	if (PWR_query((1<<ENABLE_4V1)))
 			{menu_send_1();}
