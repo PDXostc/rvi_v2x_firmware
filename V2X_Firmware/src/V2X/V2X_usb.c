@@ -41,30 +41,30 @@ void usb_cdc_set_dtr(uint8_t port, bool b_enable)
 	if (b_enable) {
 		// Host terminal has open COM
 		if (port == USB_CAN) {
-			led_0_on();	
+			//led_0_on();	
 			CAN_uart_stop();	// close direct path
 			uart_open(port);	// Open USB passthrough communication
 		}else if (port == USB_CMD) {
-			led_1_on();
+			//led_1_on();
 			menu_send_n_st();
 			//start Hayes CMD interface 
 		}else if (port == USB_ACL) {
-			led_2_on();
+			//led_2_on();
 			//enable ACL
 			//ACL_sample_on();
 		}
 	} else {
 		// Host terminal has close COM
 		if (port == USB_CAN) { //change can from pass through to direct mode
-			led_0_off();
+			//led_0_off();
 			uart_close(port);	// close USB passthrough communication
 			CAN_uart_start();	// open direct path
 			
 		}else if (port == USB_CMD) {
-			led_1_off();
+			//led_1_off();
 			//start Hayes interface
 		}else if (port == USB_ACL) {
-			led_2_off();
+			//led_2_off();
 			//disable ACL
 			//ACL_sample_off();
 		}

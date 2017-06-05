@@ -3,7 +3,7 @@
  *
  * Created: 2/12/2016 11:01:18 AM
  *  Author: jbanks2
- */ 
+ */
 
 
 #ifndef V2X_GSM_H_
@@ -11,20 +11,20 @@
 
 /**
  * @def simcard_status
- * @brief detection of SIMCARD by socket switch 
- * returns "true" if SIMCARD installed 
+ * @brief detection of SIMCARD by socket switch
+ * returns "true" if SIMCARD installed
  **/
 inline static bool simcard_status(void) {return 1-ioport_get_pin_level(SW1_PIN);}
 	/**
  * @def sim_power_status
- * @brief detection of SIMCARD by socket switch 
- * returns "true" if SIMCARD installed 
+ * @brief detection of SIM module by pin
+ * returns "true" if SIM module is powered
  **/
 inline static bool sim_power_status(void) {return ioport_get_pin_level(EXT1_PIN_SIM_PWR);}
 /**
  * @def sim_net_status
- * @brief detection of SIMCARD by socket switch 
- * returns "true" if SIMCARD installed 
+ * @brief detection of SIM network status pin
+ * returns "true" if SIM network pin detected
  **/
 inline static bool sim_net_status(void) {return ioport_get_pin_level(EXT1_PIN_SIM_NETWORK);}
 
@@ -87,7 +87,7 @@ enum GSM_sequence_states {
 	GSM_state_time_get,
 	GSM_state_wake_host
 	};
-	
+
 /**
  * @def GSM_sequence_states
  * @brief generic switch for moving through control substates
@@ -105,7 +105,7 @@ enum GSM_subsequence_states {
 	GSM_subssequence_10,
 	GSM_subssequence_FAIL
 	};
-	
+
 /**
  * @def GSM_control
  * @brief head of the controller sequencer, sends calls into corect module
@@ -154,6 +154,13 @@ void GSM_time_job (void);
 void GSM_time_sync  (char * responce_buffer);
 
 /**
+ * @def GSM_command_enable_gps_auto
+ * @brief send command to enable gps auto start in SIMCOM
+ * @param enable integer 0/1 to disable/enable respectively
+ */
+void GSM_command_enable_gps_auto(int enable);
+
+/**
  * @def GSM_parse_gps_info
  * @brief takes GPS string parses into usable sections
  * @param *responce_buffer pointer to the buffer to be analysed
@@ -173,4 +180,9 @@ void GSM_control_fail (void);
  */
 char * GSM_get_imei (void);
 
+/**
+ *@def GSM_power_off
+ *@brief send a shutdown command to the gsm
+ */
+void GSM_command_power_off(void);
 #endif /* V2X_GSM_H_ */
