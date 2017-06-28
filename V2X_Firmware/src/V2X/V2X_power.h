@@ -157,13 +157,12 @@ void PWR_4_stop(void);
  */
 void PWR_shutdown(void);
 
-#endif
-
 /**
- * @def	PWR_5_stop
- * @brief stop 5v rail
+ * @def PWR_5_start
+ * @brief Start 5v rail. Also automatically activates 4v
  */
-void PWR_5_stop (void);
+void PWR_5_start(void);
+#endif
 
 /**
  * @def PWR_is_5_needed
