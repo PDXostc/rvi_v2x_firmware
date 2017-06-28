@@ -423,9 +423,15 @@ void menu_power (void) {
 	case 'q':
 		menu_power_status();
 		break;
+	case 'h': //switch to high power mode, all peripherals enabled
+		PWR_mode_high();
+		break;
+	case 'l': //switch to low power mode, all peripherals disabled
+		PWR_mode_low();
+		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\n"));
+		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\nH: High power mode (all peripherals enabled)\r\nL: Low power mode (all peripherals disabled)\r\n"));
 		break;
 	}
 }

@@ -82,25 +82,10 @@ void handle_button_check(int sec) {
 		PWR_shutdown();
 	} else if (sec >= 3)
 	{
-		usb_tx_string_P(PSTR("Power 3v Only"));
-		// do 3v only
-		PWR_host_stop();
-		PWR_5_stop();
-		ACL_set_sample_off();
-		PWR_4_stop();
-		// maybe we'd like to force the leds to update here, just in case...
-		led_1_off();
-		led_2_off();
+		PWR_mode_low();
 	} else if (sec >= 1)
 	{
-		// full power mode
-		PWR_4_start();
-		usb_tx_string_P(PSTR("Power Full"));
-		udd_attach();
-		ACL_set_sample_on();
-		GSM_modem_init();
-		CAN_elm_init();
-		PWR_host_start();
+		PWR_mode_high();
 	}
 	button_reset_delta();
 }
