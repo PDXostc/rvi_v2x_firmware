@@ -144,7 +144,7 @@ void menu_accel (void) {
 			ACL_set_rate(ACL_RATE_1);
 			usb_tx_string_PV(PSTR("Set to 1Hz"));
  		}else {
-			usb_tx_string_P(PSTR("ERROR: Out of range, try again."));
+			usb_tx_string_P(PSTR("ERROR: Out of range, try again.\r\n"));
 		}
 		break;
 	case 'w':
