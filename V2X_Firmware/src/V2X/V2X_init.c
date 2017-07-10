@@ -93,7 +93,7 @@ void v2x_board_init(void)
 void reset_processor(void) {
 	if (reset_flags) {
 		if (reset_flags & (1<<RESET_SYSTEM)) {
-			usb_tx_string_P(PSTR("V2X restarting\rPlease close this window\r>"));
+			usb_tx_string_P(PSTR("V2X restarting\rPlease close this window\r\n>"));
 			delay_s(3);
 			// use write protected inteface to software reset
 			ccp_write_io((uint8_t *)&RST.CTRL, RST_SWRST_bm);
@@ -110,7 +110,7 @@ void reset_processor(void) {
 		}
 		if (reset_flags & (1<<RESET_CAN)) {
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("CAN restarting\r>"));
+			usb_tx_string_P(PSTR("CAN restarting\r\n>"));
 			PWR_can_stop();
 			delay_ms(100);
 			CAN_elm_init();
@@ -118,7 +118,7 @@ void reset_processor(void) {
 		}
 		if (reset_flags & (1<<RESET_GSM)) {
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("GSM restarting\r>"));
+			usb_tx_string_P(PSTR("GSM restarting\r\n>"));
 			// Forces reset of GSM
 			PWR_gsm_reset();
 			delay_ms(500);

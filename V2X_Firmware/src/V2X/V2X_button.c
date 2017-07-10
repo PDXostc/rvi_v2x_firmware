@@ -33,6 +33,7 @@ void button_service(void) {
 			menu_send_BTN();
 			usb_tx_string_P(PSTR("RELEASE:"));		// report to CMD interface
 			menu_print_int(button_delta);
+			usb_tx_string_P(PSTR("\r\n"));		// report to CMD interface
 			menu_send_n_st();
 			button_pressed = false;		//note the button was released
 			button_check_flag = true;	//flag button for checking
@@ -43,7 +44,7 @@ void button_service(void) {
 			pressed_at = time_get(); //store press time
 			button_pressed = true;  //hold button state
 			menu_send_BTN();
-			usb_tx_string_P(PSTR("PRESS")); //report press event to CMD
+			usb_tx_string_P(PSTR("PRESS\r\n")); //report press event to CMD
 			menu_send_n_st();
 			break;
 		}
@@ -73,7 +74,7 @@ void handle_button_check(int sec) {
 	if (sec >= 5)
 	{
 		// do hard power off
-		usb_tx_string_P(PSTR("Power Off"));
+		usb_tx_string_P(PSTR("Power Off\r\n"));
 		PWR_host_stop();
 		PWR_can_stop();
 		PWR_gsm_stop();

@@ -81,7 +81,7 @@ void time_alarm_set_relative(long offset) {
 void time_alarm_event(void) {
 	alarm_is_set = false;
 	menu_send_CTL();
-	usb_tx_string_P(PSTR("ALARM"));
+	usb_tx_string_P(PSTR("ALARM\r\n"));
 	menu_send_n_st();
 	//respond to alarm
 	PWR_host_start();

@@ -191,7 +191,7 @@ void PWR_gsm_reset(void) {
 void PWR_mode_high(void) {
 	PWR_4_start();
 	PWR_5_start();
-	usb_tx_string_P(PSTR("Power Full"));
+	usb_tx_string_P(PSTR("Power Full\r\n"));
 	udd_attach();
 	ACL_set_sample_on();
 	GSM_modem_init();
@@ -200,7 +200,7 @@ void PWR_mode_high(void) {
 }
 
 void PWR_mode_low(void) {
-	usb_tx_string_P(PSTR("Power 3v Only"));
+	usb_tx_string_P(PSTR("Power 3v Only\r\n"));
 	// do 3v only
 	PWR_host_stop();
 	PWR_5_stop();
