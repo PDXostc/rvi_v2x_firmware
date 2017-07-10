@@ -58,10 +58,6 @@ int main ()
  */
 ISR(SW0_INT_VECT_0)
 {
-	if (ioport_get_pin_level(PWR_3V3_PIN) == true)
-	{
-		usb_tx_string_P(PSTR("**3v is UP!**\r"));
-	}
 	// do we need to make sure that it was actually the button that got us here?
 	if (ioport_get_pin_level(SW0_PIN) == SW0_ACTIVE)
 	{

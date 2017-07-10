@@ -115,6 +115,24 @@ void PWR_shutdown(void) {
 	PWR_3_stop();
 }
 
+void PWR_5_start(void) {
+	PWR_4_start();
+	PWR_turn_on(1<<ENABLE_5V0);
+}
+
+void PWR_5_stop (void) {
+	PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
+	PWR_push();
+}
+
+void PWR_is_5_needed (void) { //turn off 5v0 if host and can are off
+	if (power_control_state & ((1<<ENABLE_CAN_RESET)|(1<<ENABLE_5V0B))) {
+		PWR_5_start();
+	} else {
+		PWR_5_stop();
+	}
+	PWR_push();
+}
 void PWR_host_start(void) {
 	PWR_turn_on((1<<ENABLE_5V0B));
 	PWR_is_5_needed();
@@ -125,19 +143,7 @@ void PWR_host_stop(void){
 	PWR_is_5_needed();
 }
 
-void PWR_5_stop (void) {
-	PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
-	PWR_push();
-}
 
-void PWR_is_5_needed (void) { //turn off 5v0 if host and can are off
-	if (power_control_state & ((1<<ENABLE_CAN_RESET)|(1<<ENABLE_5V0B))) {
-		PWR_turn_on((1<<ENABLE_5V0));
-	} else {
-		PWR_turn_off(1<<ENABLE_5V0);
-	}
-	PWR_push();
-}
 
 void PWR_can_stop (void) {
 	PWR_turn_off((1<<ENABLE_CAN_RESET));
