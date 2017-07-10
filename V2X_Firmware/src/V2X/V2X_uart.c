@@ -7,21 +7,6 @@
 
 #include "V2X.h"
 
-#if V2X_REV <= REV_12
-/* DELETEME: Likely get rid of this entirely, like the aforementioned buffer cases */
-void canbus_serial_routing(uint8_t source)
-{
-	gpio_set_pin_low(BUF0_PIN);
-
-	/* use FTDI by default */
-	gpio_set_pin_low(BUF1_PIN);
-	if		(source == FTDI_ROUTING)	{gpio_set_pin_high(BUF1_PIN);}
-	else  /*(source == AVR_ROUTING)*/	{gpio_set_pin_high(BUF0_PIN);}
-	/* use Atmel */
-	gpio_set_pin_high(BUF0_PIN);
-}
-#endif
-
 void uart_config(uint8_t port, usb_cdc_line_coding_t * cfg)
 {
 	if (port != USB_CAN) {return;}

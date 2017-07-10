@@ -15,11 +15,7 @@
  * @def SHIFT_REGISTER_TYPE
  * @brief shift register type, bit length determined by hardware
  */
-#if V2X_REV <= REV_12
-#define SHIFT_REGISTER_TYPE uint16_t
-#elif V2X_REV >= REV_20
 #define SHIFT_REGISTER_TYPE uint8_t
-#endif
 
 /**
  * @def shift_register_state
@@ -31,24 +27,6 @@ volatile SHIFT_REGISTER_TYPE power_control_state;
  * @def STATE_DEFAULT_VALUE
  * @brief default power state. enables 3v3 only
  */
-#if V2X_REV <= REV_12
-#define POWER_CONTROL_DEFAULT_VALUE (1<<ENABLE_3V3)|        \
-									(0<<ENABLE_3V3B)|       \
-									(0<<ENABLE_3V3C)|       \
-									(0<<ENABLE_3V3D)|       \
-									(0<<ENABLE_4V1)|        \
-									(0<<ENABLE_5V0)|        \
-									(0<<ENABLE_5V0B)|       \
-									(0<<ENABLE_SIM_WAKE)|   \
-									(1<<ENABLE_HUB)|        \
-									(0<<ENABLE_CAN_SLEEP)|  \
-									(0<<ENABLE_CAN_RESET)|  \
-									(0<<ENABLE_SIM_PWR_ON)| \
-									(0<<ENABLE_SIM_RESET)|  \
-									(0<<ENABLE_SIM_RF_OFF)| \
-									(0<<ENABLE_SIM_VBUS)|   \
-									(0<<ENABLE_FTDI_RESET)
-#elif V2X_REV >= REV_20
 #define POWER_CONTROL_DEFAULT_VALUE (1<<ENABLE_4V1)|        \
 									(0<<ENABLE_5V0)|        \
 									(0<<ENABLE_5V0B)|       \
@@ -57,7 +35,6 @@ volatile SHIFT_REGISTER_TYPE power_control_state;
 									(0<<ENABLE_SIM_PWR_ON)| \
 									(0<<ENABLE_SIM_RESET)|  \
 									(0<<ENABLE_SIM_WAKE)
-#endif
 /**
  * @def shift_register_init
  * @brief	Resets the shift register, then sets to default values
@@ -106,21 +83,6 @@ void PWR_turn_off(SHIFT_REGISTER_TYPE pins_mask);
  */
 Bool PWR_query(SHIFT_REGISTER_TYPE mask);
 
-#if V2X_REV <= REV_12
-/**
- * @def power_hub_start
- * @brief sends a sequence to disable the USB hub
- */
-void PWR_hub_start(void);
-
-/**
- * @def power_hub_reset
- * @brief sends a sequence to disable the USB hub
- */
-void PWR_hub_stop(void);
-#endif
-
-#if V2X_REV >= REV_20
 /**
  * @def PWR_3_start
  * @brief enable 3v pin
@@ -157,13 +119,11 @@ void PWR_4_stop(void);
  */
 void PWR_shutdown(void);
 
-#endif
-
 /**
- * @def	PWR_5_stop
- * @brief stop 5v rail
+ * @def PWR_5_start
+ * @brief Start 5v rail. Also automatically activates 4v
  */
-void PWR_5_stop (void);
+void PWR_5_start(void);
 
 /**
  * @def PWR_is_5_needed
@@ -214,9 +174,20 @@ void PWR_gsm_start(void);
 void PWR_gsm_stop(void);
 
 /**
- * @def power_sim_reset
+ * @def PWR_sim_reset
  * @brief Forces reset of the SIM module. Please use sparingly, with caution.
  */
 void PWR_gsm_reset(void);
 
+/**
+ * @def PWR_mode_high
+ * @brief Switch to high power / full operation mode; turns on everything
+ */
+void PWR_mode_high(void);
+
+/**
+ * @def PWR_mode_low
+ * @brief Turn off all peripherals and higher power rails, using only 3v and micro
+ */
+void PWR_mode_low(void);
 #endif /* V2X_DRIVERS_H_ */

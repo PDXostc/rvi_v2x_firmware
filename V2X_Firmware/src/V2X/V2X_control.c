@@ -165,13 +165,11 @@ void job_coordinator (void) {
 	if (job_check_timeout(SYS_CAN_CTL)) {
 		CAN_stop_snoop();
 	}
-#if V2X_REV >= REV_20
 	if (job_check_timeout(SYS_PWR))
 	{
 		handle_button_check(button_get_delta());
 		job_clear_timeout(SYS_PWR);
 	}
-#endif
 	//more jobs to add
 	//compare GPS coordinates to trigger alarm/host
 	//compare ACL data to trigger alarm/host
@@ -206,7 +204,7 @@ void job_check_fail(uint8_t system) {
 			menu_send_CAN();
 			break;
 		}
-		usb_tx_string_P(PSTR("Control timeout\r>"));
+		usb_tx_string_P(PSTR("Control timeout\r\n>"));
 		job_set_timeout(system, 1);
 	}
 }

@@ -15,9 +15,6 @@
  **/
 enum buffer_routing{
 	AVR_ROUTING = 0
-#if V2X_REV <= REV_12
-	, FTDI_ROUTING
-#endif
 	};
 
 /**

@@ -33,28 +33,16 @@ int main ()
 
 	while (1){
 		sleepmgr_enter_sleep();		//go to sleep until interrupt
-		#if V2X_REV <= REV_12
-			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
-		#endif
 		reset_processor();			//look for pending resets
-		#if V2X_REV <= REV_12
-			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
-		#endif
 		job_coordinator();			//schedule new jobs if needed
 		GSM_process_buffer();		//handle any pending jobs for GSM
 		CAN_process_buffer();		//handle any pending jobs for CAN
-		#if V2X_REV <= REV_12
-			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
-		#endif
 		if (usb_cdc_is_active(USB_ACL)) //if host listening,
 			{report_accel_data();}   //create and send accel data
-		#if V2X_REV <= REV_12
-			charge_pump_toggle();		//charge pump pin needs toggled to create boost voltage for LEDs
-		#endif
 		led_update();
 	}
 }
-#if V2X_REV >= REV_20
+
 /* Interrupt service routine for our button, on currently found on PORTA0
  * Because this pin is shared with other interesting pins, namely 3v, we
  * have to be careful about what we do with the interrupt.
@@ -70,10 +58,6 @@ int main ()
  */
 ISR(SW0_INT_VECT_0)
 {
-	if (ioport_get_pin_level(PWR_3V3_PIN) == true)
-	{
-		usb_tx_string_P(PSTR("**3v is UP!**\r"));
-	}
 	// do we need to make sure that it was actually the button that got us here?
 	if (ioport_get_pin_level(SW0_PIN) == SW0_ACTIVE)
 	{
@@ -109,4 +93,3 @@ ISR(SW0_INT_VECT_0)
 	}
 
 }
-#endif
