@@ -187,3 +187,26 @@ void PWR_gsm_reset(void) {
 	PWR_turn_on(1<<ENABLE_SIM_RESET);
 	PWR_push();
 }
+
+void PWR_mode_high(void) {
+	PWR_4_start();
+	PWR_5_start();
+	usb_tx_string_P(PSTR("Power Full"));
+	udd_attach();
+	ACL_set_sample_on();
+	GSM_modem_init();
+	CAN_elm_init();
+	PWR_host_start();
+}
+
+void PWR_mode_low(void) {
+	usb_tx_string_P(PSTR("Power 3v Only"));
+	// do 3v only
+	PWR_host_stop();
+	PWR_5_stop();
+	ACL_set_sample_off();
+	PWR_4_stop();
+	// maybe we'd like to force the leds to update here, just in case...
+	led_1_off();
+	led_2_off();
+}

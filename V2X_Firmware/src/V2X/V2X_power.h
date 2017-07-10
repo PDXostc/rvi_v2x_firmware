@@ -175,9 +175,20 @@ void PWR_gsm_start(void);
 void PWR_gsm_stop(void);
 
 /**
- * @def power_sim_reset
+ * @def PWR_sim_reset
  * @brief Forces reset of the SIM module. Please use sparingly, with caution.
  */
 void PWR_gsm_reset(void);
 
+/**
+ * @def PWR_mode_high
+ * @brief Switch to high power / full operation mode; turns on everything
+ */
+void PWR_mode_high(void);
+
+/**
+ * @def PWR_mode_low
+ * @brief Turn off all peripherals and higher power rails, using only 3v and micro
+ */
+void PWR_mode_low(void);
 #endif /* V2X_DRIVERS_H_ */
