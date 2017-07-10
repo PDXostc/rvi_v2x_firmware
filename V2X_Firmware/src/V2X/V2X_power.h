@@ -124,7 +124,6 @@ void PWR_shutdown(void);
  * @brief Start 5v rail. Also automatically activates 4v
  */
 void PWR_5_start(void);
-#endif
 
 /**
  * @def PWR_is_5_needed
