@@ -33,6 +33,7 @@ void button_service(void) {
 			menu_send_BTN();
 			usb_tx_string_P(PSTR("RELEASE:"));		// report to CMD interface
 			menu_print_int(button_delta);
+			usb_tx_string_P(PSTR("\r\n"));		// report to CMD interface
 			menu_send_n_st();
 			button_pressed = false;		//note the button was released
 			button_check_flag = true;	//flag button for checking
@@ -43,7 +44,7 @@ void button_service(void) {
 			pressed_at = time_get(); //store press time
 			button_pressed = true;  //hold button state
 			menu_send_BTN();
-			usb_tx_string_P(PSTR("PRESS")); //report press event to CMD
+			usb_tx_string_P(PSTR("PRESS\r\n")); //report press event to CMD
 			menu_send_n_st();
 			break;
 		}
@@ -69,12 +70,11 @@ void button_reset_delta(void)
 	button_delta = 0;
 }
 
-#if V2X_REV >= REV_20
 void handle_button_check(int sec) {
 	if (sec >= 5)
 	{
 		// do hard power off
-		usb_tx_string_P(PSTR("Power Off"));
+		usb_tx_string_P(PSTR("Power Off\r\n"));
 		PWR_host_stop();
 		PWR_can_stop();
 		PWR_gsm_stop();
@@ -82,26 +82,10 @@ void handle_button_check(int sec) {
 		PWR_shutdown();
 	} else if (sec >= 3)
 	{
-		usb_tx_string_P(PSTR("Power 3v Only"));
-		// do 3v only
-		PWR_host_stop();
-		PWR_5_stop();
-		ACL_set_sample_off();
-		PWR_4_stop();
-		// maybe we'd like to force the leds to update here, just in case...
-		led_1_off();
-		led_2_off();
+		PWR_mode_low();
 	} else if (sec >= 1)
 	{
-		// full power mode
-		PWR_4_start();
-		usb_tx_string_P(PSTR("Power Full"));
-		udd_attach();
-		ACL_set_sample_on();
-		GSM_modem_init();
-		CAN_elm_init();
-		PWR_host_start();
+		PWR_mode_high();
 	}
 	button_reset_delta();
 }
-#endif

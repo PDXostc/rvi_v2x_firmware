@@ -156,7 +156,7 @@ void CAN_control_init (char * responce_buffer){
 			CAN_subsequence_state = CAN_subssequence_2;
 			CAN_control(responce_buffer);
 			} else { //if not power it up
-			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r"));  //does not need end of string, exits through menu
+			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
 			PWR_can_start();
 			CAN_subsequence_state = CAN_subssequence_4;
 			job_set_timeout(SYS_CAN, 4); //give elm module 3 seconds to start
@@ -183,12 +183,12 @@ void CAN_control_init (char * responce_buffer){
 		if (strcmp_P(responce_buffer, PSTR("LV RESET")) == 0) {
 			CAN_subsequence_state = CAN_subssequence_3;
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("CAN Powered\r>"));
+			usb_tx_string_P(PSTR("CAN Powered\r\n>"));
 			CAN_control(responce_buffer);
 		}
 		if (strcmp_P(responce_buffer, PSTR("ELM327 v1.3a")) == 0) {
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("CAN Responding\r>"));
+			usb_tx_string_P(PSTR("CAN Responding\r\n>"));
 			CAN_sequence_state = CAN_state_idle;
 			CAN_in_command = false;
 			job_clear_timeout(SYS_CAN);
@@ -201,7 +201,7 @@ void CAN_control_init (char * responce_buffer){
 		CAN_in_command = false;
 		job_clear_timeout(SYS_CAN);
 		menu_send_CTL();
-		usb_tx_string_P(PSTR("CAN start fail\r>"));
+		usb_tx_string_P(PSTR("CAN start fail\r\n>"));
 		break;
 	}
 }
@@ -248,7 +248,7 @@ void CAN_ee_sequence (char * responce_buffer) {
 			CAN_sequence_state = CAN_state_idle;
 			job_clear_timeout(SYS_CAN);
 			menu_send_CAN();
-			usb_tx_string_P(PSTR("ERROR: EEPROM sequence fail\r>"));
+			usb_tx_string_P(PSTR("ERROR: EEPROM sequence fail\r\n>"));
 	} else if (CAN_subsequence_state != 0) { //not the first state, responce_buffer should have responce
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) { //if responce was OK
 			eeprom_read_CAN_string(buffer); //get copy of the entire string
@@ -261,7 +261,7 @@ void CAN_ee_sequence (char * responce_buffer) {
 				CAN_sequence_state = CAN_state_idle;
 				job_clear_timeout(SYS_CAN);
 				menu_send_CAN();
-				usb_tx_string_P(PSTR("EEPROM sequence complete\r>"));
+				usb_tx_string_P(PSTR("EEPROM sequence complete\r\n>"));
 			}
 		} else { //the response was bad
 			CAN_subsequence_state == CAN_subssequence_FAIL;
