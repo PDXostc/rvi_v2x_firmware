@@ -53,7 +53,7 @@ Tools in use:
 
 Primary contact: [rstreif@partner.jaguarlandrover.com](rstreif@partner.jaguarlandrover.com)
 
-Primary Development by Jesse Banks - jbanks2@jaguarlandrover.com.
+Primary Development by Jesse Banks - jese@jopeldesigns.com.
 
 Other Contributions from UCSD ECE191 Students Jaguar Land Rover OSTC - Portland,
 Oregon 2015-2016.
