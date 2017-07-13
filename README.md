@@ -51,10 +51,14 @@ Tools in use:
 
 ## Contributors
 
+Primary contact: [rstreif@partner.jaguarlandrover.com](rstreif@partner.jaguarlandrover.com)
+
 Primary Development by Jesse Banks - jbanks2@jaguarlandrover.com.
 
 Other Contributions from UCSD ECE191 Students Jaguar Land Rover OSTC - Portland,
 Oregon 2015-2016.
 
-Current release maintained by Steve Miller - [smiller6 at
-jaguarlandrover.com](smiller6@jaguarlandrover.com)
+Additional development and 0.2.0 release by Steve Miller - [stevemillercode@gmail.com](stevemillercode@gmail.com)
+
+__Contributions and feedback are most welcome!__
+Please use the Github [issue tracking system](https://github.com/PDXostc/rvi_v2x_firmware/issues) for bugs and suggestions. Please feel free to fork this repo and send a merge request if you'd like to make an improvement or fix.
