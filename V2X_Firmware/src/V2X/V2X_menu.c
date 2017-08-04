@@ -73,7 +73,7 @@ void menu_main(void) {
 				break;
 			case '?':  //timer functions
 			default:
-				usb_tx_string_P(PSTR("*** Main Menu ***\r\nI: Device information\r\nA: Accelerometer menu(ACL)\r\nC: ELM327 menu(CAN)\r\nM: SIM Modem menu(GSM)\r\nP: Power menu\r\nT: Timer menu\r\nS: Sleep-timer check menu\r\nQ: Query system status\r\nV: Toggle verbose messages\r\nR: Reboot\r\n"));
+				usb_tx_string_P(PSTR("*** Main Menu ***\r\nI: Device information\r\nA: Accelerometer menu(ACL)\r\nC: ELM327 menu(CAN)\r\nM: SIM Modem menu(GSM)\r\nP: Power menu\r\nT: Timer menu\r\nS: Sleep-state timer checks menu\r\nQ: Query system status\r\nV: Toggle verbose messages\r\nR: Reboot\r\n"));
 				break;
 			}
 	}else{
@@ -453,23 +453,23 @@ void menu_sleep(void) {
 		case 'd':  //disable sleep-state checks
 			switch (CMD_buffer[4]) {
 				case 'c':  // car-on check
-					usb_tx_string_PV(PSTR("Disabling car-on sleep-timer check"));
+					usb_tx_string_PV(PSTR("Disabling car-on sleep-state check"));
 					//PWR_4_stop();
 					break;
 					
 				case 'a':  // accelerometer check
-					usb_tx_string_PV(PSTR("Disabling accelerometer sleep-timer check"));
-					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					usb_tx_string_PV(PSTR("Disabling accelerometer sleep-state check"));
+					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
 					break;
 					
 				case 't':  // text-message check
-					usb_tx_string_PV(PSTR("Disabling text-message sleep-timer check"));
-					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					usb_tx_string_PV(PSTR("Disabling text-message sleep-state check"));
+					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
 					break;
 					
 				case 'g': // gps-movement check
-					usb_tx_string_PV(PSTR("Disabling gps-movement sleep-timer check"));
-					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					usb_tx_string_PV(PSTR("Disabling gps-movement sleep-state check"));
+					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
 					break;
 					
 				default:
@@ -482,23 +482,23 @@ void menu_sleep(void) {
 		case 'e':  //enable sleep-state checks
 			switch (CMD_buffer[4]) {
 				case 'c':  // Car-on check
-					usb_tx_string_PV(PSTR("Enabling car-on sleep-timer check"));
+					usb_tx_string_PV(PSTR("Enabling car-on sleep-state check"));
 					//PWR_4_start();
 					break;
 					
 				case 'a':  // Accelerometer check
-					usb_tx_string_PV(PSTR("Enabling accelerometer sleep-timer check"));
-					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					usb_tx_string_PV(PSTR("Enabling accelerometer sleep-state check"));
+					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
 					break;
 					
 				case 't':  // text-message check
-					usb_tx_string_PV(PSTR("Enabling text-message sleep-timer check"));
-					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					usb_tx_string_PV(PSTR("Enabling text-message sleep-state check"));
+					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
 					break;
 				
 				case 'g': // gps-movement check
-					usb_tx_string_PV(PSTR("Enabling gps-movement sleep-timer check"));
-					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					usb_tx_string_PV(PSTR("Enabling gps-movement sleep-state check"));
+					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
 					break;
 					
 				default:
@@ -513,12 +513,12 @@ void menu_sleep(void) {
 			break;
 			
 		case 'i': // briefly describe function of the sleep-state timer checks
-			//menu_power_status();
+			usb_tx_string_P(PSTR("Allows Enable/Disable of checks performed while the host is sleeping\r\n"));
 			break;
 				
 		case '?':
 		default:
-			usb_tx_string_P(PSTR("*** Sleep-State Checks Menu ***\r\nE[C|A|T|G]: Enable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nD[C|A|T|G]: Disable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nQ: Query status of sleep-state checks\r\nI: Info on sleep-state timer checks\r\n"));
+			usb_tx_string_P(PSTR("*** Sleep-State Checks Menu ***\r\nE<N>: Enable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nD<N>: Disable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nQ: Query status of sleep-state checks\r\nI: Info on sleep-state timer checks\r\n"));
 			break;
 	}
 }

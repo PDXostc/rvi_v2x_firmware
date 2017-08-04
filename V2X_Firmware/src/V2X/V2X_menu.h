@@ -177,7 +177,7 @@ void menu_timer_status(void);
 
 /**
  * @def menu_sleep
- * @brief sleep-check timer menu content and conditional branching
+ * @brief sleep-state timer checks menu content and conditional branching
  **/
 void menu_sleep(void);
 
