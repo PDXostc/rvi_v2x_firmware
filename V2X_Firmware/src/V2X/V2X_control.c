@@ -7,8 +7,8 @@
 
 #include "V2X.h"
 
-uint32_t job_timeout[2] = {0, 0, 0, 0};
-Bool job_timeout_enable[4] = {false, false, false, false};
+uint32_t job_timeout[SYS_NUM];
+Bool job_timeout_enable[SYS_NUM];
 
 void CTL_add_to_buffer(buff * buffer, Bool in_out, char value) {
 	switch (in_out) {
@@ -174,6 +174,13 @@ void job_coordinator (void) {
 	//compare GPS coordinates to trigger alarm/host
 	//compare ACL data to trigger alarm/host
 	//ignition detection to trigger alarm/host
+}
+
+void job_timeout_init () {
+	for (uint8_t x = 0; x < SYS_NUM; x++) {
+		//job_timeout[x] = time_get() //time does not matter if not being watched
+		job_timeout_enable[x] = false;
+	}
 }
 
 void job_set_timeout (uint8_t system, int span) {
