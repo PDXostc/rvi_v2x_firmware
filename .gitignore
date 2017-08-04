@@ -84,6 +84,7 @@ tags
 
 # Project Specific
 V2X_Firmware/debug\.log
+V2X_Firmware.old/
 
 # config folder ignored 
 # explanation: though necessary files live in the Config folder, they should be

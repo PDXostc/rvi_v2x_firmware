@@ -70,6 +70,7 @@ void v2x_board_init(void)
 	pmic_init();
 	cpu_irq_enable();
 	eeprom_init();							//verifies eeprom safe for use
+	job_timeout_init();						//clears active job timers
 	menu_init();							//loads menu settings
 	time_init();							//starts the RTC
 	button_init();							//init button stuffs
