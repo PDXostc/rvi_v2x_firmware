@@ -31,7 +31,7 @@ void menu_add_to_command(char value) {
 }
 
 void menu_main(void) {
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 4; i++) { // Only lower case the first 4 characters, because some of the CAN functions take in strings which ARE case-sensitive
 		CMD_buffer[i] = tolower(CMD_buffer[i]);
 	}
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
@@ -63,6 +63,9 @@ void menu_main(void) {
 			case 't':  //timer functions
 				menu_timer();
 				break;
+			case 's':  //sleep functions
+				menu_sleep();
+				break;
 			case 'v': //toggle verbose setting
 				verbose = !verbose;
 				nvm_eeprom_write_byte(EE_verbose,verbose);
@@ -70,7 +73,7 @@ void menu_main(void) {
 				break;
 			case '?':  //timer functions
 			default:
-				usb_tx_string_P(PSTR("*** Main Menu ***\r\nI: Device information\r\nA: Accelerometer menu(ACL)\r\nC: ELM327 menu(CAN)\r\nM: SIM Modem menu(GSM)\r\nP: Power menu\r\nT: Timer menu\r\nQ: Query system status\r\nV: Toggle verbose messages\r\nR: Reboot\r\n"));
+				usb_tx_string_P(PSTR("*** Main Menu ***\r\nI: Device information\r\nA: Accelerometer menu(ACL)\r\nC: ELM327 menu(CAN)\r\nM: SIM Modem menu(GSM)\r\nP: Power menu\r\nT: Timer menu\r\nS: Sleep-timer check menu\r\nQ: Query system status\r\nV: Toggle verbose messages\r\nR: Reboot\r\n"));
 				break;
 			}
 	}else{
@@ -318,6 +321,8 @@ void menu_can (void) {
 }
 
 void menu_power (void) {
+	CMD_buffer[4] = tolower(CMD_buffer[4]);
+	
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable power
 		switch (CMD_buffer[4]) {
@@ -407,7 +412,7 @@ void menu_timer(void) {
 		break;
 	case 'r':  //relative alarm
 		time_alarm_set_relative(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_PV(PSTR("Alarm has been set"));
+		usb_tx_string_PV(PSTR("Alarm has been set2"));
 		break;
 	case 'z':  //set time zone
 		time_zone_set(menu_sample_number(CMD_buffer+4));
@@ -438,6 +443,83 @@ void menu_timer(void) {
 	default:
 		usb_tx_string_P(PSTR("*** Timer Menu ***\r\nSn: Set V2X time (UET)\r\nDn: Daylight Savings Time\r\nG: Get V2X time\r\nAn: Set absolute alarm (UET) \r\nRn: Set relative alarm (Seconds)\r\nI: timer information\r\nQ: Timer inquery\r\nU: Update using gps\r\nZn: Set timezone\r\n"));
 		break;
+	}
+}
+
+void menu_sleep(void) {
+	CMD_buffer[4] = tolower(CMD_buffer[4]);
+	
+	switch (CMD_buffer[3]) {
+		case 'd':  //disable sleep-state checks
+			switch (CMD_buffer[4]) {
+				case 'c':  // car-on check
+					usb_tx_string_PV(PSTR("Disabling car-on sleep-timer check"));
+					//PWR_4_stop();
+					break;
+					
+				case 'a':  // accelerometer check
+					usb_tx_string_PV(PSTR("Disabling accelerometer sleep-timer check"));
+					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					break;
+					
+				case 't':  // text-message check
+					usb_tx_string_PV(PSTR("Disabling text-message sleep-timer check"));
+					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					break;
+					
+				case 'g': // gps-movement check
+					usb_tx_string_PV(PSTR("Disabling gps-movement sleep-timer check"));
+					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					break;
+					
+				default:
+					menu_send_q();
+					break;
+			}
+			
+			break; //disable sleep-state checks
+		
+		case 'e':  //enable sleep-state checks
+			switch (CMD_buffer[4]) {
+				case 'c':  // Car-on check
+					usb_tx_string_PV(PSTR("Enabling car-on sleep-timer check"));
+					//PWR_4_start();
+					break;
+					
+				case 'a':  // Accelerometer check
+					usb_tx_string_PV(PSTR("Enabling accelerometer sleep-timer check"));
+					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					break;
+					
+				case 't':  // text-message check
+					usb_tx_string_PV(PSTR("Enabling text-message sleep-timer check"));
+					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					break;
+				
+				case 'g': // gps-movement check
+					usb_tx_string_PV(PSTR("Enabling gps-movement sleep-timer check"));
+					usb_tx_string_PV(PSTR("NOT YET IMPLEMENTED"));
+					break;
+					
+				default:
+					menu_send_q();
+					break;
+			}
+			
+			break;  //enable sleep-state checks
+			
+		case 'q': // query state of checks
+			
+			break;
+			
+		case 'i': // briefly describe function of the sleep-state timer checks
+			//menu_power_status();
+			break;
+				
+		case '?':
+		default:
+			usb_tx_string_P(PSTR("*** Sleep-State Checks Menu ***\r\nE[C|A|T|G]: Enable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nD[C|A|T|G]: Disable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nQ: Query status of sleep-state checks\r\nI: Info on sleep-state timer checks\r\n"));
+			break;
 	}
 }
 

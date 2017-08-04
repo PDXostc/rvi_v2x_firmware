@@ -176,6 +176,12 @@ void menu_timer(void);
 void menu_timer_status(void);
 
 /**
+ * @def menu_sleep
+ * @brief sleep-check timer menu content and conditional branching
+ **/
+void menu_sleep(void);
+
+/**
  * @def usb_tx_string_P
  * @brief special routine to send program memory stored strings over USB
  * @param data pointer to PSTR() strored strings
