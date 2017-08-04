@@ -55,8 +55,9 @@ enum system_switch {
 	SYS_CAN = 0,	//used for direct control of CAN
 	SYS_GSM,		//used for direct control of GSM
 	SYS_CAN_CTL,	//used for CTL passthrough of CAN
-	SYS_CTL,			//stand alone sequence jobs, wake host, etc.
-	SYS_PWR
+	SYS_CTL,		//stand alone sequence jobs, wake host, etc.
+	SYS_PWR,
+	SYS_NUM
 };
 
 /**
@@ -162,6 +163,12 @@ void CTL_input_proc_index_check (buff * buffer);
  * @brief uses the RTC to launch chron jobs
  **/
 void job_coordinator (void);
+
+/**
+ * @def job_timeout_init
+ * @brief clears all timeout 
+ **/
+void job_timeout_init (void);
 
 /**
  * @def job_set_timeout
