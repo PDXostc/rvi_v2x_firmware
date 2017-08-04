@@ -412,7 +412,7 @@ void menu_timer(void) {
 		break;
 	case 'r':  //relative alarm
 		time_alarm_set_relative(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_PV(PSTR("Alarm has been set2"));
+		usb_tx_string_PV(PSTR("Alarm has been set"));
 		break;
 	case 'z':  //set time zone
 		time_zone_set(menu_sample_number(CMD_buffer+4));
