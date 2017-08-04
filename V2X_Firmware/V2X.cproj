@@ -30,22 +30,14 @@
     <AsfFrameworkConfig>
       <framework-data>
         <options>
-          <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.drivers.nvm" value="Add" config="no_extmem" content-id="Atmel.ASF" />
           <option id="common.services.calendar" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common.services.basic.clock" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.basic.cpu" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.delay" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.basic.gpio" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.services.ioport" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common.services.basic.serial" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common.services.basic.sleepmgr" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common.services.basic.spi_master" value="Add" config="standard_spi" content-id="Atmel.ASF" />
           <option id="common.services.storage.ctrl_access" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common.services.usb.class.device" value="Add" config="composite" content-id="Atmel.ASF" />
           <option id="common.utils.interrupt" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common.utils.stdio.stdio_serial" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="thirdparty.wireless.addons.sio2host" value="Add" config="usb" content-id="Atmel.ASF" />
           <option id="xmega.drivers.ac" value="Add" config="" content-id="Atmel.ASF" />
           <option id="xmega.drivers.adc" value="Add" config="" content-id="Atmel.ASF" />
           <option id="xmega.drivers.cpu" value="Add" config="" content-id="Atmel.ASF" />
@@ -53,13 +45,20 @@
           <option id="xmega.drivers.ioport" value="Add" config="" content-id="Atmel.ASF" />
           <option id="xmega.drivers.nvm" value="Add" config="" content-id="Atmel.ASF" />
           <option id="xmega.drivers.pmic" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="xmega.drivers.rtc" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="xmega.drivers.sleep" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="xmega.drivers.spi" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="xmega.drivers.tc" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="xmega.drivers.usart" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="xmega.drivers.wdt" value="Add" config="" content-id="Atmel.ASF" />
           <option id="xmega.services.pwm" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="xmega.drivers.rtc" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="thirdparty.wireless.addons.sio2host" value="Add" config="usb" content-id="Atmel.ASF" />
+          <option id="xmega.drivers.sleep" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.services.basic.sleepmgr" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="xmega.drivers.spi" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.services.basic.spi_master" value="Add" config="standard_spi" content-id="Atmel.ASF" />
+          <option id="common.utils.stdio.stdio_serial" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.services.basic.clock" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="xmega.drivers.tc" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.services.basic.serial" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="xmega.drivers.usart" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.services.usb.class.device" value="Add" config="composite" content-id="Atmel.ASF" />
+          <option id="xmega.drivers.wdt" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.boards.user_board.common" value="Add" config="" content-id="Atmel.ASF" />
         </options>
         <configurations>
@@ -201,7 +200,7 @@
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.avrdragon</avrtool>
     <avrtoolinterface>PDI</avrtoolinterface>
-    <avrtoolserialnumber>00A200057008</avrtoolserialnumber>
+    <avrtoolserialnumber>00A200053369</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x1E9746</avrdeviceexpectedsignature>
     <com_atmel_avrdbg_tool_avrdragon>
       <ToolOptions>
@@ -210,7 +209,7 @@
         <InterfaceName>PDI</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.avrdragon</ToolType>
-      <ToolNumber>00A200057008</ToolNumber>
+      <ToolNumber>00A200053369</ToolNumber>
       <ToolName>AVR Dragon</ToolName>
     </com_atmel_avrdbg_tool_avrdragon>
     <TriggerUpgrade>true</TriggerUpgrade>

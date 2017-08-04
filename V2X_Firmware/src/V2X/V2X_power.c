@@ -116,7 +116,6 @@ void PWR_shutdown(void) {
 }
 
 void PWR_5_start(void) {
-	PWR_4_start();
 	PWR_turn_on(1<<ENABLE_5V0);
 }
 
@@ -146,7 +145,7 @@ void PWR_host_stop(void){
 
 
 void PWR_can_stop (void) {
-	PWR_turn_off((1<<ENABLE_CAN_RESET));
+	PWR_turn_off((1<<ENABLE_CAN_RESET)|(1<<ENABLE_CAN_SLEEP));
 	PWR_is_5_needed();
 	PWR_push();
 };
@@ -158,7 +157,7 @@ void PWR_can_start (void) {
 
 void PWR_gsm_stop(void) {
 	// GSM_command_power_off();
-	PWR_turn_on(1<<ENABLE_SIM_PWR_ON);
+	PWR_turn_off((1<<ENABLE_SIM_PWR_ON)|(1<<ENABLE_SIM_RESET));  //drops the reset pin, forcing the SIM chip into low power
 	PWR_push();
 }
 
@@ -202,10 +201,13 @@ void PWR_mode_high(void) {
 void PWR_mode_low(void) {
 	usb_tx_string_P(PSTR("Power 3v Only\r\n"));
 	// do 3v only
+	//remove 5V loads
+	PWR_can_stop();
 	PWR_host_stop();
 	PWR_5_stop();
 	ACL_set_sample_off();
 	PWR_4_stop();
+	PWR_gsm_stop();
 	// maybe we'd like to force the leds to update here, just in case...
 	led_1_off();
 	led_2_off();
