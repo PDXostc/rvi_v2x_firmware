@@ -454,8 +454,8 @@ void menu_sleep(void) {
 			switch (CMD_buffer[4]) {
 				case 'c':  // car-on check
 					usb_tx_string_PV(PSTR("Disabling car-on sleep-state check"));
-					//PWR_4_stop();
-					break;
+                    job_clear_timeout(SYS_CAR_ON_STATE_CHECK);
+                    break;
 					
 				case 'a':  // accelerometer check
 					usb_tx_string_PV(PSTR("Disabling accelerometer sleep-state check"));
@@ -483,7 +483,7 @@ void menu_sleep(void) {
 			switch (CMD_buffer[4]) {
 				case 'c':  // Car-on check
 					usb_tx_string_PV(PSTR("Enabling car-on sleep-state check"));
-					//PWR_4_start();
+					job_set_timeout(SYS_CAR_ON_STATE_CHECK, 3);
 					break;
 					
 				case 'a':  // Accelerometer check
