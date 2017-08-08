@@ -154,22 +154,32 @@ void job_coordinator (void) {
 			GSM_time_job(); //kick off a time sync job
 		}
 	}
+
 	if (job_check_timeout(SYS_GSM)) {
 		char nuthin[] = ".timeout.";
 		GSM_control(nuthin);  //start another job to catch the timeout
 	}
+
 	if (job_check_timeout(SYS_CAN)) {
 		char nuthin[] = ".timeout.";
 		CAN_control(nuthin);  //start another job to catch the timeout
 	}
+
 	if (job_check_timeout(SYS_CAN_CTL)) {
 		CAN_stop_snoop();
 	}
+
 	if (job_check_timeout(SYS_PWR))
 	{
 		handle_button_check(button_get_delta());
 		job_clear_timeout(SYS_PWR);
 	}
+
+	if (job_check_timeout(SYS_CAR_ON_STATE_CHECK))
+	{
+		PWR_car_on_state_check();
+	}
+
 	//more jobs to add
 	//compare GPS coordinates to trigger alarm/host
 	//compare ACL data to trigger alarm/host
@@ -178,7 +188,8 @@ void job_coordinator (void) {
 
 void job_timeout_init () {
 	for (uint8_t x = 0; x < SYS_NUM; x++) {
-		//job_timeout[x] = time_get() //time does not matter if not being watched
+		//job_timeout[x] = time_get() //time does not matter if not being watched (Still a good practice to initialize variables to something as it helps prevent/find bugs down the road...)
+		job_timeout[x] = 0;
 		job_timeout_enable[x] = false;
 	}
 }
