@@ -57,7 +57,7 @@ enum system_switch {
 	SYS_CAN_CTL,	//used for CTL passthrough of CAN
 	SYS_CTL,		//stand alone sequence jobs, wake host, etc.
 	SYS_PWR,
-	SYS_CAR_ON_STATE_CHECK,
+	SYS_CAR_STATE_CHECK,
 	SYS_NUM
 };
 
