@@ -8,8 +8,6 @@
 
 #include "V2X.h"
 
-Bool isLowPower = true;
-
 void PWR_init(void)
 {
 	/* Need to drive high 3v3_EN signal here, to ensure CPU operation.

@@ -63,7 +63,7 @@ void menu_main(void) {
 			case 't':  //timer functions
 				menu_timer();
 				break;
-			case 's':  //sleep functions
+			case 's':  //sleep-state check functions
 				menu_sleep();
 				break;
 			case 'v': //toggle verbose setting
@@ -453,7 +453,7 @@ void menu_sleep(void) {
 		case 'd':  //disable sleep-state checks
 			switch (CMD_buffer[4]) {
 				case 'c':  // car-on check
-					usb_tx_string_PV(PSTR("Disabling car-on sleep-state check"));
+					usb_tx_string_PV(PSTR("Disabling car-state check"));
                     job_clear_timeout(SYS_CAR_ON_STATE_CHECK);
                     break;
 					
@@ -482,7 +482,7 @@ void menu_sleep(void) {
 		case 'e':  //enable sleep-state checks
 			switch (CMD_buffer[4]) {
 				case 'c':  // Car-on check
-					usb_tx_string_PV(PSTR("Enabling car-on sleep-state check"));
+					usb_tx_string_PV(PSTR("Enabling car-state check"));
 					job_set_timeout(SYS_CAR_ON_STATE_CHECK, 3);
 					break;
 					

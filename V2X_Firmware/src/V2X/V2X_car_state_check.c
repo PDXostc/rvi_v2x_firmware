@@ -7,7 +7,7 @@
 
 #include "V2X.h"
 
-void PWR_car_on_state_check() {
+void CSC_car_state_check_init() {
 
 
     usb_tx_string_PV(PSTR("Car-on sleep-state check!\n"));
@@ -26,40 +26,47 @@ void PWR_car_on_state_check() {
 
     }
 
-    /*
-     *
-     * first check if low power. if not low power, check if car is still running by listening to the CAN bus.
-     *
-     * if low power, do the can stuff. this will pull us out of low power, so if the check puts us back into the 'do
-     * nothing' state, we need to make sure to go back to low power so that our isLowPower check is reset.
-     */
+/*
+    Updated functionality...
 
+    In summary:
+    First check if low power. If not low power, check if car is still running by listening to the CAN bus;
+    shut down the raspi if it is not running.
 
-    /*
-        This function must:
-        Check if low power or high power
+    If low power, do the CAN initialization stuff. This will pull us out of low power, so if the check puts us back
+    into the 'do nothing' state, we need to make sure to go back to low power so that our isLowPower check is reset.
 
-        If low power:
-            Change power state to enable CAN device (because we're in low power mode)
-                (turn on the 4 and the 5 and it will give me the 3, maybe? - probably happens automatically)
+    In detail:
+    Check if low power or high power
 
-            Configure can device
-                ()
+    If low power:
+        {//Change power state to power STN chip
+            PWR_4_start(); starts 4V and stops low power 3V, as 4V now provides 3V
+            PWR_can_start(); //starts 5V, STN enable signals
+        }
 
-            Take measurement of battery voltage (to see if we need to kill ourselves completely?)
-                ()
+        Configure can device ();
 
-            Decide what to do:
-                - less than 11V do no reschedule checking job, power off
-                - less than 13V and more than 11V reschedule checking job
-                - more than 13V needs follow up
-                    -- configure can setup (wouldn't this already be done?)
-                    -- check for RPM (scratch that... just listen for CAN noise)
-                    -- start raspi bring up sequence if greater than 0 (keep the job, though)
+        Listen for can activity ()
 
-        If high power:
-            Listen for CAN noise
-                - If silent, kill the raspi, reschedule job (at longer interval)
-                - If not silent, reschedule job (at shorter interval)
-    */
+        IF CanBusActive
+                -- PWR_mode_high(); //start raspi-bring-up sequence
+                -- reschedule job (at shorter interval)
+        ELSE
+                --  check the battery voltage
+        IF (Battery < 11V)
+                -- PWR_shutdown();
+        ELSE  kill the 5&4V,
+                --  PWR_4_stop(); //stops 4V and starts low power 3V
+                -- PWR_5_stop(); //stops 5V, drops STN enable signals
+                -- reschedule job (at longer interval)
+
+    If high power:
+        IF CanBusActive
+                --  reschedule job (at shorter interval)
+        ELSE
+                -- PWR_mode_low (); //kills everything but low power 3V
+                -- reschedule job (at longer interval)
+
+*/
 }

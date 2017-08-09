@@ -11,21 +11,9 @@
 
 
 
-/**
-	This function must:
-	Change power state to enable CAN device
-	Configure can device
-	Take measurement of battery voltage
-	Decide what to do:
 
-	- less than 11V do no reschedule checking job
-	- less than 13V and more than 11V reschedule checking job
-	- more than 13V needs follow up
-		-- configure can setup
-		-- check for RPM
-		-- start Rpi bring up sequence if greater than 0
- */
-void PWR_car_on_state_check();
+void CSC_car_state_check_init();
+
 
 
 
