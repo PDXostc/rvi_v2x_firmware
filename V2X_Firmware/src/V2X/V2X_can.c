@@ -155,7 +155,7 @@ void CAN_control_init (char * responce_buffer){
 		if (PWR_query((1<<ENABLE_5V0))) { //is the module power on?
 			CAN_subsequence_state = CAN_subssequence_2;
 			CAN_control(responce_buffer);
-			} else { //if not power it up
+        } else { //if not power it up
 			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
 			PWR_can_start();
 			CAN_subsequence_state = CAN_subssequence_4;
@@ -180,20 +180,20 @@ void CAN_control_init (char * responce_buffer){
 		job_set_timeout(SYS_CAN, 2);
 		break;
 	case CAN_subssequence_4: //Module response
-		if (strcmp_P(responce_buffer, PSTR("LV RESET")) == 0) {
+		if (strcmp_P(responce_buffer, PSTR("LV RESET")) == 0) { // if high-power, probably tell us this
 			CAN_subsequence_state = CAN_subssequence_3;
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Powered\r\n>"));
 			CAN_control(responce_buffer);
-		}
-		if (strcmp_P(responce_buffer, PSTR("ELM327 v1.3a")) == 0) {
+		} else if (strcmp_P(responce_buffer, PSTR("ELM327 v1.3a")) == 0) { // if booting-up probably be here
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Responding\r\n>"));
-			CAN_sequence_state = CAN_state_idle;
+			CAN_sequence_state = CAN_state_idle; // Lilli note - Maybe change to 'initialized'? do more here...
 			CAN_in_command = false;
 			job_clear_timeout(SYS_CAN);
+		} else {
+			job_check_fail(SYS_CAN);
 		}
-		job_check_fail(SYS_CAN);
 		break;
 	case CAN_subssequence_FAIL:
 		default:
