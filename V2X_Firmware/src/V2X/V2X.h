@@ -24,6 +24,7 @@
 #include "V2X_time.h"
 #include "V2X_can.h"
 #include "V2X_eeprom.h"
+#include "V2X_car_state_check.h"
 
 //#include "V2X_"
 
