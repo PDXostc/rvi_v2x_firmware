@@ -24,19 +24,20 @@ enum CAN_sequence_states {
  * @brief generic switch for moving through control substates
  */
 enum CAN_subsequence_states {
-	CAN_subssequence_1 = 0,
-	CAN_subssequence_2,
-	CAN_subssequence_3,
-	CAN_subssequence_4,
-	CAN_subssequence_5,
-	CAN_subssequence_6,
-	CAN_subssequence_7,
-	CAN_subssequence_8,
-	CAN_subssequence_9,
-	CAN_subssequence_10,
-	CAN_subssequence_FAIL
+	CAN_subsequence_1 = 0,
+	CAN_subsequence_2,
+	CAN_subsequence_3,
+	CAN_subsequence_4,
+	CAN_subsequence_5,
+	CAN_subsequence_6,
+	CAN_subsequence_7,
+	CAN_subsequence_8,
+	CAN_subsequence_9,
+	CAN_subsequence_10,
+	CAN_subsequence_COMPLETE,
+	CAN_subsequence_FAIL
 	};
-	
+
 /**
  * @def CAN_uart_start
  * @brief configure the usart port used by the CAN device, active RX
@@ -201,4 +202,19 @@ void CAN_EE_start (void);
  * @brief extracts sections of the EE string
 */
 Bool CAN_find_message (char * buffer, uint8_t index);
+
+/**
+ * @def CAN_get_sequence_state
+ * @brief gets value of CAN_sequence_state variable
+ * @return value of CAN_sequence_state variable
+ */
+uint8_t CAN_get_sequence_state();
+
+/**
+ * @def CAN_get_subsequence_state
+ * @brief gets value of CAN_subsequence_state variable
+ * @return value of CAN_subsequence_state variable
+ */
+uint8_t CAN_get_subsequence_state();
+
 #endif /* V2X_CAN_H_ */

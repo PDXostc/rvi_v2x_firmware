@@ -84,20 +84,11 @@ void PWR_turn_off(SHIFT_REGISTER_TYPE pins_mask);
 Bool PWR_query(SHIFT_REGISTER_TYPE mask);
 
 /**
-	This function must:
-	Change power state to enable CAN device
-	Configure can device
-	Take measurement of battery voltage
-	Decide what to do:
-
-	- less than 11V do no reschedule checking job
-	- less than 13V and more than 11V reschedule checking job
-	- more than 13V needs follow up
-		-- configure can setup
-		-- check for RPM
-		-- start Rpi bring up sequence if greater than 0
+ * @def PWR_is_low_power
+ * @brief returns true if none of the 4 or 5 Vs are enabled
+ * @return true if none of the 4 or 5 Vs are enabled, else false
  */
-void PWR_car_on_state_check();
+Bool PWR_is_low_power();
 
 /**
  * @def PWR_3_start

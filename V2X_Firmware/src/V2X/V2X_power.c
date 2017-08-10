@@ -58,23 +58,8 @@ Bool PWR_query(SHIFT_REGISTER_TYPE mask) {
 	else {return false;}
 }
 
-void PWR_car_on_state_check() {
-/*
-	This function must:
-	Change power state to enable CAN device
-	Configure can device
-	Take measurement of battery voltage
-	Decide what to do:
-
-	- less than 11V do no reschedule checking job
-	- less than 13V and more than 11V reschedule checking job
-	- more than 13V needs follow up
-		-- configure can setup
-		-- check for RPM
-		-- start Rpi bring up sequence if greater than 0
-*/
-	usb_tx_string_PV(PSTR("Car-on sleep-state check!\n"));
-	job_set_timeout(SYS_CAR_ON_STATE_CHECK, 3);
+Bool PWR_is_low_power() {
+    return (Bool) ((power_control_state & ((1<<ENABLE_4V1) | (1<<ENABLE_5V0) | (1<<ENABLE_5V0B))) == 0);
 }
 
 /* 3 volt power pin manipulation

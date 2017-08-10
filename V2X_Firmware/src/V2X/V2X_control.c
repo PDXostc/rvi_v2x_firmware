@@ -175,9 +175,9 @@ void job_coordinator (void) {
 		job_clear_timeout(SYS_PWR);
 	}
 
-	if (job_check_timeout(SYS_CAR_ON_STATE_CHECK))
+	if (job_check_timeout(SYS_CAR_STATE_CHECK))
 	{
-		PWR_car_on_state_check();
+        CSC_car_state_check();
 	}
 
 	//more jobs to add

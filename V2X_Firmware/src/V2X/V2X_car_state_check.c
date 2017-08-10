@@ -1,0 +1,306 @@
+/*
+ * V2X_car_state_check.c
+ *
+ * Created: 8/9/2017 2:13:20 PM
+ *  Author: Lilli Szafranski
+ */
+
+#include "V2X.h"
+
+
+#define CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT  10
+#define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 3
+
+#define CSC_CAN_START_TIMEOUT                 5
+#define CSC_CAN_START_RECHECK_TIMEOUT         1
+#define CSC_CAN_CHATTER_TIMEOUT               2
+#define CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT 2
+
+CSC_CAR_STATE                    CSC_car_state         = CSC_car_state_unknown;
+CSC_SEQUENCE_STATE               CSC_sequence_state    = CSC_state_start;
+CSC_LOW_POWER_SUBSEQUENCE_STATE  CSC_low_power_subsequence_state  = CSC_low_power_subsequence_1;
+CSC_HIGH_POWER_SUBSEQUENCE_STATE CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
+
+uint8_t CSC_low_power_car_check_timeout() {
+    // TODO: Read from eeprom
+    return CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
+}
+
+uint8_t CSC_high_power_car_check_timeout() {
+    // TODO: Read from eeprom
+    return CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
+}
+
+uint8_t CSC_get_timeout_for_car_state() {
+    if (CSC_car_state == CSC_car_state_running)
+        return CSC_high_power_car_check_timeout();
+
+    return CSC_low_power_car_check_timeout();
+}
+
+Bool CSC_enable_car_state_check() {
+    if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't enable the check; it'll overwrite our timer job. */
+        return false;
+
+    if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
+        return false;
+
+    job_clear_timeout(SYS_CAR_STATE_CHECK);
+
+    return true;
+}
+
+Bool CSC_disable_car_state_check() {
+    if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't disable the check; it'll overwrite our timer job. */
+        return false;
+
+    if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
+        return false;
+
+    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+
+    return true;
+}
+
+void CSC_car_state_low_power_flow();
+void CSC_car_state_high_power_flow();
+
+/*
+    Updated functionality...
+
+    In summary:
+    First check if low power. If not low power, check if car is still running by listening to the CAN bus;
+    shut down the raspi if it is not running.
+
+    If low power, do the CAN initialization stuff. This will pull us out of low power, so if the check puts us back
+    into the 'do nothing' state, we need to make sure to go back to low power so that our isLowPower check is reset.
+
+    In detail:
+    Check if low power or high power
+
+    If low power:
+        {//Change power state to power STN chip
+            PWR_4_start(); starts 4V and stops low power 3V, as 4V now provides 3V
+            PWR_can_start(); //starts 5V, STN enable signals
+        }
+
+        Configure can device ();
+
+        Listen for can activity ()
+
+        IF CanBusActive
+                -- PWR_mode_high(); //start raspi-bring-up sequence
+                -- reschedule job (at shorter interval)
+        ELSE
+                --  check the battery voltage
+        IF (Battery < 11V)
+                -- PWR_shutdown();
+        ELSE  kill the 5&4V,
+                --  PWR_4_stop(); //stops 4V and starts low power 3V
+                -- PWR_5_stop(); //stops 5V, drops STN enable signals
+                -- reschedule job (at longer interval)
+
+    If high power:
+        IF CanBusActive
+                --  reschedule job (at shorter interval)
+        ELSE
+                -- PWR_mode_low (); //kills everything but low power 3V
+                -- reschedule job (at longer interval)
+
+*/
+void CSC_car_state_check() {
+    usb_tx_string_PV(PSTR("Car-state check!\n"));
+
+    switch (CSC_sequence_state) {
+        case CSC_state_start:
+            if (PWR_is_low_power()) {
+                CSC_sequence_state = CSC_state_low_power;
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_1;
+            } else {
+                CSC_sequence_state = CSC_state_high_power;
+                CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
+            }
+
+            CSC_car_state_check();
+
+            break;
+
+        case CSC_state_low_power:
+            CSC_car_state_low_power_flow();
+            break;
+
+        case CSC_state_high_power:
+            CSC_car_state_high_power_flow();
+            break;
+    }
+}
+
+void CSC_car_state_low_power_flow() {
+    switch (CSC_low_power_subsequence_state) {
+        case CSC_low_power_subsequence_1:
+            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else, just fail and check later */
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+                CSC_car_state_check();
+
+            } else { /* Otherwise, power-on CAN and start our check sequence */
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_2;
+
+                PWR_4_start();
+                PWR_can_start();
+
+                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_TIMEOUT);
+            }
+
+            break;
+
+        case CSC_low_power_subsequence_2: /* Is CAN successfully online? */
+
+            if (CAN_get_subsequence_state() == CAN_subsequence_FAIL) { /* If it failed, we fail, and try again later */
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+                CSC_car_state_check();
+
+            } else if (CAN_get_subsequence_state() == CAN_subsequence_COMPLETE) { /* If it completed, we move on */
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_3;
+                CSC_car_state_check();
+
+            } else { /* Otherwise, try again soon */
+                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_RECHECK_TIMEOUT);
+
+            }
+
+            break;
+
+        case CSC_low_power_subsequence_3: /* CAN is online, so start the process for listening to CAN chatter */
+            CSC_low_power_subsequence_state = CSC_low_power_subsequence_4;
+
+            // TODO: Start listening for CAN chatter
+
+            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHATTER_TIMEOUT);
+
+            break;
+
+        case CSC_low_power_subsequence_4: /* Do we have CAN chatter? */
+            // TODO: Check if chatter
+
+            if (1) { /* If we do, turn on the raspi, and reset our job */
+                CSC_sequence_state = CSC_state_start;
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
+                CSC_car_state = CSC_car_state_running;
+
+                PWR_mode_high();
+
+                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+
+            } else { /* If we don't, check that the battery voltage isn't too low */
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_5;
+
+                // TODO: Check battery voltage
+
+                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT);
+
+            }
+
+            break;
+
+        case CSC_low_power_subsequence_5: /* What is the battery voltage? */
+            // TODO: Check voltage value
+
+            if (0) { /* The voltage is too low, shut everything down */
+                PWR_shutdown();
+
+            } else { /* Reset our car-state check */
+
+            }
+
+            CSC_sequence_state = CSC_state_start;
+            CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
+            CSC_car_state = CSC_car_state_sleeping;
+
+            PWR_mode_low();
+
+            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+
+            break;
+
+        default:
+        case CSC_low_power_subsequence_FAIL:
+            CSC_sequence_state = CSC_state_start;
+            CSC_car_state = CSC_car_state_sleeping;
+
+            PWR_mode_low();
+
+            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+
+            break;
+    }
+}
+
+void CSC_car_state_high_power_flow() {
+
+    switch (CSC_high_power_subsequence_state) {
+        case CSC_high_power_subsequence_1:
+            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else, just fail and check later */
+                CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
+                CSC_car_state_check();
+
+            } else { /* Otherwise, start our check sequence */
+                CSC_high_power_subsequence_state = CSC_high_power_subsequence_2;
+                CSC_car_state_check();
+            }
+
+            break;
+
+        case CSC_high_power_subsequence_2: /* Is CAN successfully online? */
+
+            if (CAN_get_subsequence_state() == CAN_subsequence_FAIL) { /* If it failed, we fail, and try again later */
+                CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
+                CSC_car_state_check();
+
+            } else if (CAN_get_subsequence_state() == CAN_subsequence_COMPLETE) { /* If it completed, we move on */
+                CSC_high_power_subsequence_state = CSC_high_power_subsequence_3;
+                CSC_car_state_check();
+
+            } else { /* Otherwise, try again soon */
+                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_RECHECK_TIMEOUT);
+
+            }
+
+            break;
+
+        case CSC_high_power_subsequence_3: /* CAN is online, so start the process for listening to CAN chatter */
+            CSC_high_power_subsequence_state = CSC_high_power_subsequence_4;
+
+            // TODO: Start listening for CAN chatter
+
+            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHATTER_TIMEOUT);
+
+            break;
+
+        case CSC_high_power_subsequence_4: /* Do we have CAN chatter? */
+            // TODO: Check if chatter
+
+            if (1) { /* If we do, just reset our job */
+                CSC_car_state = CSC_car_state_running;
+
+            } else { /* If we don't, put everything to sleep */
+                CSC_car_state = CSC_car_state_sleeping;
+
+                PWR_mode_low();
+            }
+
+            CSC_sequence_state = CSC_state_start;
+            CSC_high_power_subsequence_state = CSC_high_power_subsequence_COMPLETE;
+
+            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+
+            break;
+
+        default:
+        case CSC_high_power_subsequence_FAIL:
+            CSC_sequence_state = CSC_state_start;
+            CSC_car_state = CSC_car_state_running;
+
+            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+    }
+}
+
