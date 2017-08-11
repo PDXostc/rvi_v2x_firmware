@@ -121,19 +121,19 @@ void CAN_process_buffer (void) {
 	}
 }
 
-void CAN_control (char * responce_buffer) {
+void CAN_control (char * response_buffer) {
 	switch (CAN_sequence_state) {
 	case CAN_state_idle:
 		CAN_in_command = false;
 		break;
 	case CAN_state_power:
-		CAN_control_init(responce_buffer);
+		CAN_control_init(response_buffer);
 		break;
 	case CAN_state_EE:
-		CAN_ee_sequence(responce_buffer);
+		CAN_ee_sequence(response_buffer);
 		break;
     case CAN_state_read_voltage:
-        CAN_read_voltage_sequence(responce_buffer);
+        CAN_read_voltage_sequence(response_buffer);
         break;
 	default:
 		CAN_sequence_state = CAN_state_idle;
@@ -157,12 +157,12 @@ void CAN_elm_init (void) {
     }
 }
 
-void CAN_control_init (char * responce_buffer){
+void CAN_control_init (char * response_buffer){
 	switch (CAN_init_subsequence_state) {
 	case CAN_init_subsequence_1:  //check module power
 		if (PWR_query((1<<ENABLE_5V0))) { //is the module power on?
 			CAN_init_subsequence_state = CAN_init_subsequence_2;
-			CAN_control(responce_buffer);
+			CAN_control(response_buffer);
         } else { //if not power it up
 			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
 			PWR_can_start();
@@ -178,7 +178,7 @@ void CAN_control_init (char * responce_buffer){
 			CAN_init_subsequence_state = CAN_init_subsequence_1; //should wake blurt
 		} else {
 			CAN_init_subsequence_state = CAN_init_subsequence_3; //needs ati to check response
-			CAN_control(responce_buffer);
+			CAN_control(response_buffer);
 		}
 		break;
 	case CAN_init_subsequence_3: //push ATI to can
@@ -188,12 +188,12 @@ void CAN_control_init (char * responce_buffer){
 		job_set_timeout(SYS_CAN, 2);
 		break;
 	case CAN_init_subsequence_4: //Module response
-		if (strcmp_P(responce_buffer, PSTR("LV RESET")) == 0) { // if high-power, probably tell us this
+		if (strcmp_P(response_buffer, PSTR("LV RESET")) == 0) { // if high-power, probably tell us this
 			CAN_init_subsequence_state = CAN_init_subsequence_3;
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Powered\r\n>"));
-			CAN_control(responce_buffer);
-		} else if (strcmp_P(responce_buffer, PSTR("ELM327 v1.3a")) == 0) { // if booting-up probably be here
+			CAN_control(response_buffer);
+		} else if (strcmp_P(response_buffer, PSTR("ELM327 v1.3a")) == 0) { // if booting-up probably be here
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Responding\r\n>"));
 			CAN_sequence_state = CAN_state_idle; // Lilli note - Maybe change to 'initialized'? do more here...
@@ -252,7 +252,7 @@ Bool CAN_find_message (char * buffer, uint8_t index) {
 	return true; //message was successfully parsed
 }
 
-void CAN_ee_sequence (char * responce_buffer) {
+void CAN_ee_sequence (char * response_buffer) {
 	char buffer[EE_CAN_ARRAY_SIZE+1];
 	uint8_t found;
 	if (CAN_ee_subsequence_state == CAN_ee_subsequence_FAIL) {
@@ -260,8 +260,8 @@ void CAN_ee_sequence (char * responce_buffer) {
 			job_clear_timeout(SYS_CAN);
 			menu_send_CAN();
 			usb_tx_string_P(PSTR("ERROR: EEPROM sequence fail\r\n>"));
-	} else if (CAN_ee_subsequence_state != CAN_ee_subsequence_1) { //not the first state, responce_buffer should have responce
-		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) { //if responce was OK
+	} else if (CAN_ee_subsequence_state != CAN_ee_subsequence_1) { //not the first state, response_buffer should have response
+		if (strcmp_P(response_buffer, PSTR("OK")) == 0) { //if response was OK
 			eeprom_read_CAN_string(buffer); //get copy of the entire string
 			found = CAN_find_message(buffer, CAN_ee_subsequence_state++);
 			if (found) {
@@ -308,7 +308,7 @@ void CAN_read_voltage_start() {
 //}
 
 void CAN_read_voltage_sequence (char * response_buffer) {
-
+ 
 }
 
 uint8_t CAN_get_sequence_state() {

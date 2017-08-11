@@ -149,9 +149,9 @@ void CAN_add_string_to_buffer(Bool in_out, char * to_add);
 /**
  * @def CAN_control
  * @brief interaction control sequencer, host asleep.
- * @param *responce_buffer pointer to the buffer to be analysed
+ * @param *response_buffer pointer to the buffer to be analysed
 */
-void CAN_control (char * responce_buffer);
+void CAN_control (char * response_buffer);
 
 /**
  * @def CAN_control_init_fail
@@ -174,9 +174,9 @@ void CAN_elm_init (void);
 /**
  * @def CAN_control_init
  * @brief control processor for the init sequence
- * @param *responce_buffer pointer to the buffer to be analysed
+ * @param *response_buffer pointer to the buffer to be analysed
 */
-void CAN_control_init (char * responce_buffer);
+void CAN_control_init (char * response_buffer);
 
 /**
  * @def CAN_is_controlled
@@ -219,7 +219,7 @@ Bool CAN_is_snooping(void);
  * @def CAN_ee_sequence
  * @brief used by can_control to iterate through the EE commands
 */
-void CAN_ee_sequence(char * responce_buffer);
+void CAN_ee_sequence(char * response_buffer);
 
 /**
  * @def CAN_EE_start
