@@ -156,11 +156,11 @@ void CSC_car_state_low_power_flow() {
 
         case CSC_low_power_subsequence_2: /* Is CAN successfully online? */
 
-            if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_FAIL) { /* If it failed, we fail, and try again later */
+            if (CAN_get_init_subsequence_state() == CAN_init_subsequence_FAIL) { /* If it failed, we fail, and try again later */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
                 CSC_car_state_check();
 
-            } else if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_COMPLETE) { /* If it completed, we move on */
+            } else if (CAN_get_init_subsequence_state() == CAN_init_subsequence_COMPLETE) { /* If it completed, we move on */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_3;
                 CSC_car_state_check();
 
@@ -253,11 +253,11 @@ void CSC_car_state_high_power_flow() {
 
         case CSC_high_power_subsequence_2: /* Is CAN successfully online? */
 
-            if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_FAIL) { /* If it failed, we fail, and try again later */
+            if (CAN_get_init_subsequence_state() == CAN_init_subsequence_FAIL) { /* If it failed, we fail, and try again later */
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
                 CSC_car_state_check();
 
-            } else if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_COMPLETE) { /* If it completed, we move on */
+            } else if (CAN_get_init_subsequence_state() == CAN_init_subsequence_COMPLETE) { /* If it completed, we move on */
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_3;
                 CSC_car_state_check();
 

@@ -9,7 +9,7 @@
 
 volatile buff CAN;
 uint8_t CAN_sequence_state = CAN_state_idle;
-uint8_t CAN_power_on_subsequence_state = CAN_power_on_subsequence_1;
+uint8_t CAN_init_subsequence_state = CAN_init_subsequence_1;
 uint8_t CAN_ee_subsequence_state = CAN_ee_subsequence_1;
 uint8_t CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_1;
 Bool CAN_in_command = false;
@@ -141,55 +141,55 @@ void CAN_control (char * responce_buffer) {
 	}
 }
 
-void CAN_control_power_on_fail(void) {
-	CAN_power_on_subsequence_state = CAN_power_on_subsequence_FAIL;
+void CAN_control_init_fail(void) {
+	CAN_init_subsequence_state = CAN_init_subsequence_FAIL;
 }
 
 void CAN_elm_init (void) {
 	if (CAN_sequence_state == CAN_state_idle) {
 		CAN_sequence_state = CAN_state_power;
-		CAN_power_on_subsequence_state = CAN_power_on_subsequence_1; //move to response state
+		CAN_init_subsequence_state = CAN_init_subsequence_1; //move to response state
 		CAN_in_command = true; //make sure responses come back to command processor
 		char hold[2] = "\0";
 		CAN_control (hold);
 	} else {
-        CAN_power_on_subsequence_state = CAN_power_on_subsequence_FAIL;
+        CAN_init_subsequence_state = CAN_init_subsequence_FAIL;
     }
 }
 
 void CAN_control_init (char * responce_buffer){
-	switch (CAN_power_on_subsequence_state) {
-	case CAN_power_on_subsequence_1:  //check module power
+	switch (CAN_init_subsequence_state) {
+	case CAN_init_subsequence_1:  //check module power
 		if (PWR_query((1<<ENABLE_5V0))) { //is the module power on?
-			CAN_power_on_subsequence_state = CAN_power_on_subsequence_2;
+			CAN_init_subsequence_state = CAN_init_subsequence_2;
 			CAN_control(responce_buffer);
         } else { //if not power it up
 			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
 			PWR_can_start();
-			CAN_power_on_subsequence_state = CAN_power_on_subsequence_4;
+			CAN_init_subsequence_state = CAN_init_subsequence_4;
 			job_set_timeout(SYS_CAN, 4); //give elm module 3 seconds to start
 		}
 		break;
-	case CAN_power_on_subsequence_2: //is chip enabled?
+	case CAN_init_subsequence_2: //is chip enabled?
 		if (PWR_query((1<<ENABLE_CAN_RESET)) == false) { //no enable it
 			PWR_can_stop();
 			PWR_can_start();
 			job_set_timeout(SYS_CAN, 4); //give elm module 3 seconds to start
-			CAN_power_on_subsequence_state = CAN_power_on_subsequence_1; //should wake blurt
+			CAN_init_subsequence_state = CAN_init_subsequence_1; //should wake blurt
 		} else {
-			CAN_power_on_subsequence_state = CAN_power_on_subsequence_3; //needs ati to check response
+			CAN_init_subsequence_state = CAN_init_subsequence_3; //needs ati to check response
 			CAN_control(responce_buffer);
 		}
 		break;
-	case CAN_power_on_subsequence_3: //push ATI to can
+	case CAN_init_subsequence_3: //push ATI to can
 		CTL_add_string_to_buffer_P(&CAN, BUFFER_OUT, PSTR("ATI\r")); //compose message
 		CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
-		CAN_power_on_subsequence_state = CAN_power_on_subsequence_4; //move to response state
+		CAN_init_subsequence_state = CAN_init_subsequence_4; //move to response state
 		job_set_timeout(SYS_CAN, 2);
 		break;
-	case CAN_power_on_subsequence_4: //Module response
+	case CAN_init_subsequence_4: //Module response
 		if (strcmp_P(responce_buffer, PSTR("LV RESET")) == 0) { // if high-power, probably tell us this
-			CAN_power_on_subsequence_state = CAN_power_on_subsequence_3;
+			CAN_init_subsequence_state = CAN_init_subsequence_3;
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Powered\r\n>"));
 			CAN_control(responce_buffer);
@@ -197,14 +197,14 @@ void CAN_control_init (char * responce_buffer){
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Responding\r\n>"));
 			CAN_sequence_state = CAN_state_idle; // Lilli note - Maybe change to 'initialized'? do more here...
-            CAN_power_on_subsequence_state = CAN_power_on_subsequence_COMPLETE;
+            CAN_init_subsequence_state = CAN_init_subsequence_COMPLETE;
 			CAN_in_command = false;
 			job_clear_timeout(SYS_CAN);
 		} else {
 			job_check_fail(SYS_CAN);
 		}
 		break;
-	case CAN_power_on_subsequence_FAIL:
+	case CAN_init_subsequence_FAIL:
 		default:
 		CAN_sequence_state = CAN_state_idle;
 		CAN_in_command = false;
@@ -303,9 +303,9 @@ void CAN_read_voltage_start() {
     }
 }
 
-void CAN_read_voltage_stop() {
-    CAN_sequence_state = CAN_state_idle;
-}
+//void CAN_read_voltage_stop() {
+//    CAN_sequence_state = CAN_state_idle;
+//}
 
 void CAN_read_voltage_sequence (char * response_buffer) {
 
@@ -315,7 +315,7 @@ uint8_t CAN_get_sequence_state() {
     return CAN_sequence_state;
 }
 
-uint8_t CAN_get_power_on_subsequence_state() {
-    return CAN_power_on_subsequence_state;
+uint8_t CAN_get_init_subsequence_state() {
+    return CAN_init_subsequence_state;
 }
 

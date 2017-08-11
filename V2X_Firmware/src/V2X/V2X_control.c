@@ -218,7 +218,7 @@ void job_check_fail(uint8_t system) {
 			menu_send_GSM();
 			break;
 			case SYS_CAN:
-            CAN_control_power_on_fail();
+			CAN_control_init_fail();
 			menu_send_CAN();
 			break;
 		}

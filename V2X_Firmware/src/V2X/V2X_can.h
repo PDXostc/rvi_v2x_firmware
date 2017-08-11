@@ -21,22 +21,22 @@ enum CAN_sequence_states {
 	};
 	
 /**
- * @def CAN_power_on_subsequence_states
+ * @def CAN_init_subsequence_states
  * @brief generic switch for moving through control substates during power-on sequence
  */
-enum CAN_power_on_subsequence_states {
-	CAN_power_on_subsequence_1 = 0,
-	CAN_power_on_subsequence_2,
-	CAN_power_on_subsequence_3,
-	CAN_power_on_subsequence_4,
-	CAN_power_on_subsequence_5,
-	CAN_power_on_subsequence_6,
-	CAN_power_on_subsequence_7,
-	CAN_power_on_subsequence_8,
-	CAN_power_on_subsequence_9,
-	CAN_power_on_subsequence_10,
-	CAN_power_on_subsequence_COMPLETE,
-	CAN_power_on_subsequence_FAIL
+enum CAN_init_subsequence_states {
+	CAN_init_subsequence_1 = 0,
+	CAN_init_subsequence_2,
+	CAN_init_subsequence_3,
+	CAN_init_subsequence_4,
+	CAN_init_subsequence_5,
+	CAN_init_subsequence_6,
+	CAN_init_subsequence_7,
+	CAN_init_subsequence_8,
+	CAN_init_subsequence_9,
+	CAN_init_subsequence_10,
+	CAN_init_subsequence_COMPLETE,
+	CAN_init_subsequence_FAIL
 	};
 
 /**
@@ -154,10 +154,10 @@ void CAN_add_string_to_buffer(Bool in_out, char * to_add);
 void CAN_control (char * responce_buffer);
 
 /**
- * @def CAN_control_fail
+ * @def CAN_control_init_fail
  * @brief puts the CAN control sequence in a fail state due to timeout
 */
-void CAN_control_power_on_fail(void);
+void CAN_control_init_fail(void);
 
 /**
  * @def CAN_mark_as_sent
@@ -264,6 +264,6 @@ uint8_t CAN_get_sequence_state();
  * @brief gets value of CAN_subsequence_state variable
  * @return value of CAN_subsequence_state variable
  */
-uint8_t CAN_get_power_on_subsequence_state();
+uint8_t CAN_get_init_subsequence_state();
 
 #endif /* V2X_CAN_H_ */
