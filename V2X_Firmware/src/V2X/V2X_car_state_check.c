@@ -138,28 +138,29 @@ void CSC_car_state_check() {
 void CSC_car_state_low_power_flow() {
     switch (CSC_low_power_subsequence_state) {
         case CSC_low_power_subsequence_1:
-            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else, just fail and check later */
-                CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
-                CSC_car_state_check();
+            //if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else, just fail and check later */
+            //    CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+            //    CSC_car_state_check();
 
-            } else { /* Otherwise, power-on CAN and start our check sequence */
+            //} else { /* Otherwise, power-on CAN and start our check sequence */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_2;
 
                 PWR_4_start();
                 PWR_can_start();
+                CAN_elm_init(); // TODO: Unclear...
 
                 job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_TIMEOUT);
-            }
+            //}
 
             break;
 
         case CSC_low_power_subsequence_2: /* Is CAN successfully online? */
 
-            if (CAN_get_subsequence_state() == CAN_subsequence_FAIL) { /* If it failed, we fail, and try again later */
+            if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_FAIL) { /* If it failed, we fail, and try again later */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
                 CSC_car_state_check();
 
-            } else if (CAN_get_subsequence_state() == CAN_subsequence_COMPLETE) { /* If it completed, we move on */
+            } else if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_COMPLETE) { /* If it completed, we move on */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_3;
                 CSC_car_state_check();
 
@@ -239,24 +240,24 @@ void CSC_car_state_high_power_flow() {
 
     switch (CSC_high_power_subsequence_state) {
         case CSC_high_power_subsequence_1:
-            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else, just fail and check later */
-                CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
-                CSC_car_state_check();
+            //if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else or in some other state, just fail and check later */
+            //    CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
+            //    CSC_car_state_check();
 
-            } else { /* Otherwise, start our check sequence */
+            //} else { /* Otherwise, start our check sequence */
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_2;
                 CSC_car_state_check();
-            }
+            //} // TODO
 
             break;
 
         case CSC_high_power_subsequence_2: /* Is CAN successfully online? */
 
-            if (CAN_get_subsequence_state() == CAN_subsequence_FAIL) { /* If it failed, we fail, and try again later */
+            if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_FAIL) { /* If it failed, we fail, and try again later */
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
                 CSC_car_state_check();
 
-            } else if (CAN_get_subsequence_state() == CAN_subsequence_COMPLETE) { /* If it completed, we move on */
+            } else if (CAN_get_power_on_subsequence_state() == CAN_power_on_subsequence_COMPLETE) { /* If it completed, we move on */
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_3;
                 CSC_car_state_check();
 
