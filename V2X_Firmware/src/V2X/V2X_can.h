@@ -260,10 +260,31 @@ void CAN_read_voltage_sequence (char * response_buffer);
 uint8_t CAN_get_sequence_state();
 
 /**
- * @def CAN_get_subsequence_state
- * @brief gets value of CAN_subsequence_state variable
- * @return value of CAN_subsequence_state variable
+ * @def CAN_get_init_subsequence_state
+ * @brief gets value of CAN_get_init_subsequence_state variable
+ * @return value of CAN_get_init_subsequence_state variable
  */
 uint8_t CAN_get_init_subsequence_state();
+
+/**
+ * @def CAN_get_ee_subsequence_state
+ * @brief gets value of CAN_get_ee_subsequence_state variable
+ * @return value of CAN_get_ee_subsequence_state variable
+ */
+uint8_t CAN_get_ee_subsequence_state();
+
+/**
+ * @def CAN_get_read_voltage_subsequence_state
+ * @brief gets value of CAN_get_read_voltage_subsequence_state variable
+ * @return value of CAN_get_read_voltage_subsequence_state variable
+ */
+uint8_t CAN_get_read_voltage_subsequence_state();
+
+/**
+ * @def CAN_get_last_read_voltage
+ * @brief gets the last read voltage
+ * @return the last read voltage
+ */
+float CAN_get_last_read_voltage();
 
 #endif /* V2X_CAN_H_ */

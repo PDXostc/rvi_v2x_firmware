@@ -15,6 +15,8 @@ uint8_t CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_1;
 Bool CAN_in_command = false;
 Bool CAN_snoop = false;
 
+float CAN_last_read_voltage = 0;
+
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
 	CTL_add_to_buffer(&CAN, buffer_select, value);
  }
@@ -196,7 +198,7 @@ void CAN_control_init (char * response_buffer){
 		} else if (strcmp_P(response_buffer, PSTR("ELM327 v1.3a")) == 0) { // if booting-up probably be here
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("CAN Responding\r\n>"));
-			CAN_sequence_state = CAN_state_idle; // Lilli note - Maybe change to 'initialized'? do more here...
+			CAN_sequence_state = CAN_state_idle;
             CAN_init_subsequence_state = CAN_init_subsequence_COMPLETE;
 			CAN_in_command = false;
 			job_clear_timeout(SYS_CAN);
@@ -308,7 +310,54 @@ void CAN_read_voltage_start() {
 //}
 
 void CAN_read_voltage_sequence (char * response_buffer) {
- 
+    switch (CAN_read_voltage_subsequence_state) {
+        case CAN_read_voltage_subsequence_1:
+            CTL_add_string_to_buffer_P(&CAN, BUFFER_OUT, PSTR("ATRV\r")); //compose message
+            CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
+
+            CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_2; //move to response state
+            job_set_timeout(SYS_CAN, 2);
+
+            break;
+
+        case CAN_read_voltage_subsequence_2: //Module response
+            if (strcmp_P(response_buffer, PSTR("ATRV")) == 0) {
+                CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_3;
+                job_set_timeout(SYS_CAN, 1);
+
+
+            } else {
+                job_check_fail(SYS_CAN);
+            }
+
+            break;
+
+        case CAN_read_voltage_subsequence_3:
+            if (1) { // TODO: Check is valid number
+
+                // TODO: Parse out number and save it
+                CAN_last_read_voltage = 20.0;
+
+                CAN_sequence_state = CAN_state_idle;
+                CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_COMPLETE;
+                CAN_in_command = false;
+
+                job_clear_timeout(SYS_CAN);
+            } else {
+                job_check_fail(SYS_CAN);
+            }
+
+            break;
+
+        case CAN_read_voltage_subsequence_FAIL:
+        default:
+            CAN_sequence_state = CAN_state_idle;
+            CAN_in_command = false;
+            job_clear_timeout(SYS_CAN);
+            menu_send_CTL();
+            usb_tx_string_P(PSTR("CAN read voltage fail\r\n>"));
+            break;
+    }
 }
 
 uint8_t CAN_get_sequence_state() {
@@ -317,5 +366,13 @@ uint8_t CAN_get_sequence_state() {
 
 uint8_t CAN_get_init_subsequence_state() {
     return CAN_init_subsequence_state;
+}
+
+uint8_t CAN_get_ee_subsequence_state() {
+    return CAN_ee_subsequence_state;
+}
+
+uint8_t CAN_get_read_voltage_subsequence_state() {
+    return CAN_read_voltage_subsequence_state;
 }
 

@@ -165,6 +165,7 @@ void CSC_car_state_low_power_flow() {
                 CSC_car_state_check();
 
             } else { /* Otherwise, try again soon */
+                // TODO: Only try so many times
                 job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_RECHECK_TIMEOUT);
 
             }
@@ -183,7 +184,7 @@ void CSC_car_state_low_power_flow() {
         case CSC_low_power_subsequence_4: /* Do we have CAN chatter? */
             // TODO: Check if chatter
 
-            if (1) { /* If we do, turn on the raspi, and reset our job */
+            if (0) { /* If we do, turn on the raspi, and reset our job */
                 CSC_sequence_state = CSC_state_start;
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
                 CSC_car_state = CSC_car_state_running;
@@ -195,7 +196,7 @@ void CSC_car_state_low_power_flow() {
             } else { /* If we don't, check that the battery voltage isn't too low */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_5;
 
-                // TODO: Check battery voltage
+                CAN_read_voltage_start();
 
                 job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT);
 
@@ -206,20 +207,26 @@ void CSC_car_state_low_power_flow() {
         case CSC_low_power_subsequence_5: /* What is the battery voltage? */
             // TODO: Check voltage value
 
-            if (0) { /* The voltage is too low, shut everything down */
-                PWR_shutdown();
+            if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_COMPLETE) {
+                if (0) { /* The voltage is too low, shut everything down */
+                    PWR_shutdown();
 
-            } else { /* Reset our car-state check */
+                } else { /* Reset our car-state check */
+                    CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
+
+                    CSC_sequence_state = CSC_state_start;
+                    CSC_car_state = CSC_car_state_sleeping;
+
+                    PWR_mode_low();
+
+                    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+                }
+
+            } else {
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+                CSC_car_state_check();
 
             }
-
-            CSC_sequence_state = CSC_state_start;
-            CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
-            CSC_car_state = CSC_car_state_sleeping;
-
-            PWR_mode_low();
-
-            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 
             break;
 
