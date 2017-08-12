@@ -330,40 +330,6 @@ double CAN_parse_voltage_regex(char * buffer) {
         return -1;
 
     return voltageVal;
-
-//
-//
-//
-//
-//
-//
-//    regex_t regex;
-//    int retVal;
-//    //size_t maxGroups = 3;
-//   // regmatch_t groupArray[maxGroups];
-//
-//
-//    retVal = regcomp(&regex, "^\\d+(\\.\\d+)?V$", REG_EXTENDED);
-//    if (retVal) {
-//        return -1;
-//    }
-//
-//    retVal = regexec(&regex, buffer, 0, NULL, 0);//maxGroups, groupArray, 0);
-//    if (!retVal) {
-//        size_t bufferLength = sizeof(buffer);
-//        char voltageStr[bufferLength];
-//        memcpy(voltageStr, &buffer[0], bufferLength - 1);
-//        voltageStr[bufferLength - 1] = '\0';
-//
-//        float voltageFloat = (float)strtod(voltageStr);
-//
-//        regfree(&regex);
-//        return voltageFloat;
-//
-//    }
-//
-//    regfree(&regex);
-//    return -1;
 }
 
 void CAN_read_voltage_sequence (char * response_buffer) {

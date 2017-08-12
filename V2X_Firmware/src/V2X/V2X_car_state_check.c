@@ -115,7 +115,7 @@ void CSC_car_state_check() {
             menu_send_CSC();
             usb_tx_string_PVO(PSTR("Car-state check - "));
 
-            if (1){//PWR_is_low_power()) {
+            if (PWR_is_low_power()) {
 
                 usb_tx_string_PVO(PSTR("low power!\r\n"));
 
@@ -319,7 +319,7 @@ void CSC_car_state_high_power_flow() {
 
                 menu_send_CSC();
                 usb_tx_string_PVO(PSTR("Car-state check - CAN chatter not heard; powering down\n\r"));
-                
+
                 PWR_mode_low();
             }
 
