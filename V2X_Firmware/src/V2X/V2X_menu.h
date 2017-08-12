@@ -71,26 +71,32 @@ void menu_send_n_st(void);
 void menu_send_out_of_range(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "GSM>>>:"
+ * @def menu_send_GSM
+ * @brief canned message, sends "GSM>:"
  **/
 void menu_send_GSM(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "CAN>>>:"
+ * @def menu_send_CAN
+ * @brief canned message, sends "CAN>:"
  **/
 void menu_send_CAN(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "BTN>>>:"
+ * @def menu_send_BTN
+ * @brief canned message, sends "BTN>:"
  **/
 void menu_send_BTN(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "CTL>>>:"
+ * @def menu_send_CSC
+ * @brief canned message, sends "CSC>:"
+ **/
+void menu_send_CSC(void);
+
+/**
+ * @def menu_send_CTL
+ * @brief canned message, sends "CTL>:"
  **/
 void menu_send_CTL(void);
 
@@ -194,6 +200,13 @@ void usb_tx_string_P(const char *data);
  * @param data pointer to PSTR() strored strings
  **/
 void usb_tx_string_PV(const char *data);
+
+/**
+ * @def usb_tx_string_PVO
+ * @brief if not verbose, nothing is sent
+ * @param data pointer to PSTR() strored strings
+ **/
+void usb_tx_string_PVO(const char *data);
 
 /**
  * @def menu_lockup

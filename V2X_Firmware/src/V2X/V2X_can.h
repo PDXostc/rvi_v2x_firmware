@@ -17,26 +17,56 @@ enum CAN_sequence_states {
 	CAN_state_idle = 0,
 	CAN_state_power,
 	CAN_state_EE,
+    CAN_state_read_voltage,
 	};
 	
 /**
- * @def CAN_subsequence_states
- * @brief generic switch for moving through control substates
+ * @def CAN_init_subsequence_states
+ * @brief generic switch for moving through control substates during power-on sequence
  */
-enum CAN_subsequence_states {
-	CAN_subsequence_1 = 0,
-	CAN_subsequence_2,
-	CAN_subsequence_3,
-	CAN_subsequence_4,
-	CAN_subsequence_5,
-	CAN_subsequence_6,
-	CAN_subsequence_7,
-	CAN_subsequence_8,
-	CAN_subsequence_9,
-	CAN_subsequence_10,
-	CAN_subsequence_COMPLETE,
-	CAN_subsequence_FAIL
+enum CAN_init_subsequence_states {
+	CAN_init_subsequence_1 = 0,
+	CAN_init_subsequence_2,
+	CAN_init_subsequence_3,
+	CAN_init_subsequence_4,
+	CAN_init_subsequence_5,
+	CAN_init_subsequence_6,
+	CAN_init_subsequence_7,
+	CAN_init_subsequence_8,
+	CAN_init_subsequence_9,
+	CAN_init_subsequence_10,
+	CAN_init_subsequence_COMPLETE,
+	CAN_init_subsequence_FAIL
 	};
+
+/**
+ * @def CAN_ee_subsequence_states
+ * @brief generic switch for moving through control substates during ee sequence
+ */
+enum CAN_ee_subsequence_states {
+	CAN_ee_subsequence_1 = 0,
+	CAN_ee_subsequence_2,
+	CAN_ee_subsequence_3,
+	CAN_ee_subsequence_4,
+	CAN_ee_subsequence_5,
+	CAN_ee_subsequence_6,
+	CAN_ee_subsequence_7,
+	CAN_ee_subsequence_8,
+	CAN_ee_subsequence_9,
+	CAN_ee_subsequence_10,
+	CAN_ee_subsequence_COMPLETE,
+	CAN_ee_subsequence_FAIL
+	};
+
+enum CAN_read_voltage_subsequence_states {
+    CAN_read_voltage_subsequence_1,
+    CAN_read_voltage_subsequence_2,
+    CAN_read_voltage_subsequence_3,
+    CAN_read_voltage_subsequence_4,
+    CAN_read_voltage_subsequence_5,
+    CAN_read_voltage_subsequence_COMPLETE,
+    CAN_read_voltage_subsequence_FAIL,
+};
 
 /**
  * @def CAN_uart_start
@@ -119,15 +149,15 @@ void CAN_add_string_to_buffer(Bool in_out, char * to_add);
 /**
  * @def CAN_control
  * @brief interaction control sequencer, host asleep.
- * @param *responce_buffer pointer to the buffer to be analysed
+ * @param *response_buffer pointer to the buffer to be analysed
 */
-void CAN_control (char * responce_buffer);
+void CAN_control (char * response_buffer);
 
 /**
- * @def CAN_control_fail
+ * @def CAN_control_init_fail
  * @brief puts the CAN control sequence in a fail state due to timeout
 */
-void CAN_control_fail (void);
+void CAN_control_init_fail(void);
 
 /**
  * @def CAN_mark_as_sent
@@ -144,9 +174,9 @@ void CAN_elm_init (void);
 /**
  * @def CAN_control_init
  * @brief control processor for the init sequence
- * @param *responce_buffer pointer to the buffer to be analysed
+ * @param *response_buffer pointer to the buffer to be analysed
 */
-void CAN_control_init (char * responce_buffer);
+void CAN_control_init (char * response_buffer);
 
 /**
  * @def CAN_is_controlled
@@ -189,7 +219,7 @@ Bool CAN_is_snooping(void);
  * @def CAN_ee_sequence
  * @brief used by can_control to iterate through the EE commands
 */
-void CAN_ee_sequence(char * responce_buffer);
+void CAN_ee_sequence(char * response_buffer);
 
 /**
  * @def CAN_EE_start
@@ -204,6 +234,25 @@ void CAN_EE_start (void);
 Bool CAN_find_message (char * buffer, uint8_t index);
 
 /**
+ * @def CAN_read_voltage_start
+ * @brief Starts the voltage-reading state machine
+ */
+void CAN_read_voltage_start();
+
+///**
+// * @def CAN_read_voltage_stop
+// * @brief Stops the voltage-reading state machine
+// */
+//void CAN_read_voltage_stop();
+
+/**
+ * @def CAN_read_voltage_sequence
+ * @brief Method for processing the return buffer when in the read-voltage state
+ * @param response_buffer buffer with CAN data
+ */
+void CAN_read_voltage_sequence (char * response_buffer);
+
+/**
  * @def CAN_get_sequence_state
  * @brief gets value of CAN_sequence_state variable
  * @return value of CAN_sequence_state variable
@@ -211,10 +260,31 @@ Bool CAN_find_message (char * buffer, uint8_t index);
 uint8_t CAN_get_sequence_state();
 
 /**
- * @def CAN_get_subsequence_state
- * @brief gets value of CAN_subsequence_state variable
- * @return value of CAN_subsequence_state variable
+ * @def CAN_get_init_subsequence_state
+ * @brief gets value of CAN_get_init_subsequence_state variable
+ * @return value of CAN_get_init_subsequence_state variable
  */
-uint8_t CAN_get_subsequence_state();
+uint8_t CAN_get_init_subsequence_state();
+
+/**
+ * @def CAN_get_ee_subsequence_state
+ * @brief gets value of CAN_get_ee_subsequence_state variable
+ * @return value of CAN_get_ee_subsequence_state variable
+ */
+uint8_t CAN_get_ee_subsequence_state();
+
+/**
+ * @def CAN_get_read_voltage_subsequence_state
+ * @brief gets value of CAN_get_read_voltage_subsequence_state variable
+ * @return value of CAN_get_read_voltage_subsequence_state variable
+ */
+uint8_t CAN_get_read_voltage_subsequence_state();
+
+/**
+ * @def CAN_get_last_read_voltage
+ * @brief gets the last read voltage
+ * @return the last read voltage
+ */
+double CAN_get_last_read_voltage();
 
 #endif /* V2X_CAN_H_ */
