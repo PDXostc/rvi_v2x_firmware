@@ -15,7 +15,7 @@ uint8_t CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_1;
 Bool CAN_in_command = false;
 Bool CAN_snoop = false;
 
-float CAN_last_read_voltage = 0;
+double CAN_last_read_voltage = 0;
 
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
 	CTL_add_to_buffer(&CAN, buffer_select, value);
@@ -28,7 +28,7 @@ float CAN_last_read_voltage = 0;
  char CAN_next_byte (uint8_t buffer_select) {
 	return CTL_next_byte(&CAN, buffer_select);
  }
- 
+
  void CAN_purge_buffer(uint8_t buffer_select) {
 	CTL_purge_buffer(&CAN, buffer_select);
  }
@@ -309,6 +309,63 @@ void CAN_read_voltage_start() {
 //    CAN_sequence_state = CAN_state_idle;
 //}
 
+/**
+ * Parses the buffer for a valid voltage reading
+ * @param buffer
+ * @return the voltage reading, or -1 if there's an error
+ */
+double CAN_parse_voltage_regex(char * buffer) {
+
+    /* If the value starts with '0', forget the decimal and return 0, as the voltage may as well be 0.
+     * Doing this because strtod returns 0.0 if there's an error. Not sure how else to test if actually 0. */
+
+    char* pEnd;
+    double voltageVal;
+    voltageVal = strtod(buffer, &pEnd);
+
+    if (!voltageVal)
+        return -1;
+
+    if (pEnd[0] != 'V')
+        return -1;
+
+    return voltageVal;
+
+//
+//
+//
+//
+//
+//
+//    regex_t regex;
+//    int retVal;
+//    //size_t maxGroups = 3;
+//   // regmatch_t groupArray[maxGroups];
+//
+//
+//    retVal = regcomp(&regex, "^\\d+(\\.\\d+)?V$", REG_EXTENDED);
+//    if (retVal) {
+//        return -1;
+//    }
+//
+//    retVal = regexec(&regex, buffer, 0, NULL, 0);//maxGroups, groupArray, 0);
+//    if (!retVal) {
+//        size_t bufferLength = sizeof(buffer);
+//        char voltageStr[bufferLength];
+//        memcpy(voltageStr, &buffer[0], bufferLength - 1);
+//        voltageStr[bufferLength - 1] = '\0';
+//
+//        float voltageFloat = (float)strtod(voltageStr);
+//
+//        regfree(&regex);
+//        return voltageFloat;
+//
+//    }
+//
+//    regfree(&regex);
+//    return -1;
+}
+
 void CAN_read_voltage_sequence (char * response_buffer) {
     switch (CAN_read_voltage_subsequence_state) {
         case CAN_read_voltage_subsequence_1:
@@ -325,26 +382,29 @@ void CAN_read_voltage_sequence (char * response_buffer) {
                 CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_3;
                 job_set_timeout(SYS_CAN, 1);
 
-
             } else {
-                job_check_fail(SYS_CAN);
+                CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_FAIL;
+                CAN_control(response_buffer);
+
             }
 
             break;
 
         case CAN_read_voltage_subsequence_3:
-            if (1) { // TODO: Check is valid number
+            if (CAN_parse_voltage_regex(response_buffer) != -1) {
 
-                // TODO: Parse out number and save it
-                CAN_last_read_voltage = 20.0;
+                CAN_last_read_voltage = CAN_parse_voltage_regex(response_buffer);
 
                 CAN_sequence_state = CAN_state_idle;
                 CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_COMPLETE;
                 CAN_in_command = false;
 
                 job_clear_timeout(SYS_CAN);
+
             } else {
-                job_check_fail(SYS_CAN);
+                CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_FAIL;
+                CAN_control(response_buffer);
+
             }
 
             break;
@@ -376,3 +436,6 @@ uint8_t CAN_get_read_voltage_subsequence_state() {
     return CAN_read_voltage_subsequence_state;
 }
 
+double CAN_get_last_read_voltage() {
+    return CAN_last_read_voltage;
+}

@@ -456,9 +456,9 @@ void menu_sleep(void) {
 					usb_tx_string_PV(PSTR("Disabling car-state check: "));
 
                     if (CSC_disable_car_state_check())
-                        usb_tx_string_PV("SUCCESS");
+                        usb_tx_string_PV(PSTR("SUCCESS"));
                     else
-                        usb_tx_string_PV("FAIL");
+                        usb_tx_string_PV(PSTR("FAIL"));
 
                     break;
 					
@@ -490,11 +490,11 @@ void menu_sleep(void) {
 					usb_tx_string_PV(PSTR("Enabling car-state check: "));
 
                     if (CSC_enable_car_state_check())
-                        usb_tx_string_PV("SUCCESS");
+                        usb_tx_string_PV(PSTR("SUCCESS"));
                     else
-                        usb_tx_string_PV("FAIL");
+                        usb_tx_string_PV(PSTR("FAIL"));
 
-					break;
+                    break;
 					
 				case 'a':  // Accelerometer check
 					usb_tx_string_PV(PSTR("Enabling accelerometer sleep-state check"));
@@ -566,6 +566,9 @@ void menu_send_CAN(void) {usb_tx_string_P(PSTR("CAN>:"));
 void menu_send_BTN(void) {usb_tx_string_P(PSTR("BTN>:"));
 }
 
+void menu_send_CSC(void) {usb_tx_string_P(PSTR("CSC>:"));
+}
+
 Bool menu_verbose(void) {
 	return verbose;
 }
@@ -593,8 +596,14 @@ void usb_tx_string_PV(const char *data) {
 	} else {
 		usb_tx_string_P(PSTR("OK"));
 	}
-
 }
+
+void usb_tx_string_PVO(const char *data) {
+    if (verbose) {
+        usb_tx_string_P(data);
+    }
+}
+
 
 void menu_lockup (void) {
 	char msg[] = "AVR>>RESET:\r\n";

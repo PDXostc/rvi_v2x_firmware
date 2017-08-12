@@ -239,11 +239,11 @@ Bool CAN_find_message (char * buffer, uint8_t index);
  */
 void CAN_read_voltage_start();
 
-/**
- * @def CAN_read_voltage_stop
- * @brief Stops the voltage-reading state machine
- */
-void CAN_read_voltage_stop();
+///**
+// * @def CAN_read_voltage_stop
+// * @brief Stops the voltage-reading state machine
+// */
+//void CAN_read_voltage_stop();
 
 /**
  * @def CAN_read_voltage_sequence
@@ -285,6 +285,6 @@ uint8_t CAN_get_read_voltage_subsequence_state();
  * @brief gets the last read voltage
  * @return the last read voltage
  */
-float CAN_get_last_read_voltage();
+double CAN_get_last_read_voltage();
 
 #endif /* V2X_CAN_H_ */

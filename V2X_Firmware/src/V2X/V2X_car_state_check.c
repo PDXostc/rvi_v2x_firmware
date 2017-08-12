@@ -11,10 +11,10 @@
 #define CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT  10
 #define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 3
 
-#define CSC_CAN_START_TIMEOUT                 5
+#define CSC_CAN_START_TIMEOUT                 12
 #define CSC_CAN_START_RECHECK_TIMEOUT         1
 #define CSC_CAN_CHATTER_TIMEOUT               2
-#define CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT 2
+#define CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT 4
 
 CSC_CAR_STATE                    CSC_car_state         = CSC_car_state_unknown;
 CSC_SEQUENCE_STATE               CSC_sequence_state    = CSC_state_start;
@@ -45,7 +45,7 @@ Bool CSC_enable_car_state_check() {
     if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
         return false;
 
-    job_clear_timeout(SYS_CAR_STATE_CHECK);
+    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 
     return true;
 }
@@ -57,7 +57,7 @@ Bool CSC_disable_car_state_check() {
     if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
         return false;
 
-    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+    job_clear_timeout(SYS_CAR_STATE_CHECK);
 
     return true;
 }
@@ -109,14 +109,21 @@ void CSC_car_state_high_power_flow();
 
 */
 void CSC_car_state_check() {
-    usb_tx_string_PV(PSTR("Car-state check!\n"));
 
     switch (CSC_sequence_state) {
         case CSC_state_start:
-            if (PWR_is_low_power()) {
+            menu_send_CSC();
+            usb_tx_string_PVO(PSTR("Car-state check - "));
+
+            if (1){//PWR_is_low_power()) {
+
+                usb_tx_string_PVO(PSTR("low power!\r\n"));
+
                 CSC_sequence_state = CSC_state_low_power;
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_1;
             } else {
+                usb_tx_string_PVO(PSTR("high power!\r\n"));
+
                 CSC_sequence_state = CSC_state_high_power;
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
             }
@@ -146,8 +153,7 @@ void CSC_car_state_low_power_flow() {
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_2;
 
                 PWR_4_start();
-                PWR_can_start();
-                CAN_elm_init(); // TODO: Unclear...
+                CAN_elm_init();
 
                 job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_TIMEOUT);
             //}
@@ -208,7 +214,7 @@ void CSC_car_state_low_power_flow() {
             // TODO: Check voltage value
 
             if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_COMPLETE) {
-                if (0) { /* The voltage is too low, shut everything down */
+                if (CAN_get_last_read_voltage() < 11.0) { /* The voltage is too low, shut everything down */
                     PWR_shutdown();
 
                 } else { /* Reset our car-state check */
