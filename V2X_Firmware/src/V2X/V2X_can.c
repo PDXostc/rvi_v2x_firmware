@@ -408,10 +408,21 @@ void CAN_hear_chatter_start() {
  * @return the voltage reading, or -1 if there's an error
  */
 void CAN_parse_chatter(char * buffer) {
-	CAN_last_did_hear_chatter = true;
+	static uint8_t chatterCount = 0;
+	
+	if (CAN_last_did_hear_chatter == false) { // && check if hex byte or something?
+		chatterCount++;
+	}
+	
+	if (chatterCount > 10) {
+		CAN_last_did_hear_chatter = true;
+		chatterCount = 0;
+	}
 }
 
 void CAN_hear_chatter_sequence (char * response_buffer) {
+	static Bool heardEcho = false;
+	
     switch (CAN_hear_chatter_subsequence_state) {
         case CAN_hear_chatter_subsequence_1:
             CTL_add_string_to_buffer_P(&CAN, BUFFER_OUT, PSTR("ATSP0\r")); //compose message
@@ -423,12 +434,17 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
             break;
 
         case CAN_hear_chatter_subsequence_2: //Module response
-            if (strcmp_P(response_buffer, PSTR("OK")) == 0) {
+            if (strcmp_P(response_buffer, PSTR("ATSP0")) == 0) {
+				heardEcho = true;
+				
+            } else if (strcmp_P(response_buffer, PSTR("OK")) == 0 && heardEcho) {
+				heardEcho = false;
+				
 				CTL_add_string_to_buffer_P(&CAN, BUFFER_OUT, PSTR("ATMA\r")); //compose message
 				CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
 
 				CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_3;
-				job_set_timeout(SYS_CAN, 1);
+				job_set_timeout(SYS_CAN, 2);
 
             } else {
                 CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_FAIL;
@@ -439,15 +455,20 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
             break;
 
         case CAN_hear_chatter_subsequence_3:
-            CAN_parse_chatter(response_buffer);
-
-			CAN_chatter_count++;
-
-			if (CAN_chatter_count > 10) {
+            if (strcmp_P(response_buffer, PSTR("ATMA")) == 0) {
+				//heardEcho = true;
+				
+			} else if (strcmp_P(response_buffer, PSTR(".timeout.")) == 0) {
 				CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_4;
-			}
-
-			job_set_timeout(SYS_CAN, 1);
+				CAN_control(response_buffer);
+			
+			} if (strcmp_P(response_buffer, PSTR("SEARCHING...")) == 0) {
+				; // Do nothing
+			
+			} else {
+	            CAN_parse_chatter(response_buffer);
+			
+			}			
 
 			break;
 
@@ -493,7 +514,11 @@ uint8_t CAN_get_ee_subsequence_state() {
 }
 
 uint8_t CAN_get_read_voltage_subsequence_state() {
-    return CAN_read_voltage_subsequence_state;
+	return CAN_read_voltage_subsequence_state;
+}
+
+uint8_t CAN_get_hear_chatter_subsequence_state() {
+	return CAN_hear_chatter_subsequence_state;
 }
 
 double CAN_get_last_read_voltage() {

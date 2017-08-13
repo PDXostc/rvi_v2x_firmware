@@ -201,7 +201,7 @@ void CSC_car_state_low_power_flow() {
 
         case CSC_low_power_subsequence_4: /* Do we have CAN chatter? */
 
-            if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_COMPLETE) {
+            if (CAN_get_hear_chatter_subsequence_state() == CAN_hear_chatter_subsequence_COMPLETE) {
                 if (CAN_get_last_did_hear_chatter()) { /* If we do, turn on the raspi, and reset our job */
 
                     menu_send_CSC();
@@ -316,7 +316,7 @@ void CSC_car_state_high_power_flow() {
 
         case CSC_high_power_subsequence_3: /* Do we have CAN chatter? */
 
-            if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_COMPLETE) {
+            if (CAN_get_hear_chatter_subsequence_state() == CAN_hear_chatter_subsequence_COMPLETE) {
                 if (CAN_get_last_did_hear_chatter()) { /* If we do, just reset our job */
                     CSC_car_state = CSC_car_state_running;
 
