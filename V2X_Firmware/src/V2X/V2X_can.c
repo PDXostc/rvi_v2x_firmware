@@ -12,10 +12,13 @@ uint8_t CAN_sequence_state = CAN_state_idle;
 uint8_t CAN_init_subsequence_state = CAN_init_subsequence_1;
 uint8_t CAN_ee_subsequence_state = CAN_ee_subsequence_1;
 uint8_t CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_1;
+uint8_t CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_1;
 Bool CAN_in_command = false;
 Bool CAN_snoop = false;
 
 double CAN_last_read_voltage = 0;
+Bool CAN_last_did_hear_chatter = false;
+uint8_t CAN_chatter_count = 0;
 
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
 	CTL_add_to_buffer(&CAN, buffer_select, value);
@@ -136,6 +139,9 @@ void CAN_control (char * response_buffer) {
 		break;
     case CAN_state_read_voltage:
         CAN_read_voltage_sequence(response_buffer);
+        break;
+    case CAN_state_hear_chatter:
+        CAN_hear_chatter_sequence(response_buffer);
         break;
 	default:
 		CAN_sequence_state = CAN_state_idle;
@@ -305,10 +311,6 @@ void CAN_read_voltage_start() {
     }
 }
 
-//void CAN_read_voltage_stop() {
-//    CAN_sequence_state = CAN_state_idle;
-//}
-
 /**
  * Parses the buffer for a valid voltage reading
  * @param buffer
@@ -330,40 +332,6 @@ double CAN_parse_voltage_regex(char * buffer) {
         return -1;
 
     return voltageVal;
-
-//
-//
-//
-//
-//
-//
-//    regex_t regex;
-//    int retVal;
-//    //size_t maxGroups = 3;
-//   // regmatch_t groupArray[maxGroups];
-//
-//
-//    retVal = regcomp(&regex, "^\\d+(\\.\\d+)?V$", REG_EXTENDED);
-//    if (retVal) {
-//        return -1;
-//    }
-//
-//    retVal = regexec(&regex, buffer, 0, NULL, 0);//maxGroups, groupArray, 0);
-//    if (!retVal) {
-//        size_t bufferLength = sizeof(buffer);
-//        char voltageStr[bufferLength];
-//        memcpy(voltageStr, &buffer[0], bufferLength - 1);
-//        voltageStr[bufferLength - 1] = '\0';
-//
-//        float voltageFloat = (float)strtod(voltageStr);
-//
-//        regfree(&regex);
-//        return voltageFloat;
-//
-//    }
-//
-//    regfree(&regex);
-//    return -1;
 }
 
 void CAN_read_voltage_sequence (char * response_buffer) {
@@ -420,6 +388,119 @@ void CAN_read_voltage_sequence (char * response_buffer) {
     }
 }
 
+void CAN_hear_chatter_start() {
+    if (CAN_sequence_state == CAN_state_idle) {
+        CAN_sequence_state = CAN_state_hear_chatter;
+        CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_1;
+		CAN_last_did_hear_chatter = false;
+		CAN_chatter_count = 0;
+        CAN_in_command = true; //make sure responses come back to command processor
+        char hold[2] = "\0"; // ??
+        CAN_control (hold);
+    } else {
+        CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_FAIL;
+    }
+}
+
+/**
+ * Parses the buffer for a valid voltage reading
+ * @param buffer
+ * @return the voltage reading, or -1 if there's an error
+ */
+void CAN_parse_chatter(char * buffer) {
+	static uint8_t chatterCount = 0;
+	
+	if (CAN_last_did_hear_chatter == false) { // && check if hex byte or something?
+		chatterCount++;
+	}
+	
+	if (chatterCount > 10) {
+		CAN_last_did_hear_chatter = true;
+		chatterCount = 0;
+	}
+}
+
+void CAN_hear_chatter_sequence (char * response_buffer) {
+	static Bool heardEcho = false;
+	
+    switch (CAN_hear_chatter_subsequence_state) {
+        case CAN_hear_chatter_subsequence_1:
+            CTL_add_string_to_buffer_P(&CAN, BUFFER_OUT, PSTR("ATSP0\r")); //compose message
+            CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
+
+            CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_2; //move to response state
+            job_set_timeout(SYS_CAN, 2);
+
+            break;
+
+        case CAN_hear_chatter_subsequence_2: //Module response
+            if (strcmp_P(response_buffer, PSTR("ATSP0")) == 0) {
+				heardEcho = true;
+				
+            } else if (strcmp_P(response_buffer, PSTR("OK")) == 0 && heardEcho) {
+				heardEcho = false;
+				
+				CTL_add_string_to_buffer_P(&CAN, BUFFER_OUT, PSTR("ATMA\r")); //compose message
+				CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
+
+				CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_3;
+				job_set_timeout(SYS_CAN, 2);
+
+            } else {
+                CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_FAIL;
+                CAN_control(response_buffer);
+
+            }
+
+            break;
+
+        case CAN_hear_chatter_subsequence_3:
+            if (strcmp_P(response_buffer, PSTR("ATMA")) == 0) {
+				//heardEcho = true;
+				
+			} else if (strcmp_P(response_buffer, PSTR(".timeout.")) == 0) {
+				CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_4;
+				CAN_control(response_buffer);
+			
+			} if (strcmp_P(response_buffer, PSTR("SEARCHING...")) == 0) {
+				; // Do nothing
+			
+			} else {
+	            CAN_parse_chatter(response_buffer);
+			
+			}			
+
+			break;
+
+		case CAN_hear_chatter_subsequence_4:
+			CTL_add_string_to_buffer_P(&CAN, BUFFER_OUT, PSTR("\r")); //compose message
+			CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
+
+			CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_5;
+			job_set_timeout(SYS_CAN, 1);
+
+			break;
+
+		case CAN_hear_chatter_subsequence_5:
+            CAN_sequence_state = CAN_state_idle;
+            CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_COMPLETE;
+            CAN_in_command = false;
+
+            job_clear_timeout(SYS_CAN);
+
+            break;
+
+        case CAN_hear_chatter_subsequence_FAIL:
+        default:
+            CAN_sequence_state = CAN_state_idle;
+            CAN_in_command = false;
+            job_clear_timeout(SYS_CAN);
+            menu_send_CTL();
+            usb_tx_string_P(PSTR("CAN hear chatter fail\r\n>"));
+            break;
+    }
+}
+
 uint8_t CAN_get_sequence_state() {
     return CAN_sequence_state;
 }
@@ -433,9 +514,17 @@ uint8_t CAN_get_ee_subsequence_state() {
 }
 
 uint8_t CAN_get_read_voltage_subsequence_state() {
-    return CAN_read_voltage_subsequence_state;
+	return CAN_read_voltage_subsequence_state;
+}
+
+uint8_t CAN_get_hear_chatter_subsequence_state() {
+	return CAN_hear_chatter_subsequence_state;
 }
 
 double CAN_get_last_read_voltage() {
     return CAN_last_read_voltage;
+}
+
+Bool CAN_get_last_did_hear_chatter() {
+    return  CAN_last_did_hear_chatter;
 }

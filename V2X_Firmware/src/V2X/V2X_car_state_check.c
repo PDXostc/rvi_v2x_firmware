@@ -13,7 +13,7 @@
 
 #define CSC_CAN_START_TIMEOUT                 12
 #define CSC_CAN_START_RECHECK_TIMEOUT         1
-#define CSC_CAN_CHATTER_TIMEOUT               2
+#define CSC_CAN_CHATTER_TIMEOUT               15
 #define CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT 4
 
 CSC_CAR_STATE                    CSC_car_state         = CSC_car_state_unknown;
@@ -115,7 +115,7 @@ void CSC_car_state_check() {
             menu_send_CSC();
             usb_tx_string_PVO(PSTR("Car-state check - "));
 
-            if (1){//PWR_is_low_power()) {
+            if (PWR_is_low_power()) {
 
                 usb_tx_string_PVO(PSTR("low power!\r\n"));
 
@@ -193,38 +193,45 @@ void CSC_car_state_low_power_flow() {
             menu_send_CSC();
             usb_tx_string_PVO(PSTR("Car-state check - listening for CAN chatter\n\r"));
 
-            // TODO: Start listening for CAN chatter
+            CAN_hear_chatter_start();
 
             job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHATTER_TIMEOUT);
 
             break;
 
         case CSC_low_power_subsequence_4: /* Do we have CAN chatter? */
-            // TODO: Check if chatter
 
-            if (0) { /* If we do, turn on the raspi, and reset our job */
+            if (CAN_get_hear_chatter_subsequence_state() == CAN_hear_chatter_subsequence_COMPLETE) {
+                if (CAN_get_last_did_hear_chatter()) { /* If we do, turn on the raspi, and reset our job */
+
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Car-state check - CAN chatter heard; powering up\n\r"));
+
+                    CSC_sequence_state = CSC_state_start;
+                    CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
+                    CSC_car_state = CSC_car_state_running;
+
+                    PWR_mode_high();
+
+                    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+
+                } else { /* If we don't, check that the battery voltage isn't too low */
+                    CSC_low_power_subsequence_state = CSC_low_power_subsequence_5;
+
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Car-state check - CAN chatter not heard; checking voltage\n\r"));
+
+                    CAN_read_voltage_start();
+
+                    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT);
+
+                }
+            } else {
+                CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+                CSC_car_state_check();
 
                 menu_send_CSC();
-                usb_tx_string_PVO(PSTR("Car-state check - CAN chatter heard; powering up\n\r"));
-
-                CSC_sequence_state = CSC_state_start;
-                CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
-                CSC_car_state = CSC_car_state_running;
-
-                PWR_mode_high();
-
-                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
-
-            } else { /* If we don't, check that the battery voltage isn't too low */
-                CSC_low_power_subsequence_state = CSC_low_power_subsequence_5;
-
-                menu_send_CSC();
-                usb_tx_string_PVO(PSTR("Car-state check - CAN chatter not heard; checking voltage\n\r"));
-
-                CAN_read_voltage_start();
-
-                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT);
-
+                usb_tx_string_PVO(PSTR("Car-state check failed - listening for CAN chatter failed\n\r"));
             }
 
             break;
@@ -258,6 +265,8 @@ void CSC_car_state_low_power_flow() {
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
                 CSC_car_state_check();
 
+                menu_send_CSC();
+                usb_tx_string_PVO(PSTR("Car-state check failed - reading voltage failed\n\r"));
             }
 
             break;
@@ -299,34 +308,42 @@ void CSC_car_state_high_power_flow() {
             menu_send_CSC();
             usb_tx_string_PVO(PSTR("Car-state check - listening for CAN chatter\n\r"));
 
-            // TODO: Start listening for CAN chatter
+            CAN_hear_chatter_start();
 
             job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_CHATTER_TIMEOUT);
 
             break;
 
         case CSC_high_power_subsequence_3: /* Do we have CAN chatter? */
-            // TODO: Check if chatter
 
-            if (1) { /* If we do, just reset our job */
-                CSC_car_state = CSC_car_state_running;
+            if (CAN_get_hear_chatter_subsequence_state() == CAN_hear_chatter_subsequence_COMPLETE) {
+                if (CAN_get_last_did_hear_chatter()) { /* If we do, just reset our job */
+                    CSC_car_state = CSC_car_state_running;
+
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Car-state check - CAN chatter heard; rescheduling job\n\r"));
+
+                } else { /* If we don't, put everything to sleep */
+                    CSC_car_state = CSC_car_state_sleeping;
+
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Car-state check - CAN chatter not heard; powering down\n\r"));
+
+                    PWR_mode_low();
+                }
+
+                CSC_sequence_state = CSC_state_start;
+                CSC_high_power_subsequence_state = CSC_high_power_subsequence_COMPLETE;
+
+                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+
+            } else {
+                CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
+                CSC_car_state_check();
 
                 menu_send_CSC();
-                usb_tx_string_PVO(PSTR("Car-state check - CAN chatter heard; rescheduling job\n\r"));
-
-            } else { /* If we don't, put everything to sleep */
-                CSC_car_state = CSC_car_state_sleeping;
-
-                menu_send_CSC();
-                usb_tx_string_PVO(PSTR("Car-state check - CAN chatter not heard; powering down\n\r"));
-                
-                PWR_mode_low();
+                usb_tx_string_PVO(PSTR("Car-state check failed - listening for CAN chatter failed\n\r"));
             }
-
-            CSC_sequence_state = CSC_state_start;
-            CSC_high_power_subsequence_state = CSC_high_power_subsequence_COMPLETE;
-
-            job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 
             break;
 

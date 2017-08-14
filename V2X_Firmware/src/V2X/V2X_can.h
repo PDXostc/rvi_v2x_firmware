@@ -18,6 +18,7 @@ enum CAN_sequence_states {
 	CAN_state_power,
 	CAN_state_EE,
     CAN_state_read_voltage,
+    CAN_state_hear_chatter,
 	};
 	
 /**
@@ -66,6 +67,16 @@ enum CAN_read_voltage_subsequence_states {
     CAN_read_voltage_subsequence_5,
     CAN_read_voltage_subsequence_COMPLETE,
     CAN_read_voltage_subsequence_FAIL,
+};
+
+enum CAN_hear_chatter_subsequence_states {
+    CAN_hear_chatter_subsequence_1,
+    CAN_hear_chatter_subsequence_2,
+    CAN_hear_chatter_subsequence_3,
+    CAN_hear_chatter_subsequence_4,
+    CAN_hear_chatter_subsequence_5,
+    CAN_hear_chatter_subsequence_COMPLETE,
+    CAN_hear_chatter_subsequence_FAIL,
 };
 
 /**
@@ -239,18 +250,25 @@ Bool CAN_find_message (char * buffer, uint8_t index);
  */
 void CAN_read_voltage_start();
 
-///**
-// * @def CAN_read_voltage_stop
-// * @brief Stops the voltage-reading state machine
-// */
-//void CAN_read_voltage_stop();
-
 /**
  * @def CAN_read_voltage_sequence
- * @brief Method for processing the return buffer when in the read-voltage state
+ * @brief Method for processing the return buffer when in the read-voltage sequence
  * @param response_buffer buffer with CAN data
  */
-void CAN_read_voltage_sequence (char * response_buffer);
+void CAN_read_voltage_sequence(char * response_buffer);
+
+/**
+ * @def CAN_hear_chatter_start
+ * @brief Starts the hear-chatter state machine
+ */
+void CAN_hear_chatter_start();
+
+/**
+ * @def CAN_hear_chatter_sequence
+ * @brief Method for processing the return buffer when in the hear-chatter sequence
+ * @param response_buffer buffer with CAN data
+ */
+void CAN_hear_chatter_sequence(char * response_buffer);
 
 /**
  * @def CAN_get_sequence_state
@@ -281,10 +299,24 @@ uint8_t CAN_get_ee_subsequence_state();
 uint8_t CAN_get_read_voltage_subsequence_state();
 
 /**
+ * @def CAN_get_hear_chatter_subsequence_state
+ * @brief gets value of CAN_hear_chatter_subsequence_state variable
+ * @return value of CAN_hear_chatter_subsequence_state variable
+ */
+uint8_t CAN_get_hear_chatter_subsequence_state();
+
+/**
  * @def CAN_get_last_read_voltage
  * @brief gets the last read voltage
  * @return the last read voltage
  */
 double CAN_get_last_read_voltage();
+
+/**
+ * @def CAN_get_last_did_hear_chatter
+ * @brief gets the last result of whether it heard chatter
+ * @return whether it last hard chatter
+ */
+Bool CAN_get_last_did_hear_chatter();
 
 #endif /* V2X_CAN_H_ */
