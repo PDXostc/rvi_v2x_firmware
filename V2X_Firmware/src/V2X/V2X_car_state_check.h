@@ -74,10 +74,7 @@ Bool CSC_disable_car_state_check();
 
 Bool CSC_enable_car_state_check();
 
-
 void CSC_car_state_check();
-
-
 
 
 #endif /* V2X_CAR_STATE_CHECK_H_ */

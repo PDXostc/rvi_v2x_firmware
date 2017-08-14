@@ -120,7 +120,6 @@ void CAN_process_buffer (void) {
 			usb_cdc_send_string(USB_CMD, CAN.input_proc_buf);
 			menu_send_n_st();
 			CAN_control(CAN.input_proc_buf);
-            //CSC_can_input_buffer(CAN.input_proc_buf);
 			CAN.input_proc_loaded = false;		//input proc buffer has been handled
 		}
 	}
