@@ -190,21 +190,28 @@ void menu_sleep(void);
 /**
  * @def usb_tx_string_P
  * @brief special routine to send program memory stored strings over USB
- * @param data pointer to PSTR() strored strings
+ * @param data pointer to PSTR() stored strings
  **/
 void usb_tx_string_P(const char *data);
 
 /**
  * @def usb_tx_string_PV
- * @brief if not verbose, strings are preplaced by "OK"
- * @param data pointer to PSTR() strored strings
+ * @brief if not verbose, strings are replaced by "OK"
+ * @param data pointer to PSTR() stored strings
  **/
 void usb_tx_string_PV(const char *data);
 
 /**
+ * @def usb_tx_string_PVF
+ * @brief if not verbose, strings are replaced by "FAIL"
+ * @param data pointer to PSTR() stored strings
+ **/
+void usb_tx_string_PVF(const char *data);
+
+/**
  * @def usb_tx_string_PVO
  * @brief if not verbose, nothing is sent
- * @param data pointer to PSTR() strored strings
+ * @param data pointer to PSTR() stored strings
  **/
 void usb_tx_string_PVO(const char *data);
 

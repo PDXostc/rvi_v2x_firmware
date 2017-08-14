@@ -453,28 +453,24 @@ void menu_sleep(void) {
 		case 'd':  //disable sleep-state checks
 			switch (CMD_buffer[4]) {
 				case 'c':  // car-on check
-					usb_tx_string_PV(PSTR("Disabling car-state check: "));
 
                     if (CSC_disable_car_state_check())
-                        usb_tx_string_PV(PSTR("SUCCESS"));
+                        usb_tx_string_PV(PSTR("Disabling car-state check: SUCCESS"));
                     else
-                        usb_tx_string_PV(PSTR("FAIL"));
+                        usb_tx_string_PVF(PSTR("Disabling car-state check: FAIL")); // Note, this prints fail message
 
                     break;
 					
 				case 'a':  // accelerometer check
-					usb_tx_string_PV(PSTR("Disabling accelerometer sleep-state check"));
-					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
+					usb_tx_string_PVF(PSTR("Disabling accelerometer sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
 					break;
 					
 				case 't':  // text-message check
-					usb_tx_string_PV(PSTR("Disabling text-message sleep-state check"));
-					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
+					usb_tx_string_PVF(PSTR("Disabling text-message sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
 					break;
 					
 				case 'g': // gps-movement check
-					usb_tx_string_PV(PSTR("Disabling gps-movement sleep-state check"));
-					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
+					usb_tx_string_PVF(PSTR("Disabling gps-movement sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
 					break;
 					
 				default:
@@ -487,28 +483,24 @@ void menu_sleep(void) {
 		case 'e':  //enable sleep-state checks
 			switch (CMD_buffer[4]) {
 				case 'c':  // Car-on check
-					usb_tx_string_PV(PSTR("Enabling car-state check: "));
 
                     if (CSC_enable_car_state_check())
-                        usb_tx_string_PV(PSTR("SUCCESS"));
+                        usb_tx_string_PV(PSTR("Enabling car-state check: SUCCESS"));
                     else
-                        usb_tx_string_PV(PSTR("FAIL"));
+                        usb_tx_string_PVF(PSTR("Enabling car-state check: FAIL"));
 
                     break;
 					
 				case 'a':  // Accelerometer check
-					usb_tx_string_PV(PSTR("Enabling accelerometer sleep-state check"));
-					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
+					usb_tx_string_PVF(PSTR("Enabling accelerometer sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
 					break;
 					
 				case 't':  // text-message check
-					usb_tx_string_PV(PSTR("Enabling text-message sleep-state check"));
-					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
+					usb_tx_string_PVF(PSTR("Enabling text-message sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
 					break;
 				
 				case 'g': // gps-movement check
-					usb_tx_string_PV(PSTR("Enabling gps-movement sleep-state check"));
-					usb_tx_string_PV(PSTR(" - NOT YET IMPLEMENTED"));
+					usb_tx_string_PVF(PSTR("Enabling gps-movement sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
 					break;
 					
 				default:
@@ -595,6 +587,14 @@ void usb_tx_string_PV(const char *data) {
 		usb_tx_string_P(data);
 	} else {
 		usb_tx_string_P(PSTR("OK"));
+	}
+}
+
+void usb_tx_string_PVF(const char *data) {
+	if (verbose) {
+		usb_tx_string_P(data);
+	} else {
+		usb_tx_string_P(PSTR("FAIL"));
 	}
 }
 
