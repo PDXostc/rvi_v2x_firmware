@@ -459,19 +459,24 @@ void menu_sleep(void) {
                     else
                         usb_tx_string_PVF(PSTR("Disabling car-state check: FAIL")); // Note, this prints fail message
 
+                    menu_send_n();
+
                     break;
 					
 				case 'a':  // accelerometer check
 					usb_tx_string_PVF(PSTR("Disabling accelerometer sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
-					break;
+                    menu_send_n();
+                    break;
 					
 				case 't':  // text-message check
 					usb_tx_string_PVF(PSTR("Disabling text-message sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
-					break;
+                    menu_send_n();
+                    break;
 					
 				case 'g': // gps-movement check
 					usb_tx_string_PVF(PSTR("Disabling gps-movement sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
-					break;
+                    menu_send_n();
+                    break;
 					
 				default:
 					menu_send_q();
@@ -489,18 +494,23 @@ void menu_sleep(void) {
                     else
                         usb_tx_string_PVF(PSTR("Enabling car-state check: FAIL"));
 
+                    menu_send_n();
+
                     break;
 					
 				case 'a':  // Accelerometer check
 					usb_tx_string_PVF(PSTR("Enabling accelerometer sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
+                    menu_send_n();
 					break;
 					
 				case 't':  // text-message check
 					usb_tx_string_PVF(PSTR("Enabling text-message sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
+                    menu_send_n();
 					break;
 				
 				case 'g': // gps-movement check
 					usb_tx_string_PVF(PSTR("Enabling gps-movement sleep-state check - NOT YET IMPLEMENTED")); // Note, this prints fail message at the moment, change when implemented
+                    menu_send_n();
 					break;
 					
 				default:
