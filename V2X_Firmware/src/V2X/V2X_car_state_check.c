@@ -42,9 +42,6 @@ Bool CSC_enable_car_state_check() {
     if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't enable the check; it'll overwrite our timer job. */
         return false;
 
-    if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
-        return false;
-
     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 
     return true;
@@ -52,9 +49,6 @@ Bool CSC_enable_car_state_check() {
 
 Bool CSC_disable_car_state_check() {
     if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't disable the check; it'll overwrite our timer job. */
-        return false;
-
-    if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
         return false;
 
     job_clear_timeout(SYS_CAR_STATE_CHECK);

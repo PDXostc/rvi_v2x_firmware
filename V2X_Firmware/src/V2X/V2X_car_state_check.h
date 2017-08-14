@@ -16,8 +16,6 @@
  */
 typedef enum {
     CSC_car_state_unknown = 0,
-    CSC_car_state_transitioning_up,
-    CSC_car_state_transitioning_down,
     CSC_car_state_sleeping,
     CSC_car_state_running,
 } CSC_CAR_STATE;
