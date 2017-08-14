@@ -444,7 +444,7 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
 				CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
 
 				CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_3;
-				job_set_timeout(SYS_CAN, 2);
+				job_set_timeout(SYS_CAN, 3);
 
             } else {
                 CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_FAIL;
@@ -467,7 +467,9 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
 			
 			} else {
 	            CAN_parse_chatter(response_buffer);
-			
+
+                if (CAN_last_did_hear_chatter)
+                    CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_4;
 			}			
 
 			break;
@@ -495,8 +497,10 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
             CAN_sequence_state = CAN_state_idle;
             CAN_in_command = false;
             job_clear_timeout(SYS_CAN);
+
             menu_send_CTL();
             usb_tx_string_P(PSTR("CAN hear chatter fail\r\n>"));
+
             break;
     }
 }

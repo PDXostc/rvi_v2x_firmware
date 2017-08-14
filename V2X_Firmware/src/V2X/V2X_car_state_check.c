@@ -11,9 +11,9 @@
 #define CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT  10
 #define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 3
 
-#define CSC_CAN_START_TIMEOUT                    12
-#define CSC_CAN_START_RECHECK_TIMEOUT            1
-#define CSC_CAN_CHATTER_TIMEOUT                  15
+#define CSC_CAN_START_TIMEOUT                    4
+#define CSC_CAN_START_RECHECK_TIMEOUT            2
+#define CSC_CAN_CHATTER_TIMEOUT                  5
 #define CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT    4
 
 CSC_CAR_STATE                    CSC_car_state                    = CSC_car_state_unknown;
@@ -94,15 +94,14 @@ void CSC_car_state_high_power_flow();
         IF (Battery < 11V)
                 -- PWR_shutdown();
         ELSE  kill the 5&4V,
-                -- PWR_4_stop(); //stops 4V and starts low power 3V
-                -- PWR_5_stop(); //stops 5V, drops STN enable signals
+                -- PWR_mode_low();
                 -- reschedule job (at longer interval)
 
     If high power:
         IF CanBusActive
                 -- reschedule job (at shorter interval)
         ELSE
-                -- PWR_mode_low (); //kills everything but low power 3V
+                -- PWR_mode_low(); //kills everything but low power 3V
                 -- reschedule job (at longer interval)
 
 */
@@ -141,9 +140,11 @@ void CSC_car_state_check() {
 }
 
 void CSC_car_state_low_power_flow() {
+    static uint8_t retries = 0;
+
     switch (CSC_low_power_subsequence_state) {
         case CSC_low_power_subsequence_1:
-            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else, just fail and check later */
+            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is in the middle of something else, just fail and check later */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
                 CSC_car_state_check();
 
@@ -152,6 +153,7 @@ void CSC_car_state_low_power_flow() {
 
             } else { /* Otherwise, power-on CAN and start our check sequence */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_2;
+                retries = 0;
 
                 menu_send_CSC();
                 usb_tx_string_PVO(PSTR("Car-state check - starting CAN\n\r"));
@@ -178,9 +180,20 @@ void CSC_car_state_low_power_flow() {
                 CSC_car_state_check();
 
             } else { /* Otherwise, try again soon */
-                // TODO: Only try so many times
-                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_RECHECK_TIMEOUT);
+                if (retries > 3) {
+                    CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+                    CSC_car_state_check();
 
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Car-state check failed - CAN initialization timeout\n\r"));
+
+                } else {
+                    retries++;
+                    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_RECHECK_TIMEOUT);
+
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Retry\r\n"));
+                }
             }
 
             break;
@@ -235,7 +248,7 @@ void CSC_car_state_low_power_flow() {
             break;
 
         case CSC_low_power_subsequence_5: /* What is the battery voltage? */
-            
+
             if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_COMPLETE) {
                 if (CAN_get_last_read_voltage() < 11.0) { /* The voltage is too low, shut everything down */
 
@@ -253,7 +266,7 @@ void CSC_car_state_low_power_flow() {
                     menu_send_CSC();
                     usb_tx_string_PVO(PSTR("Car-state check - rescheduling job\n\r"));
 
-                    PWR_mode_low(); // TODO: Double check
+                    PWR_mode_low();
 
                     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
                 }
