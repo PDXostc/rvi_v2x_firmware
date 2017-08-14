@@ -11,13 +11,13 @@
 #define CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT  10
 #define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 3
 
-#define CSC_CAN_START_TIMEOUT                 12
-#define CSC_CAN_START_RECHECK_TIMEOUT         1
-#define CSC_CAN_CHATTER_TIMEOUT               15
-#define CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT 4
+#define CSC_CAN_START_TIMEOUT                    4
+#define CSC_CAN_START_RECHECK_TIMEOUT            2
+#define CSC_CAN_CHATTER_TIMEOUT                  5
+#define CSC_CAN_CHECK_BATTERY_VOLTAGE_TIMEOUT    4
 
-CSC_CAR_STATE                    CSC_car_state         = CSC_car_state_unknown;
-CSC_SEQUENCE_STATE               CSC_sequence_state    = CSC_state_start;
+CSC_CAR_STATE                    CSC_car_state                    = CSC_car_state_unknown;
+CSC_SEQUENCE_STATE               CSC_sequence_state               = CSC_state_start;
 CSC_LOW_POWER_SUBSEQUENCE_STATE  CSC_low_power_subsequence_state  = CSC_low_power_subsequence_1;
 CSC_HIGH_POWER_SUBSEQUENCE_STATE CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
 
@@ -42,9 +42,6 @@ Bool CSC_enable_car_state_check() {
     if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't enable the check; it'll overwrite our timer job. */
         return false;
 
-    if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
-        return false;
-
     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 
     return true;
@@ -52,9 +49,6 @@ Bool CSC_enable_car_state_check() {
 
 Bool CSC_disable_car_state_check() {
     if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't disable the check; it'll overwrite our timer job. */
-        return false;
-
-    if (CSC_car_state == CSC_car_state_transitioning_up || CSC_car_state == CSC_car_state_transitioning_down)
         return false;
 
     job_clear_timeout(SYS_CAR_STATE_CHECK);
@@ -70,10 +64,14 @@ void CSC_car_state_high_power_flow();
 
     In summary:
     First check if low power. If not low power, check if car is still running by listening to the CAN bus;
-    shut down the raspi if it is not running.
+    shut down the raspi if we don't hear chatter on the CAN bus (i.e, car is not running). Reschedule the
+    job.
 
-    If low power, do the CAN initialization stuff. This will pull us out of low power, so if the check puts us back
-    into the 'do nothing' state, we need to make sure to go back to low power so that our isLowPower check is reset.
+    If low power, do the CAN initialization stuff so that we can listen to the CAN bus and check the voltage. (This
+    will pull us out of low power, so if the checks put us back into the 'resume-sleeping' state, we need
+    to make sure to go back to low power.) Check if the car is running by listening to the CAN bus; start raspi if
+    we heard chatter and reschedule the job. If not, check the voltage to make sure the battery isn't almost dead. If it is, shut everything
+    down, otherwise reschedule the job.
 
     In detail:
     Check if low power or high power
@@ -81,7 +79,7 @@ void CSC_car_state_high_power_flow();
     If low power:
         {//Change power state to power STN chip
             PWR_4_start(); starts 4V and stops low power 3V, as 4V now provides 3V
-            PWR_can_start(); //starts 5V, STN enable signals
+            CAN_elm_init(); //starts 5V, STN enable signals
         }
 
         Configure can device ();
@@ -96,15 +94,14 @@ void CSC_car_state_high_power_flow();
         IF (Battery < 11V)
                 -- PWR_shutdown();
         ELSE  kill the 5&4V,
-                --  PWR_4_stop(); //stops 4V and starts low power 3V
-                -- PWR_5_stop(); //stops 5V, drops STN enable signals
+                -- PWR_mode_low();
                 -- reschedule job (at longer interval)
 
     If high power:
         IF CanBusActive
-                --  reschedule job (at shorter interval)
+                -- reschedule job (at shorter interval)
         ELSE
-                -- PWR_mode_low (); //kills everything but low power 3V
+                -- PWR_mode_low(); //kills everything but low power 3V
                 -- reschedule job (at longer interval)
 
 */
@@ -143,9 +140,11 @@ void CSC_car_state_check() {
 }
 
 void CSC_car_state_low_power_flow() {
+    static uint8_t retries = 0;
+
     switch (CSC_low_power_subsequence_state) {
         case CSC_low_power_subsequence_1:
-            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else, just fail and check later */
+            if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is in the middle of something else, just fail and check later */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
                 CSC_car_state_check();
 
@@ -154,6 +153,7 @@ void CSC_car_state_low_power_flow() {
 
             } else { /* Otherwise, power-on CAN and start our check sequence */
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_2;
+                retries = 0;
 
                 menu_send_CSC();
                 usb_tx_string_PVO(PSTR("Car-state check - starting CAN\n\r"));
@@ -180,9 +180,20 @@ void CSC_car_state_low_power_flow() {
                 CSC_car_state_check();
 
             } else { /* Otherwise, try again soon */
-                // TODO: Only try so many times
-                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_RECHECK_TIMEOUT);
+                if (retries > 3) {
+                    CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+                    CSC_car_state_check();
 
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Car-state check failed - CAN initialization timeout\n\r"));
+
+                } else {
+                    retries++;
+                    job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_START_RECHECK_TIMEOUT);
+
+                    menu_send_CSC();
+                    usb_tx_string_PVO(PSTR("Retry\r\n"));
+                }
             }
 
             break;
@@ -237,7 +248,6 @@ void CSC_car_state_low_power_flow() {
             break;
 
         case CSC_low_power_subsequence_5: /* What is the battery voltage? */
-            // TODO: Check voltage value
 
             if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_COMPLETE) {
                 if (CAN_get_last_read_voltage() < 11.0) { /* The voltage is too low, shut everything down */
