@@ -21,34 +21,40 @@ CSC_SEQUENCE_STATE               CSC_sequence_state               = CSC_state_st
 CSC_LOW_POWER_SUBSEQUENCE_STATE  CSC_low_power_subsequence_state  = CSC_low_power_subsequence_1;
 CSC_HIGH_POWER_SUBSEQUENCE_STATE CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
 
-int CSC_get_car_state_check_low_power_default_interval() {
+int CSC_get_car_state_check_low_power_default_interval(void) {
     return CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
 }
 
-int CSC_get_car_state_check_high_power_default_interval() {
+int CSC_get_car_state_check_high_power_default_interval(void) {
     return CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
 }
 
-uint8_t CSC_get_car_state_check_default_enabled() {
+uint8_t CSC_get_car_state_check_default_enabled(void) {
     return CSC_CAR_STATE_CHECK_ENABLED;
 }
 
-int CSC_low_power_car_check_timeout() {
+int CSC_low_power_car_check_timeout(void);
+
+int CSC_low_power_car_check_timeout(void) {
     return eeprom_read_int(EE_car_state_check_low_power_check_interval);
 }
 
-int CSC_high_power_car_check_timeout() {
+int CSC_high_power_car_check_timeout(void);
+
+int CSC_high_power_car_check_timeout(void) {
     return eeprom_read_int(EE_car_state_check_high_power_check_interval);
 }
 
-int CSC_get_timeout_for_car_state() {
+int CSC_get_timeout_for_car_state(void);
+
+int CSC_get_timeout_for_car_state(void) {
     if (CSC_car_state == CSC_car_state_running)
         return CSC_high_power_car_check_timeout();
 
     return CSC_low_power_car_check_timeout();
 }
 
-void CSC_enable_car_state_check() {
+void CSC_enable_car_state_check(void) {
     if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't overwrite the check timeout; assume already be enabled. */
         return;
 
@@ -57,7 +63,7 @@ void CSC_enable_car_state_check() {
     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 }
 
-void CSC_disable_car_state_check() {
+void CSC_disable_car_state_check(void) {
     if (CSC_sequence_state == CSC_state_low_power) {
         CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
         CSC_car_state_check();
@@ -73,8 +79,8 @@ void CSC_disable_car_state_check() {
     job_clear_timeout(SYS_CAR_STATE_CHECK);
 }
 
-void CSC_car_state_low_power_flow();
-void CSC_car_state_high_power_flow();
+void CSC_car_state_low_power_flow(void);
+void CSC_car_state_high_power_flow(void);
 
 /*
     Updated functionality...
@@ -122,7 +128,7 @@ void CSC_car_state_high_power_flow();
                 -- reschedule job (at longer interval)
 
 */
-void CSC_car_state_check() {
+void CSC_car_state_check(void) {
 
     switch (CSC_sequence_state) {
         case CSC_state_start:
@@ -156,7 +162,7 @@ void CSC_car_state_check() {
     }
 }
 
-void CSC_car_state_low_power_flow() {
+void CSC_car_state_low_power_flow(void) {
     static uint8_t retries = 0;
 
     switch (CSC_low_power_subsequence_state) {
@@ -311,7 +317,7 @@ void CSC_car_state_low_power_flow() {
     }
 }
 
-void CSC_car_state_high_power_flow() {
+void CSC_car_state_high_power_flow(void) {
 
     switch (CSC_high_power_subsequence_state) {
         case CSC_high_power_subsequence_1:

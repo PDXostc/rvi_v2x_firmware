@@ -111,12 +111,12 @@ void GSM_control (char * responce_buffer) {
 
 void GSM_control_check (char * responce_buffer){
 	switch (GSM_subsequence_state) {
-	/*This power check is actually not optimal for supporting both board versions
-	/* ...In Rev20 the SIM is not the only thing on the 4v rail, so we can't rely
-	/*on the operational convention of it being disabled/enabled as a check
-	/* for the SIM's absolute state
-	/*
-	/* Works fine for Rev1.2, needs help on Rev2.0.
+	/* This power check is actually not optimal for supporting both board versions
+	 * ...In Rev20 the SIM is not the only thing on the 4v rail, so we can't rely
+	 * on the operational convention of it being disabled/enabled as a check
+	 * for the SIM's absolute state
+	 *
+	 * Works fine for Rev1.2, needs help on Rev2.0.
 	 */
 	case GSM_subssequence_1:  //check module power
 		usb_tx_string_P(PSTR("\rCTL>>>:Power up GSM\r\n"));  //does not need end of string, exits through menu
@@ -126,8 +126,8 @@ void GSM_control_check (char * responce_buffer){
 		break;
 #if SIMCOM == SIMCOM_SIM5320A
 	/* 7100a does not appear to send the START message, so has real trouble
-	/* with this step. This appears to be why just sending the machine to subsequence_3
-	/* has been more reliable with the new version
+	 * with this step. This appears to be why just sending the machine to subsequence_3
+	 * has been more reliable with the new version
 	 */
 	case GSM_subssequence_2: //Module clean boot, look for "start"
 		if (strcmp_P(responce_buffer, PSTR("START")) == 0) {

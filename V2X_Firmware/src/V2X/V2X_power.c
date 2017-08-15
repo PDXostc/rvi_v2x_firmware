@@ -58,7 +58,7 @@ Bool PWR_query(SHIFT_REGISTER_TYPE mask) {
 	else {return false;}
 }
 
-Bool PWR_is_low_power() {
+Bool PWR_is_low_power(void) {
     return (Bool) ((power_control_state & ((1<<ENABLE_4V1) | (1<<ENABLE_5V0) | (1<<ENABLE_5V0B))) == 0);
 }
 

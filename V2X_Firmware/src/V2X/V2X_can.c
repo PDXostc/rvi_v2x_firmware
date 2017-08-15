@@ -300,7 +300,7 @@ void CAN_ee_sequence (char * response_buffer) {
 	}
 }
 
-void CAN_read_voltage_start() {
+void CAN_read_voltage_start(void) {
     if (CAN_sequence_state == CAN_state_idle) {
         CAN_sequence_state = CAN_state_read_voltage;
         CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_1;
@@ -317,6 +317,7 @@ void CAN_read_voltage_start() {
  * @param buffer
  * @return the voltage reading, or -1 if there's an error
  */
+double CAN_parse_voltage_regex(char * buffer);
 double CAN_parse_voltage_regex(char * buffer) {
 
     /* If the value starts with '0', forget the decimal and return 0, as the voltage may as well be 0.
@@ -389,7 +390,7 @@ void CAN_read_voltage_sequence (char * response_buffer) {
     }
 }
 
-void CAN_hear_chatter_start() {
+void CAN_hear_chatter_start(void) {
     if (CAN_sequence_state == CAN_state_idle) {
         CAN_sequence_state = CAN_state_hear_chatter;
         CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_1;
@@ -408,6 +409,7 @@ void CAN_hear_chatter_start() {
  * @param buffer
  * @return the voltage reading, or -1 if there's an error
  */
+void CAN_parse_chatter(char * buffer);
 void CAN_parse_chatter(char * buffer) {
 	static uint8_t chatterCount = 0;
 	
@@ -506,30 +508,30 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
     }
 }
 
-uint8_t CAN_get_sequence_state() {
+uint8_t CAN_get_sequence_state(void) {
     return CAN_sequence_state;
 }
 
-uint8_t CAN_get_init_subsequence_state() {
+uint8_t CAN_get_init_subsequence_state(void) {
     return CAN_init_subsequence_state;
 }
 
-uint8_t CAN_get_ee_subsequence_state() {
+uint8_t CAN_get_ee_subsequence_state(void) {
     return CAN_ee_subsequence_state;
 }
 
-uint8_t CAN_get_read_voltage_subsequence_state() {
+uint8_t CAN_get_read_voltage_subsequence_state(void) {
 	return CAN_read_voltage_subsequence_state;
 }
 
-uint8_t CAN_get_hear_chatter_subsequence_state() {
+uint8_t CAN_get_hear_chatter_subsequence_state(void) {
 	return CAN_hear_chatter_subsequence_state;
 }
 
-double CAN_get_last_read_voltage() {
+double CAN_get_last_read_voltage(void) {
     return (CAN_last_read_voltage + READ_VOLTAGE_DIODE_DROP);
 }
 
-Bool CAN_get_last_did_hear_chatter() {
+Bool CAN_get_last_did_hear_chatter(void) {
     return  CAN_last_did_hear_chatter;
 }
