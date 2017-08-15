@@ -322,6 +322,8 @@ void menu_can (void) {
 }
 
 void menu_power (void) {
+    char printBuffer[200];
+
 	CMD_buffer[4] = tolower(CMD_buffer[4]);
 	
 	switch (CMD_buffer[3]) {
@@ -377,6 +379,26 @@ void menu_power (void) {
 		PWR_push();
 		menu_send_ok();
 		break;
+    case 'y':
+        if (verbose) {
+            switch (PWR_get_wake_up_reason()) {
+                case PWR_WAKE_UP_REASON_UNKNOWN:
+                    snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "UNKNOWN");
+                    break;
+                case PWR_WAKE_UP_REASON_BUTTON:
+                    snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "BUTTON PRESS");
+                    break;
+                case PWR_WAKE_UP_REASON_CAR_RUNNING:
+                    snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "CAR RUNNING");
+                    break;
+            }
+        } else {
+            snprintf(printBuffer, 200, "%u", PWR_get_wake_up_reason());
+        }
+
+        usb_cdc_send_string(USB_CMD, printBuffer);
+
+        break;
 	case 'q':
 		menu_power_status();
 		break;
@@ -388,7 +410,7 @@ void menu_power (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\nH: High power mode (all peripherals enabled)\r\nL: Low power mode (all peripherals disabled)\r\n"));
+		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\nY: Why did I wake up?\r\nH: High power mode (all peripherals enabled)\r\nL: Low power mode (all peripherals disabled)\r\n"));
 		break;
 	}
 }
