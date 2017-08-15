@@ -20,6 +20,8 @@ double CAN_last_read_voltage = 0;
 Bool CAN_last_did_hear_chatter = false;
 uint8_t CAN_chatter_count = 0;
 
+#define READ_VOLTAGE_DIODE_DROP (0.6)
+
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
 	CTL_add_to_buffer(&CAN, buffer_select, value);
  }
@@ -525,7 +527,7 @@ uint8_t CAN_get_hear_chatter_subsequence_state() {
 }
 
 double CAN_get_last_read_voltage() {
-    return CAN_last_read_voltage;
+    return (CAN_last_read_voltage + READ_VOLTAGE_DIODE_DROP);
 }
 
 Bool CAN_get_last_did_hear_chatter() {
