@@ -523,10 +523,10 @@ void menu_sleep(void) {
                     // TODO: Check conversion errors
                     timeoutInterval = atoi(&CMD_buffer[5]);
 
-                    if (timeoutInterval <= 0 || timeoutInterval > 255)
+                    if (timeoutInterval <= 0 || timeoutInterval > 255) // TODO: don't need max check
                         usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 255."));
                     else
-                        nvm_eeprom_write_byte(EE_car_state_check_low_power_check_interval, (uint8_t) timeoutInterval);
+                        eeprom_write_int(EE_car_state_check_low_power_check_interval, (uint8_t) timeoutInterval);
 
                     break;
 
@@ -534,10 +534,10 @@ void menu_sleep(void) {
                     // TODO: Check conversion errors
                     timeoutInterval = atoi(&CMD_buffer[5]);
 
-                    if (timeoutInterval <= 0 || timeoutInterval > 255)
+                    if (timeoutInterval <= 0 || timeoutInterval > 255) // TODO: don't need max check
                         usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 255."));
                     else
-                        nvm_eeprom_write_byte(EE_car_state_check_high_power_check_interval, (uint8_t) timeoutInterval);
+                        eeprom_write_int(EE_car_state_check_high_power_check_interval, (uint8_t) timeoutInterval);
 
                     break;
 
@@ -551,8 +551,8 @@ void menu_sleep(void) {
 		case 'q': // query state of checks
             snprintf(printBuffer, 200, "Car-state check: %s\n\rLow-power car-state check interval: %d\n\rHigh-power car-state check interval: %d\n\r",
                                             nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED ? "ENABLED" : "DISABLED",
-                                            nvm_eeprom_read_byte(EE_car_state_check_low_power_check_interval),
-                                            nvm_eeprom_read_byte(EE_car_state_check_high_power_check_interval));
+                                            eeprom_read_int(EE_car_state_check_low_power_check_interval),
+                                            eeprom_read_int(EE_car_state_check_high_power_check_interval));
 
             usb_cdc_send_string(USB_CMD, printBuffer);
 

@@ -74,9 +74,9 @@ typedef enum {
 
 uint8_t CSC_get_car_state_check_default_enabled();
 
-uint8_t CSC_get_car_state_check_high_power_default_interval();
+int CSC_get_car_state_check_high_power_default_interval();
 
-uint8_t CSC_get_car_state_check_low_power_default_interval();
+int CSC_get_car_state_check_low_power_default_interval();
 
 void CSC_disable_car_state_check();
 

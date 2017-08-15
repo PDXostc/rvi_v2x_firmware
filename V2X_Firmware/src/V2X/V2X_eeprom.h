@@ -14,13 +14,13 @@
 
 enum eeprom_storage_names {
 	EE_timezone = 0,
-	EE_dst,
-	EE_verbose,
-	EE_car_state_check_enabled,
-	EE_car_state_check_low_power_check_interval,
-	EE_car_state_check_high_power_check_interval,
-	EE_check_byte,
-	EE_can_array //must be last
+	EE_dst = 1,
+	EE_verbose = 2,
+	EE_car_state_check_enabled = 3,
+	EE_car_state_check_low_power_check_interval = 4,
+	EE_car_state_check_high_power_check_interval = 6, // skip two for low/high bytes of previous addr
+	EE_check_byte = 8, // skip two for low/high bytes of previous addr
+	EE_can_array = 9 //must be last
 	};
 
 /**
@@ -29,6 +29,23 @@ enum eeprom_storage_names {
  *		if not correct, default values are saved then loaded
  **/
 void eeprom_init (void);
+
+/**
+ * @def eeprom_read_int
+ * @brief helper function for retrieving ints
+ * @param addr of high byte
+ * @return value stored in eeprom
+ */
+int eeprom_read_int(eeprom_addr_t addr);
+
+/**
+ * @def eeprom_write_int
+ * @brief helper function for storing ints
+ * @param addr of high byte
+ * @param value int value to be stored
+ */
+
+void eeprom_write_int(eeprom_addr_t addr, int value);
 
 /**
  * @def eeprom_store_CAN_string
