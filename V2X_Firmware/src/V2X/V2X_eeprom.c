@@ -14,8 +14,10 @@ void eeprom_init (void) {
 		nvm_eeprom_write_byte(EE_dst, time_dst_get());
 		nvm_eeprom_write_byte(EE_verbose, menu_verbose());
 		nvm_eeprom_write_byte(EE_car_state_check_enabled, CSC_get_car_state_check_default_enabled());
-		eeprom_write_int(EE_car_state_check_low_power_check_interval, CSC_get_car_state_check_low_power_default_interval());
-        eeprom_write_int(EE_car_state_check_high_power_check_interval, CSC_get_car_state_check_high_power_default_interval());
+        eeprom_write_unsigned_int_16(EE_car_state_check_low_power_check_interval,
+                                     CSC_get_car_state_check_low_power_default_interval());
+        eeprom_write_unsigned_int_16(EE_car_state_check_high_power_check_interval,
+                                     CSC_get_car_state_check_high_power_default_interval());
 		
 		for (int i = 0; i < EE_CAN_ARRAY_SIZE; i++) {
 			nvm_eeprom_write_byte(EE_can_array + i, '\0');  //add null at start
@@ -25,19 +27,21 @@ void eeprom_init (void) {
 	}
 }
 
-void eeprom_write_int(eeprom_addr_t addr, int value) {
-    // TODO: Check sizeof int on system?
-    // TODO: What about negatives?
+void eeprom_write_unsigned_int_16(eeprom_addr_t addr, uint16_t value) {
 
-    // TODO: Implement
+    uint8_t high = (value>>8);
+    uint8_t low  = value & 0xff;
 
-    nvm_eeprom_write_byte(addr, (uint8_t) value);
+    nvm_eeprom_write_byte(addr, high);
+    nvm_eeprom_write_byte(addr+1, low);
 }
 
-int eeprom_read_int(eeprom_addr_t addr) {
-    // TODO
+uint16_t eeprom_read_unsigned_int_16(eeprom_addr_t addr) {
 
-    return nvm_eeprom_read_byte(addr);
+    uint8_t high = nvm_eeprom_read_byte(addr);
+    uint8_t low  = nvm_eeprom_read_byte(addr+1);
+
+    return high << 8 | low;
 }
 
 void eeprom_store_CAN_string (char * buffer) {

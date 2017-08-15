@@ -36,7 +36,7 @@ void eeprom_init (void);
  * @param addr of high byte
  * @return value stored in eeprom
  */
-int eeprom_read_int(eeprom_addr_t addr);
+uint16_t eeprom_read_unsigned_int_16(eeprom_addr_t addr);
 
 /**
  * @def eeprom_write_int
@@ -45,7 +45,7 @@ int eeprom_read_int(eeprom_addr_t addr);
  * @param value int value to be stored
  */
 
-void eeprom_write_int(eeprom_addr_t addr, int value);
+void eeprom_write_unsigned_int_16(eeprom_addr_t addr, uint16_t value);
 
 /**
  * @def eeprom_store_CAN_string

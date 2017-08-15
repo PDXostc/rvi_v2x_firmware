@@ -3,8 +3,9 @@
  *
  * Created: 3/10/2016 12:25:37 PM
  *  Author: jbanks2
- */ 
+ */
 
+#include <errno.h>
 #include "V2X.h"
 
 volatile buff CAN;
@@ -325,7 +326,12 @@ double CAN_parse_voltage_regex(char * buffer) {
 
     char* pEnd;
     double voltageVal;
-    voltageVal = strtod(buffer, &pEnd); // TODO: Check conversion errors
+
+    errno = 0;
+    voltageVal = strtod(buffer, &pEnd);
+
+    if (errno == ERANGE)
+        return -1;
 
     if (!voltageVal)
         return -1;
