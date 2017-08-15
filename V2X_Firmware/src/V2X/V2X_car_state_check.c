@@ -38,22 +38,26 @@ uint8_t CSC_get_timeout_for_car_state() {
     return CSC_low_power_car_check_timeout();
 }
 
-Bool CSC_enable_car_state_check() {
-    if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't enable the check; it'll overwrite our timer job. */
-        return false;
+void CSC_enable_car_state_check() {
+    if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't overwrite the check timeout; assume already be enabled. */
+        return;
 
     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
-
-    return true;
 }
 
-Bool CSC_disable_car_state_check() {
-    if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't disable the check; it'll overwrite our timer job. */
-        return false;
+void CSC_disable_car_state_check() {
+    if (CSC_sequence_state == CSC_state_low_power) {
+        CSC_low_power_subsequence_state = CSC_low_power_subsequence_FAIL;
+        CSC_car_state_check();
+
+    } else if (CSC_sequence_state == CSC_state_high_power) {
+        CSC_high_power_subsequence_state = CSC_high_power_subsequence_FAIL;
+        CSC_car_state_check();
+
+    }
 
     job_clear_timeout(SYS_CAR_STATE_CHECK);
 
-    return true;
 }
 
 void CSC_car_state_low_power_flow();
