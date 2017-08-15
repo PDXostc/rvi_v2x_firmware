@@ -16,6 +16,9 @@ enum eeprom_storage_names {
 	EE_timezone = 0,
 	EE_dst,
 	EE_verbose,
+	EE_car_state_check_enabled,
+	EE_car_state_check_low_power_check_interval,
+	EE_car_state_check_high_power_check_interval,
 	EE_check_byte,
 	EE_can_array //must be last
 	};
