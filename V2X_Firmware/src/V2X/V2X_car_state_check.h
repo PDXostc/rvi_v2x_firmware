@@ -70,9 +70,9 @@ typedef enum {
 } CSC_HIGH_POWER_SUBSEQUENCE_STATE;
 
 
-Bool CSC_disable_car_state_check();
+void CSC_disable_car_state_check();
 
-Bool CSC_enable_car_state_check();
+void CSC_enable_car_state_check();
 
 void CSC_car_state_check();
 
