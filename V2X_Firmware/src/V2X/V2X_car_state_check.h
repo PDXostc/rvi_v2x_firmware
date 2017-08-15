@@ -72,17 +72,17 @@ typedef enum {
     CSC_high_power_subsequence_FAIL
 } CSC_HIGH_POWER_SUBSEQUENCE_STATE;
 
-uint8_t CSC_get_car_state_check_default_enabled();
+uint8_t CSC_get_car_state_check_default_enabled(void);
 
-int CSC_get_car_state_check_high_power_default_interval();
+int CSC_get_car_state_check_high_power_default_interval(void);
 
-int CSC_get_car_state_check_low_power_default_interval();
+int CSC_get_car_state_check_low_power_default_interval(void);
 
-void CSC_disable_car_state_check();
+void CSC_disable_car_state_check(void);
 
-void CSC_enable_car_state_check();
+void CSC_enable_car_state_check(void);
 
-void CSC_car_state_check();
+void CSC_car_state_check(void);
 
 
 #endif /* V2X_CAR_STATE_CHECK_H_ */

@@ -88,7 +88,7 @@ Bool PWR_query(SHIFT_REGISTER_TYPE mask);
  * @brief returns true if none of the 4 or 5 Vs are enabled
  * @return true if none of the 4 or 5 Vs are enabled, else false
  */
-Bool PWR_is_low_power();
+Bool PWR_is_low_power(void);
 
 /**
  * @def PWR_3_start
