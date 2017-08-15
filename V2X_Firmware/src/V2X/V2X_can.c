@@ -317,6 +317,7 @@ void CAN_read_voltage_start(void) {
  * @param buffer
  * @return the voltage reading, or -1 if there's an error
  */
+double CAN_parse_voltage_regex(char * buffer);
 double CAN_parse_voltage_regex(char * buffer) {
 
     /* If the value starts with '0', forget the decimal and return 0, as the voltage may as well be 0.
@@ -408,6 +409,7 @@ void CAN_hear_chatter_start(void) {
  * @param buffer
  * @return the voltage reading, or -1 if there's an error
  */
+void CAN_parse_chatter(char * buffer);
 void CAN_parse_chatter(char * buffer) {
 	static uint8_t chatterCount = 0;
 	

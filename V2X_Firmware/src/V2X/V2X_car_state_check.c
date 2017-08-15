@@ -33,13 +33,19 @@ uint8_t CSC_get_car_state_check_default_enabled(void) {
     return CSC_CAR_STATE_CHECK_ENABLED;
 }
 
+int CSC_low_power_car_check_timeout(void);
+
 int CSC_low_power_car_check_timeout(void) {
     return eeprom_read_int(EE_car_state_check_low_power_check_interval);
 }
 
+int CSC_high_power_car_check_timeout(void);
+
 int CSC_high_power_car_check_timeout(void) {
     return eeprom_read_int(EE_car_state_check_high_power_check_interval);
 }
+
+int CSC_get_timeout_for_car_state(void);
 
 int CSC_get_timeout_for_car_state(void) {
     if (CSC_car_state == CSC_car_state_running)
