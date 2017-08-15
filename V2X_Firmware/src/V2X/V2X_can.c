@@ -324,7 +324,7 @@ double CAN_parse_voltage_regex(char * buffer) {
 
     char* pEnd;
     double voltageVal;
-    voltageVal = strtod(buffer, &pEnd);
+    voltageVal = strtod(buffer, &pEnd); // TODO: Check conversion errors
 
     if (!voltageVal)
         return -1;
@@ -411,7 +411,7 @@ void CAN_hear_chatter_start() {
 void CAN_parse_chatter(char * buffer) {
 	static uint8_t chatterCount = 0;
 	
-	if (CAN_last_did_hear_chatter == false) { // && check if hex byte or something?
+	if (CAN_last_did_hear_chatter == false) { // && TODO check if hex byte or something?
 		chatterCount++;
 	}
 	
