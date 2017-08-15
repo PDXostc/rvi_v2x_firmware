@@ -5,6 +5,7 @@
  *  Author: jbanks2
  */
 
+#include <errno.h>
 #include "V2X.h"
 #include "ctype.h"
 
@@ -449,7 +450,7 @@ void menu_timer(void) {
 void menu_sleep(void) {
 	CMD_buffer[4] = tolower(CMD_buffer[4]);
 
-    int timeoutInterval = 0;
+    long timeoutInterval = 0;
     char printBuffer[200];
 
 	switch (CMD_buffer[3]) {
@@ -517,27 +518,31 @@ void menu_sleep(void) {
 			
 			break;  //enable sleep-state checks
 
-        case 't':  //enable sleep-state checks
+        case 't':  // set check timeout intervals
 			switch (CMD_buffer[4]) {
-				case 'l':  // Car-on check
-                    // TODO: Check conversion errors
-                    timeoutInterval = atoi(&CMD_buffer[5]);
+				case 'l':
 
-                    if (timeoutInterval <= 0 || timeoutInterval > 255) // TODO: don't need max check
-                        usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 255."));
+                    errno = 0;
+                    timeoutInterval = strtol(&CMD_buffer[5], NULL, 10);
+
+                    if (timeoutInterval <= 0 || timeoutInterval > 65535 || errno == ERANGE)
+                        usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 65,535."));
                     else
-                        eeprom_write_int(EE_car_state_check_low_power_check_interval, (uint8_t) timeoutInterval);
+						eeprom_write_unsigned_int_16(EE_car_state_check_low_power_check_interval,
+													 (uint16_t) timeoutInterval);
 
                     break;
 
-				case 'h':  // Accelerometer check
-                    // TODO: Check conversion errors
-                    timeoutInterval = atoi(&CMD_buffer[5]);
+				case 'h':
 
-                    if (timeoutInterval <= 0 || timeoutInterval > 255) // TODO: don't need max check
-                        usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 255."));
+                    errno = 0;
+					timeoutInterval = strtol(&CMD_buffer[5], NULL, 10);
+
+                    if (timeoutInterval <= 0 || timeoutInterval > 65535 || errno == ERANGE)
+                        usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 65,535."));
                     else
-                        eeprom_write_int(EE_car_state_check_high_power_check_interval, (uint8_t) timeoutInterval);
+						eeprom_write_unsigned_int_16(EE_car_state_check_high_power_check_interval,
+													 (uint16_t) timeoutInterval);
 
                     break;
 
@@ -546,13 +551,13 @@ void menu_sleep(void) {
 					break;
 			}
 
-			break;  //enable sleep-state checks
+			break;  // set check timeout intervals
 			
 		case 'q': // query state of checks
-            snprintf(printBuffer, 200, "Car-state check: %s\n\rLow-power car-state check interval: %d\n\rHigh-power car-state check interval: %d\n\r",
-                                            nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED ? "ENABLED" : "DISABLED",
-                                            eeprom_read_int(EE_car_state_check_low_power_check_interval),
-                                            eeprom_read_int(EE_car_state_check_high_power_check_interval));
+            snprintf(printBuffer, 200, "Car-state check: %s\n\rLow-power car-state check interval: %u\n\rHigh-power car-state check interval: %u\n\r",
+											nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED ? "ENABLED" : "DISABLED",
+											eeprom_read_unsigned_int_16(EE_car_state_check_low_power_check_interval),
+											eeprom_read_unsigned_int_16(EE_car_state_check_high_power_check_interval));
 
             usb_cdc_send_string(USB_CMD, printBuffer);
 

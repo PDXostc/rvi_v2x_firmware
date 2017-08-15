@@ -21,11 +21,11 @@ CSC_SEQUENCE_STATE               CSC_sequence_state               = CSC_state_st
 CSC_LOW_POWER_SUBSEQUENCE_STATE  CSC_low_power_subsequence_state  = CSC_low_power_subsequence_1;
 CSC_HIGH_POWER_SUBSEQUENCE_STATE CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
 
-int CSC_get_car_state_check_low_power_default_interval(void) {
+uint16_t CSC_get_car_state_check_low_power_default_interval(void) {
     return CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
 }
 
-int CSC_get_car_state_check_high_power_default_interval(void) {
+uint16_t CSC_get_car_state_check_high_power_default_interval(void) {
     return CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
 }
 
@@ -33,21 +33,21 @@ uint8_t CSC_get_car_state_check_default_enabled(void) {
     return CSC_CAR_STATE_CHECK_ENABLED;
 }
 
-int CSC_low_power_car_check_timeout(void);
+uint16_t CSC_low_power_car_check_timeout(void);
 
-int CSC_low_power_car_check_timeout(void) {
-    return eeprom_read_int(EE_car_state_check_low_power_check_interval);
+uint16_t CSC_low_power_car_check_timeout(void) {
+    return eeprom_read_unsigned_int_16(EE_car_state_check_low_power_check_interval);
 }
 
-int CSC_high_power_car_check_timeout(void);
+uint16_t CSC_high_power_car_check_timeout(void);
 
-int CSC_high_power_car_check_timeout(void) {
-    return eeprom_read_int(EE_car_state_check_high_power_check_interval);
+uint16_t CSC_high_power_car_check_timeout(void) {
+    return eeprom_read_unsigned_int_16(EE_car_state_check_high_power_check_interval);
 }
 
-int CSC_get_timeout_for_car_state(void);
+uint16_t CSC_get_timeout_for_car_state(void);
 
-int CSC_get_timeout_for_car_state(void) {
+uint16_t CSC_get_timeout_for_car_state(void) {
     if (CSC_car_state == CSC_car_state_running)
         return CSC_high_power_car_check_timeout();
 
