@@ -21,14 +21,24 @@ CSC_SEQUENCE_STATE               CSC_sequence_state               = CSC_state_st
 CSC_LOW_POWER_SUBSEQUENCE_STATE  CSC_low_power_subsequence_state  = CSC_low_power_subsequence_1;
 CSC_HIGH_POWER_SUBSEQUENCE_STATE CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
 
-uint8_t CSC_low_power_car_check_timeout() {
-    // TODO: Read from eeprom
+uint8_t CSC_get_car_state_check_low_power_default_interval() {
     return CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
 }
 
-uint8_t CSC_high_power_car_check_timeout() {
-    // TODO: Read from eeprom
+uint8_t CSC_get_car_state_check_high_power_default_interval() {
     return CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
+}
+
+uint8_t CSC_get_car_state_check_default_enabled() {
+    return CSC_CAR_STATE_CHECK_ENABLED;
+}
+
+uint8_t CSC_low_power_car_check_timeout() {
+    return nvm_eeprom_read_byte(EE_car_state_check_low_power_check_interval);
+}
+
+uint8_t CSC_high_power_car_check_timeout() {
+    return nvm_eeprom_read_byte(EE_car_state_check_high_power_check_interval);
 }
 
 uint8_t CSC_get_timeout_for_car_state() {
@@ -41,6 +51,8 @@ uint8_t CSC_get_timeout_for_car_state() {
 void CSC_enable_car_state_check() {
     if (CSC_sequence_state != CSC_state_start) /* Then we are in the middle of a thing and really shouldn't overwrite the check timeout; assume already be enabled. */
         return;
+
+    nvm_eeprom_write_byte(EE_car_state_check_enabled, CSC_CAR_STATE_CHECK_ENABLED);
 
     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 }
@@ -56,8 +68,9 @@ void CSC_disable_car_state_check() {
 
     }
 
-    job_clear_timeout(SYS_CAR_STATE_CHECK);
+    nvm_eeprom_write_byte(EE_car_state_check_enabled, CSC_CAR_STATE_CHECK_DISABLED);
 
+    job_clear_timeout(SYS_CAR_STATE_CHECK);
 }
 
 void CSC_car_state_low_power_flow();

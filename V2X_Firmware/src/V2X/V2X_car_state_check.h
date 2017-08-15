@@ -10,6 +10,9 @@
 #define V2X_CAR_STATE_CHECK_H_
 
 
+#define CSC_CAR_STATE_CHECK_ENABLED  2
+#define CSC_CAR_STATE_CHECK_DISABLED 1
+
 /**
  * @def CSC_CAR_STATES
  * @brief switch for selecting car off/on states
@@ -69,6 +72,11 @@ typedef enum {
     CSC_high_power_subsequence_FAIL
 } CSC_HIGH_POWER_SUBSEQUENCE_STATE;
 
+uint8_t CSC_get_car_state_check_default_enabled();
+
+uint8_t CSC_get_car_state_check_high_power_default_interval();
+
+uint8_t CSC_get_car_state_check_low_power_default_interval();
 
 void CSC_disable_car_state_check();
 

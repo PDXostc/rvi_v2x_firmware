@@ -13,6 +13,10 @@ void eeprom_init (void) {
 		nvm_eeprom_write_byte(EE_timezone, time_zone_get());
 		nvm_eeprom_write_byte(EE_dst, time_dst_get());
 		nvm_eeprom_write_byte(EE_verbose, menu_verbose());
+		nvm_eeprom_write_byte(EE_car_state_check_enabled, CSC_get_car_state_check_default_enabled());
+		nvm_eeprom_write_byte(EE_car_state_check_low_power_check_interval, CSC_get_car_state_check_low_power_default_interval());
+		nvm_eeprom_write_byte(EE_car_state_check_high_power_check_interval, CSC_get_car_state_check_high_power_default_interval());
+		
 		for (int i = 0; i < EE_CAN_ARRAY_SIZE; i++) {
 			nvm_eeprom_write_byte(EE_can_array + i, '\0');  //add null at start
 		}
