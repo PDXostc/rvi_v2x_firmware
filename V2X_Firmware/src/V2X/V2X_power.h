@@ -11,6 +11,12 @@
 
 #include "V2X_board.h"
 
+typedef enum {
+	PWR_WAKE_UP_REASON_UNKNOWN,
+	PWR_WAKE_UP_REASON_BUTTON,
+	PWR_WAKE_UP_REASON_CAR_RUNNING,
+} PWR_WAKE_UP_REASON;
+
 /**
  * @def SHIFT_REGISTER_TYPE
  * @brief shift register type, bit length determined by hardware
@@ -197,4 +203,9 @@ void PWR_mode_high(void);
  * @brief Turn off all peripherals and higher power rails, using only 3v and micro
  */
 void PWR_mode_low(void);
+
+void PWR_set_wake_up_reason(PWR_WAKE_UP_REASON reason);
+
+PWR_WAKE_UP_REASON PWR_get_wake_up_reason(void);
+
 #endif /* V2X_DRIVERS_H_ */

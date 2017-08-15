@@ -8,6 +8,8 @@
 
 #include "V2X.h"
 
+PWR_WAKE_UP_REASON PWR_wake_up_reason = PWR_WAKE_UP_REASON_UNKNOWN;
+
 void PWR_init(void)
 {
 	/* Need to drive high 3v3_EN signal here, to ensure CPU operation.
@@ -21,6 +23,8 @@ void PWR_init(void)
 	PWR_3_is_needed();
 	PWR_push();		//update shift register state
 	delay_ms(100);				//allow power to stabilize
+
+    PWR_wake_up_reason = PWR_WAKE_UP_REASON_BUTTON;
 }
 
 void PWR_latch(void)
@@ -215,4 +219,12 @@ void PWR_mode_low(void) {
 	// maybe we'd like to force the leds to update here, just in case...
 	led_1_off();
 	led_2_off();
+}
+
+void PWR_set_wake_up_reason(PWR_WAKE_UP_REASON reason) {
+    PWR_wake_up_reason = reason;
+}
+
+PWR_WAKE_UP_REASON PWR_get_wake_up_reason(void) {
+    return PWR_wake_up_reason;
 }

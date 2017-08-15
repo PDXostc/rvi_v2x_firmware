@@ -245,6 +245,8 @@ void CSC_car_state_low_power_flow(void) {
                     CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
                     CSC_car_state = CSC_car_state_running;
 
+                    PWR_set_wake_up_reason(PWR_WAKE_UP_REASON_CAR_RUNNING);
+
                     PWR_mode_high();
 
                     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
