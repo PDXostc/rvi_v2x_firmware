@@ -448,7 +448,10 @@ void menu_timer(void) {
 
 void menu_sleep(void) {
 	CMD_buffer[4] = tolower(CMD_buffer[4]);
-	
+
+    int timeoutInterval = 0;
+    char printBuffer[200];
+
 	switch (CMD_buffer[3]) {
 		case 'd':  //disable sleep-state checks
 			switch (CMD_buffer[4]) {
@@ -513,18 +516,55 @@ void menu_sleep(void) {
 			}
 			
 			break;  //enable sleep-state checks
+
+        case 't':  //enable sleep-state checks
+			switch (CMD_buffer[4]) {
+				case 'l':  // Car-on check
+                    // TODO: Check conversion errors
+                    timeoutInterval = atoi(&CMD_buffer[5]);
+
+                    if (timeoutInterval <= 0 || timeoutInterval > 255)
+                        usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 255."));
+                    else
+                        nvm_eeprom_write_byte(EE_car_state_check_low_power_check_interval, (uint8_t) timeoutInterval);
+
+                    break;
+
+				case 'h':  // Accelerometer check
+                    // TODO: Check conversion errors
+                    timeoutInterval = atoi(&CMD_buffer[5]);
+
+                    if (timeoutInterval <= 0 || timeoutInterval > 255)
+                        usb_tx_string_P(PSTR("Invalid interval. Value must be between 1 and 255."));
+                    else
+                        nvm_eeprom_write_byte(EE_car_state_check_high_power_check_interval, (uint8_t) timeoutInterval);
+
+                    break;
+
+				default:
+					menu_send_q();
+					break;
+			}
+
+			break;  //enable sleep-state checks
 			
 		case 'q': // query state of checks
-			
-			break;
+            snprintf(printBuffer, 200, "Car-state check: %s\n\rLow-power car-state check interval: %d\n\rHigh-power car-state check interval: %d\n\r",
+                                            nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED ? "ENABLED" : "DISABLED",
+                                            nvm_eeprom_read_byte(EE_car_state_check_low_power_check_interval),
+                                            nvm_eeprom_read_byte(EE_car_state_check_high_power_check_interval));
+
+            usb_cdc_send_string(USB_CMD, printBuffer);
+
+            break;
 			
 		case 'i': // briefly describe function of the sleep-state timer checks
-			usb_tx_string_P(PSTR("Allows Enable/Disable of checks performed while the host is sleeping\r\n"));
-			break;
+            usb_tx_string_P(PSTR("Allows enable/disable and interval control of scheduled checks performed\r\n"));
+            break;
 				
 		case '?':
 		default:
-			usb_tx_string_P(PSTR("*** Sleep-State Checks Menu ***\r\nE<N>: Enable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nD<N>: Disable Sleep-State Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS movenent)\r\nQ: Query status of sleep-state checks\r\nI: Info on sleep-state timer checks\r\n"));
+			usb_tx_string_P(PSTR("*** Sleep-State Checks Menu ***\r\nE<N>: Enable Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS Movement)\r\nD<N>: Disable Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS Movement)\r\nT<N>XXXX: Update Check Timeout Interval ([L]ow-Power Car-State Check Interval, [H]igh-Power Car-State Check Interval)\r\nQ: Query status of checks\r\nI: Info on checks\r\n"));
 			break;
 	}
 }
