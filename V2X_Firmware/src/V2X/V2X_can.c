@@ -21,7 +21,8 @@ double CAN_last_read_voltage = 0;
 Bool CAN_last_did_hear_chatter = false;
 uint8_t CAN_chatter_count = 0;
 
-#define READ_VOLTAGE_DIODE_DROP (0.6)
+#define READ_VOLTAGE_DIODE_DROP  (0.6)
+#define CAN_HEARD_CHATTER_CUTOFF 10
 
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
 	CTL_add_to_buffer(&CAN, buffer_select, value);
@@ -417,15 +418,12 @@ void CAN_hear_chatter_start(void) {
  */
 void CAN_parse_chatter(char * buffer);
 void CAN_parse_chatter(char * buffer) {
-	static uint8_t chatterCount = 0;
-	
 	if (CAN_last_did_hear_chatter == false) { // && TODO check if hex byte or something?
-		chatterCount++;
+		CAN_chatter_count++;
 	}
 	
-	if (chatterCount > 10) {
+	if (CAN_chatter_count > CAN_HEARD_CHATTER_CUTOFF) {
 		CAN_last_did_hear_chatter = true;
-		chatterCount = 0;
 	}
 }
 
@@ -453,7 +451,7 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
 				CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
 
 				CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_3;
-				job_set_timeout(SYS_CAN, 3);
+				job_set_timeout(SYS_CAN, 1);
 
             } else {
                 CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_FAIL;
