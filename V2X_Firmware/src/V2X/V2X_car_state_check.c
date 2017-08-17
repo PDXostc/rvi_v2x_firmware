@@ -11,16 +11,16 @@
 #define CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT  10
 #define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 3
 
-#define CSC_CAN_INIT_TIMEOUT               1
-#define CSC_CAN_INIT_RETRY_TIMEOUT         1
-#define CSC_CAN_HEAR_CHATTER_TIMEOUT       1
-#define CSC_CAN_HEAR_CHATTER_RETRY_TIMEOUT 1
-#define CSC_CAN_READ_VOLTAGE_TIMEOUT       1
-#define CSC_CAN_READ_VOLTAGE_RETRY_TIMEOUT 1
+#define CSC_CAN_INIT_TIMEOUT               0
+#define CSC_CAN_INIT_RETRY_TIMEOUT         0
+#define CSC_CAN_HEAR_CHATTER_TIMEOUT       0
+#define CSC_CAN_HEAR_CHATTER_RETRY_TIMEOUT 0
+#define CSC_CAN_READ_VOLTAGE_TIMEOUT       0
+#define CSC_CAN_READ_VOLTAGE_RETRY_TIMEOUT 0
 
-#define CSC_CAN_INIT_NUM_RETRIES         5
-#define CSC_CAN_HEAR_CHATTER_NUM_RETRIES 5
-#define CSC_CAN_READ_VOLTAGE_NUM_RETRIES 5
+#define CSC_CAN_INIT_NUM_RETRIES         1000
+#define CSC_CAN_HEAR_CHATTER_NUM_RETRIES 1000
+#define CSC_CAN_READ_VOLTAGE_NUM_RETRIES 1000
 
 CSC_CAR_STATE                    CSC_car_state                    = CSC_car_state_unknown;
 CSC_SEQUENCE_STATE               CSC_sequence_state               = CSC_state_start;
@@ -163,6 +163,7 @@ void CSC_car_state_check(void) {
 
     switch (CSC_sequence_state) {
         case CSC_state_start:
+		
             menu_send_CSC();
             usb_tx_string_PVO(PSTR("Car-state check - "));
 
