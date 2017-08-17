@@ -453,7 +453,7 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
 				CTL_mark_for_processing(&CAN, BUFFER_OUT); //send it
 
 				CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_3;
-				job_set_timeout(SYS_CAN, 3);
+				job_set_timeout(SYS_CAN, 1);
 
             } else {
                 CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_FAIL;
