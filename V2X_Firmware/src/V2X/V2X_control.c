@@ -150,8 +150,10 @@ void CTL_input_proc_index_check (buff * buffer) {
 void job_coordinator (void) {
 	uint32_t temp_time = time_get();
 	if (temp_time % 60 == 0) { //check every minute
-		if (time_is_current() == 0) { //needs a sync
-			GSM_time_job(); //kick off a time sync job
+		if (PWR_query(ENABLE_SIM_RESET)) { //if sim chip not in reset i.e. low power mode
+			if (time_is_current() == 0) { //if needs a sync
+				GSM_time_job(); //kick off a time sync job
+			}
 		}
 	}
 
