@@ -27,7 +27,7 @@ void time_init(void) {
 	rtc_init();
 	rtc_set_time(time_seed);
 	rtc_set_callback(time_alarm_event);
-	time_zone = nvm_eeprom_read_byte(EE_timezone) - TZ_OFFSET;
+	time_zone = nvm_eeprom_read_byte(EE_timezone) - RTC_TZ_OFFSET;
 	dst = nvm_eeprom_read_byte(EE_dst);
 }
 
@@ -102,12 +102,16 @@ void time_validity_check (void){
 }
 
 void time_zone_set (int zone) {
-	nvm_eeprom_write_byte(EE_timezone , zone + TZ_OFFSET);
+	nvm_eeprom_write_byte(EE_timezone , zone + RTC_TZ_OFFSET);
 	time_zone = zone;
 }
 
 int time_zone_get (void) {
 	return (time_zone);
+}
+
+int time_zone_default_offset (void) {
+	return RTC_DEFAULT_TIMEZONE_OFFSET;
 }
 
 void time_print_human_readable (void) {

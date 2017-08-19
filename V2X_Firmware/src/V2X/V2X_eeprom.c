@@ -10,7 +10,7 @@
 void eeprom_init (void) {
 	if ( nvm_eeprom_read_byte(EE_check_byte) != EE_CHECK_VALUE) {
 		//the check byte was not found, set EE defaults
-		nvm_eeprom_write_byte(EE_timezone, -6);  //default TZ for Nevada
+		nvm_eeprom_write_byte(EE_timezone, time_zone_default_offset());  
 		nvm_eeprom_write_byte(EE_dst, time_dst_get());
 		nvm_eeprom_write_byte(EE_verbose, menu_verbose());
 		nvm_eeprom_write_byte(EE_car_state_check_enabled, CSC_get_car_state_check_default_enabled());
