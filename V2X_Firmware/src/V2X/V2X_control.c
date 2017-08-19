@@ -136,13 +136,13 @@ void CTL_copy_to_proc(buff * buffer) { //enters with buffer->input_proc_flag tru
 }
 
 void CTL_input_index_check (buff * buffer) {
-	if (buffer->input_index == sizeof(buffer->input_buf)) {
+	if (buffer->input_index >= sizeof(buffer->input_buf)) {
 		buffer->input_index = 0; //reset pointer
 	}
 }
 
 void CTL_input_proc_index_check (buff * buffer) {
-	if (buffer->input_proc_index == sizeof(buffer->input_buf)) {
+	if (buffer->input_proc_index >= sizeof(buffer->input_buf)) {
 		buffer->input_proc_index = 0; //reset pointer
 	}
 }

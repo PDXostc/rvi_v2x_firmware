@@ -15,12 +15,14 @@
  * returns "true" if SIMCARD installed
  **/
 inline static bool simcard_status(void) {return 1-ioport_get_pin_level(SW1_PIN);}
+	
 	/**
  * @def sim_power_status
  * @brief detection of SIM module by pin
  * returns "true" if SIM module is powered
  **/
 inline static bool sim_power_status(void) {return ioport_get_pin_level(EXT1_PIN_SIM_PWR);}
+	
 /**
  * @def sim_net_status
  * @brief detection of SIM network status pin
@@ -46,7 +48,6 @@ void GSM_clear_tx_int(void);
  * @param buffer_select (0,1) input/output
  */
 void GSM_process_buffer (void);
-
 
 /**
  * @def GSM_add_string_to_buffer

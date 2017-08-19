@@ -42,7 +42,7 @@ enum CAN_init_subsequence_states {
 
 /**
  * @def CAN_ee_subsequence_states
- * @brief generic switch for moving through control substates during ee sequence
+ * @brief switch for moving through control substates during ee sequence
  */
 enum CAN_ee_subsequence_states {
 	CAN_ee_subsequence_1 = 0,
@@ -59,6 +59,10 @@ enum CAN_ee_subsequence_states {
 	CAN_ee_subsequence_FAIL
 	};
 
+/**
+ * @def CAN_read_voltage_subsequence_states
+ * @brief switch for moving through control substates
+ **/
 enum CAN_read_voltage_subsequence_states {
     CAN_read_voltage_subsequence_1,
     CAN_read_voltage_subsequence_2,
@@ -69,6 +73,10 @@ enum CAN_read_voltage_subsequence_states {
     CAN_read_voltage_subsequence_FAIL,
 };
 
+/**
+ * @def CAN_hear_chatter_subsequence_states
+ * @brief switch for moving through control substates
+ **/
 enum CAN_hear_chatter_subsequence_states {
     CAN_hear_chatter_subsequence_1,
     CAN_hear_chatter_subsequence_2,
@@ -319,4 +327,10 @@ double CAN_get_last_read_voltage(void);
  */
 Bool CAN_get_last_did_hear_chatter(void);
 
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_CAN_H_ */

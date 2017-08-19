@@ -65,8 +65,7 @@ int button_get_delta(void) {
 }
 
 
-void button_reset_delta(void)
-{
+void button_reset_delta(void){
 	button_delta = 0;
 }
 

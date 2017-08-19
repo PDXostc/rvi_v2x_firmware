@@ -147,14 +147,14 @@ void CTL_copy_to_proc (buff * buffer);
 
 /**
  * @def CTL_input_index_check
- * @brief 
+ * @brief looks to see if the buffer size has been exceeded
  * @param *buffer pointer to the buffer struct buff_t
  **/
 void CTL_input_index_check (buff * buffer);
 
 /**
  * @def CTL_input_proc_index_check
- * @brief 
+ * @brief looks to see if the buffer size has been exceeded
  * @param *buffer pointer to the buffer struct buff_t
  **/
 void CTL_input_proc_index_check (buff * buffer);
