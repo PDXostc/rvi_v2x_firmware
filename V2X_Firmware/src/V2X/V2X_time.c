@@ -55,7 +55,7 @@ void time_dst_set(Bool set) {
 }
 
 Bool time_dst_get (void) {
-	return dst;
+	return dst = nvm_eeprom_read_byte(EE_dst);
 }
 
 long time_get(void) {
@@ -146,8 +146,8 @@ void time_set_by_strings (char * date, char * time) {
 	for (int i = 0; i < 2; i++) {bufr[i] = time[i+4];}
 	date_s.second = atoi(bufr);
 
-	long new_time = calendar_date_to_timestamp_tz(&date_s, 0, 0); 	// GPS time handled as Zulu time, no offset while setting
-	time_set(new_time);
+	long new_time = calendar_date_to_timestamp_tz(&date_s, 0, 0); 	// GPS time handled as Zulu time,
+	time_set(new_time - RTC_UTC_GPS_OFFSET); // "GPS is now ahead of UTC by 18 seconds" -> http://leapsecond.com/java/gpsclock.htm
 
 }
 

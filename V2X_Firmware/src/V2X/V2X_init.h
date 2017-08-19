@@ -8,6 +8,10 @@
 #ifndef V2X_INIT_H_
 #define V2X_INIT_H_
 
+/**
+ * @def reset_flag_defs
+ * @param used to track what system is being serviced
+ **/
 enum reset_flag_defs {
 	RESET_NONE = 0,
 	RESET_SYSTEM,
@@ -58,4 +62,10 @@ void reset_trigger_CAN (void);
  **/
 void reset_trigger_GSM (void);
 
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_INIT_H_ */

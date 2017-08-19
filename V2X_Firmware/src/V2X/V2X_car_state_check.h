@@ -72,17 +72,49 @@ typedef enum {
     CSC_high_power_subsequence_FAIL
 } CSC_HIGH_POWER_SUBSEQUENCE_STATE;
 
+/**
+ * @def CSC_get_car_state_check_default_enabled
+ * @brief gets the default value from the submodule
+ * @retval default value in seconds
+ **/
 uint8_t CSC_get_car_state_check_default_enabled(void);
 
+/**
+ * @def CSC_get_car_state_check_high_power_default_interval
+ * @brief gets the default value from the submodule
+ * @retval default value in seconds
+ **/
 uint16_t CSC_get_car_state_check_high_power_default_interval(void);
 
+/**
+ * @def CSC_get_car_state_check_low_power_default_interval
+ * @brief gets the default value from the submodule
+ * @retval default value in seconds
+ **/
 uint16_t CSC_get_car_state_check_low_power_default_interval(void);
 
+/**
+ * @def CSC_disable_car_state_check
+ * @brief stops the CSC from running and save to EEPROM
+ **/
 void CSC_disable_car_state_check(void);
 
+/**
+ * @def CSC_enable_car_state_check
+ * @brief starts the CSC from running and save to EEPROM
+ **/
 void CSC_enable_car_state_check(void);
 
+/**
+ * @def CSC_car_state_check
+ * @brief the job processor of the CSC state machine
+ **/
 void CSC_car_state_check(void);
 
-
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_CAR_STATE_CHECK_H_ */

@@ -11,9 +11,13 @@
 
 #define time_seed 1456961042  //time starter
 #define RTC_VALIDITY_PERIOD 3*24*60*60 //after 3 days (scaled up to seconds) the RTC syncs with GPS
-#define RTC_TZ_OFFSET 20
+#define RTC_TZ_OFFSET 20  //a offset larger than the largets time zone
 #define RTC_DEFAULT_TIMEZONE -6 //for Nevada
 #define RTC_DEFAULT_TIMEZONE_OFFSET (RTC_TZ_OFFSET + RTC_DEFAULT_TIMEZONE)
+
+#define RTC_UTC_GPS_OFFSET 18 // difference in seconds from GPS time to UTC "world" time
+//may be important for rolling cyphers. needs to be updated every leap second 
+// for the most up to date value see http://leapsecond.com/java/gpsclock.htm
 
 /**
  * @def time_init

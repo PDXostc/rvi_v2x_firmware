@@ -270,7 +270,8 @@ void CAN_ee_sequence (char * response_buffer) {
 			CAN_sequence_state = CAN_state_idle;
 			job_clear_timeout(SYS_CAN);
 			menu_send_CAN();
-			usb_tx_string_P(PSTR("ERROR: EEPROM sequence fail\r\n>"));
+			usb_tx_string_P(PSTR("ERROR: EEPROM sequence fail"));
+			menu_send_n_st();
 	} else if (CAN_ee_subsequence_state != CAN_ee_subsequence_1) { //not the first state, response_buffer should have response
 		if (strcmp_P(response_buffer, PSTR("OK")) == 0) { //if response was OK
 			eeprom_read_CAN_string(buffer); //get copy of the entire string
@@ -281,9 +282,11 @@ void CAN_ee_sequence (char * response_buffer) {
 				job_set_timeout(SYS_CAN, 2); //give ELM module 2 seconds to respond
 			} else {
 				CAN_sequence_state = CAN_state_idle;
+				CAN_ee_subsequence_state = CAN_ee_subsequence_COMPLETE;
 				job_clear_timeout(SYS_CAN);
 				menu_send_CAN();
-				usb_tx_string_P(PSTR("EEPROM sequence complete\r\n>"));
+				usb_tx_string_P(PSTR("EEPROM sequence complete"));
+				menu_send_n_st();
 			}
 		} else { //the response was bad
 			CAN_ee_subsequence_state == CAN_ee_subsequence_FAIL;

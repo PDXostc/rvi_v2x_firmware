@@ -32,16 +32,17 @@ void menu_add_to_command(char value) {
 }
 
 void menu_main(void) {
+	menu_send_n(); //to preserve the input command in the terminal for the 
 	for(int i = 0; i < 4; i++) { // Only lower case the first 4 characters, because some of the CAN functions take in strings which ARE case-sensitive
 		CMD_buffer[i] = tolower(CMD_buffer[i]);
 	}
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
 		switch(CMD_buffer[2]) {
 			case 'i': //information
-				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016\r\nOpen source hardware and software\r\nHW Rev2.0 \r\nSW Rev0.2\r\n"));
+				usb_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016 -2017\r\nOpen source hardware and software\r\nHW Rev2.1 \r\nSW Rev0.3"));
 				break;
 			case 'j': //Jaguar
-				usb_tx_string_P(PSTR("\r\n\r\n   ,ggp@@@@mgg,,\r\n,$Q$(`S@@$;g$$$$$@$@@gg,\r\n;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r\n  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r\n    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r\n         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r\n         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r\n                                    *$@@L ```T$W~)%g,\r\n                                      *%@gg,,,,,    5/Sw,     ,\r\n                                          ```` ` `9g `9g,``*^|'\r\n                                                    `#g,`)h\r\n\r\n   Developed at Jaguar Land Rover OSCT. Portland OR 2016\r\n"));
+				usb_tx_string_P(PSTR("\r\n\r\n   ,ggp@@@@mgg,,\r\n,$Q$(`S@@$;g$$$$$@$@@gg,\r\n;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r\n  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r\n    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r\n         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r\n         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r\n                                    *$@@L ```T$W~)%g,\r\n                                      *%@gg,,,,,    5/Sw,     ,\r\n                                          ```` ` `9g `9g,``*^|'\r\n                                                    `#g,`)h\r\n\r\n   Developed at Jaguar Land Rover OSCT. Portland OR 2016"));
 				break;
 			case 'q':
 				menu_status();
@@ -70,15 +71,15 @@ void menu_main(void) {
 			case 'v': //toggle verbose setting
 				verbose = !verbose;
 				nvm_eeprom_write_byte(EE_verbose,verbose);
-				usb_tx_string_PV(PSTR("Verbose is ON\r\n"));
+				usb_tx_string_PV(PSTR("Verbose is ON"));
 				break;
 			case '?':  //timer functions
 			default:
-				usb_tx_string_P(PSTR("*** Main Menu ***\r\nI: Device information\r\nA: Accelerometer menu(ACL)\r\nC: ELM327 menu(CAN)\r\nM: SIM Modem menu(GSM)\r\nP: Power menu\r\nT: Timer menu\r\nS: Sleep-state timer checks menu\r\nQ: Query system status\r\nV: Toggle verbose messages\r\nR: Reboot\r\n"));
+				usb_tx_string_P(PSTR("*** Main Menu ***\r\nI: Device information\r\nA: Accelerometer menu(ACL)\r\nC: ELM327 menu(CAN)\r\nM: SIM Modem menu(GSM)\r\nP: Power menu\r\nT: Time (RTC clock) menu\r\nS: Sleep-state timer checks menu\r\nQ: Query system status\r\nV: Toggle verbose messages\r\nR: Reboot"));
 				break;
 			}
 	}else{
-			usb_tx_string_PV(PSTR("All commands start VX\r\n"));
+			usb_tx_string_PV(PSTR("All commands start VX"));
 	}
 	clear_buffer(CMD_buffer);	//clear the buffer for next command
 	menu_send_n_st();
@@ -96,7 +97,7 @@ void menu_accel (void) {
 		usb_tx_string_PV(PSTR("Accelerometer started"));
 		break;
 	case 'i':
-		usb_tx_string_P(PSTR("V2X uses the ADXL345 accelerometer from Analog Devices\r\n"));
+		usb_tx_string_P(PSTR("V2X uses the ADXL345 accelerometer from Analog Devices"));
 		break;
 	case 'q':
 		menu_accel_status();
@@ -148,7 +149,8 @@ void menu_accel (void) {
 			ACL_set_rate(ACL_RATE_1);
 			usb_tx_string_PV(PSTR("Set to 1Hz"));
  		}else {
-			usb_tx_string_P(PSTR("ERROR: Out of range, try again.\r\n"));
+			usb_tx_string_P(PSTR("ERROR: Out of range, try again."));
+			menu_send_n();
 		}
 		break;
 	case 'w':
@@ -203,7 +205,6 @@ void menu_accel (void) {
 			usb_tx_string_PV(PSTR(" Offset: "));
 			if (verbose) {
 				menu_print_int(data16);
-				menu_send_n();
 			}
 		}
 		break;
@@ -218,23 +219,23 @@ void menu_accel (void) {
 			for (int i = 0; i < strlen(CMD_buffer); i++)
 				{usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);}
 		} else {
-			usb_tx_string_P(PSTR("ERROR: Not currently sampling, use VXAE\r\n"));}
-
+			usb_tx_string_P(PSTR("ERROR: Not currently sampling, use VXAE"));
+		}
 		break;
 	case 'f':
 		if (CMD_buffer[4] == '0') {
 			ACL_set_full_resolution(0);
-			usb_tx_string_PV(PSTR("10bit resolution, scale changes with 'G' range\r\n"));
+			usb_tx_string_PV(PSTR("10bit resolution, scale changes with 'G' range"));
 		}
 		else if (CMD_buffer[4] == '1') {
 			ACL_set_full_resolution(1);
-			usb_tx_string_PV(PSTR("Full resolution, 4mg/bit\r\n"));
+			usb_tx_string_PV(PSTR("Full resolution, 4mg/bit"));
 		}
 		else {menu_send_q();}
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Accelerometer Menu ***\r\nE: Enable\r\nD: Disable\r\nR: Restart\r\nI: Subsystem Information\r\nQ: Query status\r\nG: Get last Sample\r\nSn: Set sample rate in HZ (1, 3, 6, 12, 25, 50, 100, 200, 400, 800)\r\nWn: Set \"G\" Range (2, 4, 8, 16)\r\nFn: Full range (1: full 0: 10bit)\r\nXn: Set X offset (+/-127)\r\nYn: Set Y offset\r\nZn: Set Z offset\r\n"));
+		usb_tx_string_P(PSTR("*** Accelerometer Menu ***\r\nE: Enable\r\nD: Disable\r\nR: Restart\r\nI: Subsystem Information\r\nQ: Query status\r\nG: Get last Sample\r\nSn: Set sample rate in HZ (1, 3, 6, 12, 25, 50, 100, 200, 400, 800)\r\nWn: Set \"G\" Range (2, 4, 8, 16)\r\nFn: Full range (1: full 0: 10bit)\r\nXn: Set X offset (+/-127)\r\nYn: Set Y offset\r\nZn: Set Z offset"));
 		break;
 	}
 }
@@ -244,21 +245,21 @@ void menu_modem (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':
 		PWR_gsm_stop(); //disable
-		usb_tx_string_PV(PSTR("GSM shutdown\r\n"));
+		usb_tx_string_PV(PSTR("GSM shutdown"));
 		break;
 	case 'e':  //enable modem
-		usb_tx_string_PV(PSTR("GSM Start pending\r\n"));
+		usb_tx_string_PV(PSTR("GSM Start pending"));
 		GSM_modem_init();
 		break;
 	case 'r':  //reset
 		reset_trigger_GSM();
-		usb_tx_string_PV(PSTR("GSM RESET\r\n"));
+		usb_tx_string_PV(PSTR("GSM RESET"));
 		break;
 	case 'q':
 		menu_modem_status();
 		break;
 	case 'i':
-		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G or SIM7100a 4G GSM modem + GPS receiver by SIMCOM\r\n"));
+		usb_tx_string_P(PSTR("V2X uses the SIM5320A 3G or SIM7100a 4G GSM modem + GPS receiver by SIMCOM"));
 		break;
 	case 'x':
 	// FIXME: please verify that the newline is actually warranted here
@@ -268,7 +269,7 @@ void menu_modem (void) {
  		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nX: AT Command Pass through\r\n"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nXs: Comand Pass through"));
 		break;
 	}
 }
@@ -278,23 +279,23 @@ void menu_can (void) {
 	char buffer[EE_CAN_ARRAY_SIZE+1];
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable;
-		usb_tx_string_PV(PSTR("CAN is off\r\n"));
+		usb_tx_string_PV(PSTR("CAN is off"));
 		PWR_can_stop();
 		PWR_is_5_needed();
 		break;
 	case 'e':  //enable
-		usb_tx_string_PV(PSTR("CAN Starting\r\n"));
+		usb_tx_string_PV(PSTR("CAN Starting"));
 		CAN_elm_init();
 		break;
 	case 'r':  //reset
-		usb_tx_string_PV(PSTR("CAN restarting\r\n"));
+		usb_tx_string_PV(PSTR("CAN restarting"));
 		reset_trigger_CAN();
 		break;
 	case 'q': //query
 		menu_can_status();
 		break;
 	case 'i': //info
-		usb_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\r\nThe STN1110 is compliant with the ELM327 V1.3\r\n"));
+		usb_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\r\nThe STN1110 is compliant with the ELM327 V1.3"));
 		break;
 	case 'x': //pass command
 		strcat_P(CMD_buffer, PSTR("\r\n"));
@@ -316,7 +317,7 @@ void menu_can (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** CANbus Menu ***\r\nE: Enable\r\nD: Disable\r\nR: Restart\r\nS: Store config string to EE\r\nA: Execute config string in EE\r\nW: Display config string in EE\r\nI: Subsystem Information\r\nQ: Query status\r\n"));
+		usb_tx_string_P(PSTR("*** CANbus Menu ***\r\nE: Enable\r\nD: Disable\r\nR: Restart\r\nS: Store config string to EE\r\nA: Execute config string in EE\r\nW: Display config string in EE\r\nI: Subsystem Information\r\nQ: Query status"));
 		break;
 	}
 }
@@ -410,7 +411,7 @@ void menu_power (void) {
 		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\nY: Why did I wake up?\r\nH: High power mode (all peripherals enabled)\r\nL: Low power mode (all peripherals disabled)\r\n"));
+		usb_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\nY: Why did I wake up?\r\nH: High power mode (all peripherals enabled)\r\nL: Low power mode (all peripherals disabled)"));
 		break;
 	}
 }
@@ -420,14 +421,13 @@ void menu_timer(void) {
 	switch (CMD_buffer[3]) {
 	case 's':  //set V2X time
 		time_set(menu_sample_number(CMD_buffer+4));
-		usb_tx_string_PV(PSTR("Time has been set\r\n"));
+		usb_tx_string_PV(PSTR("Time has been set"));
 		break;
 	case 'g':  //get V2X time
 		usb_tx_string_P(PSTR("UET: "));
 		menu_print_int(time_get());
 		usb_tx_string_P(PSTR("\r\nTime: "));
 		time_print_human_readable();
-		menu_send_n();
 		break;
 	case 'a':  //absolute alarm
 		time_alarm_set(menu_sample_number(CMD_buffer+4));
@@ -453,18 +453,18 @@ void menu_timer(void) {
 		}
 		break;
 	case 'i':  //timer system information
-		usb_tx_string_P(PSTR("The timer module uses Unix Epoch timestamps (UET) \r\nH24: clock has been set/sync within 24hrs\r\nALM: alarm is set for the future\r\n"));
+		usb_tx_string_P(PSTR("The timer module uses Unix Epoch timestamps (UET) \r\nH24: clock has been set/sync within 24hrs\r\nALM: alarm is set for the future"));
 		break;
 	case 'q':  //timer inquery
 		menu_timer_status();
 		break;
 	case 'u':
-		//usb_tx_string_P(PSTR("GPS update\r\n"));
+		//usb_tx_string_P(PSTR("GPS update"));
 		GSM_time_job();
 		break;
 	case '?':  //Menu options
 	default:
-		usb_tx_string_P(PSTR("*** Timer Menu ***\r\nSn: Set V2X time (UET)\r\nDn: Daylight Savings Time\r\nG: Get V2X time\r\nAn: Set absolute alarm (UET) \r\nRn: Set relative alarm (Seconds)\r\nI: timer information\r\nQ: Timer inquery\r\nU: Update using gps\r\nZn: Set timezone\r\n"));
+		usb_tx_string_P(PSTR("*** Timer Menu ***\r\nSn: Set V2X time (UET)\r\nDn: Daylight Savings Time\r\nG: Get V2X time\r\nAn: Set absolute alarm (UET) \r\nRn: Set relative alarm (Seconds)\r\nI: timer information\r\nQ: Timer inquery\r\nU: Update using gps\r\nZn: Set timezone"));
 		break;
 	}
 }
@@ -482,23 +482,18 @@ void menu_sleep(void) {
 
                     CSC_disable_car_state_check();
                     usb_tx_string_PV(PSTR("Disabling car-state check"));
-                    menu_send_n();
-
                     break;
 					
 				case 'a':  // accelerometer check
 					usb_tx_string_PV(PSTR("Disabling accelerometer sleep-state check - NOT YET IMPLEMENTED"));
-                    menu_send_n();
                     break;
 					
 				case 't':  // text-message check
 					usb_tx_string_PV(PSTR("Disabling text-message sleep-state check - NOT YET IMPLEMENTED"));
-                    menu_send_n();
                     break;
 					
 				case 'g': // gps-movement check
 					usb_tx_string_PV(PSTR("Disabling gps-movement sleep-state check - NOT YET IMPLEMENTED"));
-                    menu_send_n();
                     break;
 					
 				default:
@@ -514,23 +509,18 @@ void menu_sleep(void) {
 
                     CSC_enable_car_state_check();
                     usb_tx_string_PV(PSTR("Enabling car-state check"));
-                    menu_send_n();
-
                     break;
 					
 				case 'a':  // Accelerometer check
 					usb_tx_string_PV(PSTR("Enabling accelerometer sleep-state check - NOT YET IMPLEMENTED"));
-                    menu_send_n();
 					break;
 					
 				case 't':  // text-message check
 					usb_tx_string_PV(PSTR("Enabling text-message sleep-state check - NOT YET IMPLEMENTED"));
-                    menu_send_n();
 					break;
 				
 				case 'g': // gps-movement check
 					usb_tx_string_PV(PSTR("Enabling gps-movement sleep-state check - NOT YET IMPLEMENTED"));
-                    menu_send_n();
 					break;
 					
 				default:
@@ -586,20 +576,20 @@ void menu_sleep(void) {
             break;
 			
 		case 'i': // briefly describe function of the sleep-state timer checks
-            usb_tx_string_P(PSTR("Allows enable/disable and interval control of scheduled checks performed\r\n"));
+            usb_tx_string_P(PSTR("Allows enable/disable and interval control of scheduled checks performed"));
             break;
 				
 		case '?':
 		default:
-			usb_tx_string_P(PSTR("*** Sleep-State Checks Menu ***\r\nE<N>: Enable Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS Movement)\r\nD<N>: Disable Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS Movement)\r\nT<N>XXXX: Update Check Timeout Interval ([L]ow-Power Car-State Check Interval, [H]igh-Power Car-State Check Interval)\r\nQ: Query status of checks\r\nI: Info on checks\r\n"));
+			usb_tx_string_P(PSTR("*** Sleep-State Checks Menu ***\r\nE<N>: Enable Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS Movement)\r\nD<N>: Disable Checks ([C]ar-On, [A]ccelerometer, [T]ext Messages Received, [G]PS Movement)\r\nT<N>XXXX: Update Check Timeout Interval ([L]ow-Power Car-State Check Interval, [H]igh-Power Car-State Check Interval)\r\nQ: Query status of checks\r\nI: Info on checks"));
 			break;
 	}
 }
 
-void menu_send_ok(void) {usb_tx_string_P(PSTR("OK\r\n"));
+void menu_send_ok(void) {usb_tx_string_P(PSTR("OK\r\n>"));
 }
 
-void menu_send_q(void) {usb_tx_string_P(PSTR("?\r\n"));
+void menu_send_q(void) {usb_tx_string_P(PSTR("?\r\n>"));
 }
 
 void menu_send_1(void) {usb_tx_string_P(PSTR("1\r\n"));
@@ -614,7 +604,7 @@ void menu_send_n(void) {usb_tx_string_P(PSTR("\r\n"));
 void menu_send_n_st(void) {usb_tx_string_P(PSTR("\r\n>"));
 }
 
-void menu_send_out_of_range(void) {usb_tx_string_P(PSTR("ERROR: out of range\r\n"));
+void menu_send_out_of_range(void) {usb_tx_string_P(PSTR("ERROR: out of range\r\n>"));
 }
 
 void menu_send_GSM(void) {usb_tx_string_P(PSTR("GSM>:"));
@@ -657,7 +647,7 @@ void usb_tx_string_PV(const char *data) {
 	if (verbose) {
 		usb_tx_string_P(data);
 	} else {
-		usb_tx_string_P(PSTR("OK"));
+		menu_send_ok();
 	}
 }
 
@@ -766,3 +756,4 @@ void menu_timer_status (void) {
 	else	{menu_send_0();}
 
 }
+			

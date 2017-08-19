@@ -11,6 +11,10 @@
 
 #include "V2X_board.h"
 
+/**
+ * @def PWR_WAKE_UP_REASON
+ * @brief used to track the reason the V2X board was last started
+ **/
 typedef enum {
 	PWR_WAKE_UP_REASON_UNKNOWN,
 	PWR_WAKE_UP_REASON_BUTTON,
@@ -204,8 +208,18 @@ void PWR_mode_high(void);
  */
 void PWR_mode_low(void);
 
+/**
+ * @def PWR_set_wake_up_reason
+ * @brief saves the wake up reason
+ * @param the PWR_WAKE_UP_REASON  
+ **/
 void PWR_set_wake_up_reason(PWR_WAKE_UP_REASON reason);
 
+/**
+ * @def PWR_get_wake_up_reason
+ * @brief requests the wake up reason
+ * @retval the PWR_WAKE_UP_REASON  
+ **/
 PWR_WAKE_UP_REASON PWR_get_wake_up_reason(void);
 
 #endif /* V2X_DRIVERS_H_ */
