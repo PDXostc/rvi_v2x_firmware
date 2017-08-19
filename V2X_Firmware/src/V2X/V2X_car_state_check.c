@@ -9,7 +9,7 @@
 
 
 #define CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT  10
-#define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 30
+#define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 10
 
 #define CSC_CAN_INIT_TIMEOUT               0
 #define CSC_CAN_INIT_RETRY_TIMEOUT         0
@@ -26,6 +26,7 @@ CSC_CAR_STATE                    CSC_car_state                    = CSC_car_stat
 CSC_SEQUENCE_STATE               CSC_sequence_state               = CSC_state_start;
 CSC_LOW_POWER_SUBSEQUENCE_STATE  CSC_low_power_subsequence_state  = CSC_low_power_subsequence_1;
 CSC_HIGH_POWER_SUBSEQUENCE_STATE CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
+
 
 uint16_t CSC_get_car_state_check_low_power_default_interval(void) {
     return CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT;
@@ -58,6 +59,13 @@ uint16_t CSC_get_timeout_for_car_state(void) {
         return CSC_high_power_car_check_timeout();
 
     return CSC_low_power_car_check_timeout();
+}
+
+void CSC_init (void) {
+	/* Might need to turn on the car-state check */
+	if (nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED) {
+		job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state);
+	}
 }
 
 void CSC_enable_car_state_check(void) {

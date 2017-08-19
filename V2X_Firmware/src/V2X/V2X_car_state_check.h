@@ -9,7 +9,7 @@
 #ifndef V2X_CAR_STATE_CHECK_H_
 #define V2X_CAR_STATE_CHECK_H_
 
-
+// these values are not 0 or 0xFF to detect uninitialized eeprom
 #define CSC_CAR_STATE_CHECK_ENABLED  2
 #define CSC_CAR_STATE_CHECK_DISABLED 1
 
@@ -71,6 +71,12 @@ typedef enum {
     CSC_high_power_subsequence_COMPLETE,
     CSC_high_power_subsequence_FAIL
 } CSC_HIGH_POWER_SUBSEQUENCE_STATE;
+
+/**
+ * @def CSC_init
+ * @brief gets the eeprom saved values from the submodule
+ **/
+void CSC_init (void);
 
 /**
  * @def CSC_get_car_state_check_default_enabled
