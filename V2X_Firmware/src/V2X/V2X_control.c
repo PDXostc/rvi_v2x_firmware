@@ -194,16 +194,9 @@ void job_timeout_init () {
 		job_timeout[x] = 0;
 		job_timeout_enable[x] = false;
 	}
-
-    /* Might need to turn on the car-state check */
-    job_timeout_enable[SYS_CAR_STATE_CHECK] =
-            (nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED) ? true : false;
-    
-    if (job_timeout_enable[SYS_CAR_STATE_CHECK])
-        job_set_timeout(SYS_CAR_STATE_CHECK, nvm_eeprom_read_byte(EE_car_state_check_high_power_check_interval));
 }
 
-void job_set_timeout (uint8_t system, int span) {
+void job_set_timeout (uint8_t system, uint16_t span) {
 	job_timeout[system] = time_get() + span;
 	job_timeout_enable[system] = true;
 }
