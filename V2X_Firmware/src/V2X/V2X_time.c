@@ -59,7 +59,7 @@ Bool time_dst_get (void) {
 }
 
 long time_get(void) {
-	time_24hr_check();
+	time_validity_check();
 	return  rtc_get_time();
 }
 
@@ -93,11 +93,11 @@ Bool time_alarm_active(void) {
 }
 
 Bool time_is_current(void) {
-	time_24hr_check();
+	time_validity_check();
 	return time_is_set;
 }
 
-void time_24hr_check (void){
+void time_validity_check (void){
 	if (rtc_get_time() - time_was_set > RTC_VALIDITY_PERIOD) {time_is_set = false;}
 }
 
