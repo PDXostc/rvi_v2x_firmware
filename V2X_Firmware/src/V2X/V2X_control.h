@@ -177,7 +177,7 @@ void job_timeout_init (void);
  * @param system - SYS_CAN or SYS_GPS system
  * @param span - number of seconds until timeout
  **/
-void job_set_timeout (uint8_t system, int span);
+void job_set_timeout (uint8_t system, uint16_t span);
 
 /**
  * @def job_check_timeout
