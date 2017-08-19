@@ -170,20 +170,19 @@ void PWR_gsm_stop(void) {
 }
 
 void PWR_gsm_start(void) {
-	PWR_turn_on(1<<ENABLE_SIM_RESET);
-	PWR_4_start();
- 	if (PWR_query(1<<ENABLE_SIM_PWR_ON))
-	{
-		PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
-		PWR_push();
-		delay_ms(500);
-	}
-
-	PWR_turn_on((1<<ENABLE_SIM_PWR_ON));
+	PWR_4_start(); //make sure power is on
+ 	delay_ms(100); //delay for powre to stabilize
+	PWR_turn_off((1<<ENABLE_SIM_PWR_ON)); //ensure the "power on" signal is in the correct starting state
+	PWR_turn_on(1<<ENABLE_SIM_RESET); //allow SIM chip out of reset
+ 	PWR_push();
+	delay_ms(100); //allow wake time for SIM chip
+	
+	PWR_turn_on((1<<ENABLE_SIM_PWR_ON));  //start turn on pulse
 	PWR_push();
-	delay_ms(250);
-	PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
-	PWR_push();					//clear the start bit
+	
+	delay_ms(200); //data sheet says min:65ms, typical:180ms
+	PWR_turn_off((1<<ENABLE_SIM_PWR_ON));  //end turn on pulse
+	PWR_push();	
 }
 
 /* Force GSM reset. Please use with caution */

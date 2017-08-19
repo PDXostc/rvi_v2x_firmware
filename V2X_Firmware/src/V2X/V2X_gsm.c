@@ -253,7 +253,7 @@ void GSM_control_start (char * responce_buffer){
 		if (strcmp_P(responce_buffer, PSTR("OK")) == 0){
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("GSM Started\r\n>"));
-			CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPS=1\r")); //compose message
+			CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("\rAT+CGPS=1\r")); //compose message
 			CTL_mark_for_processing(&GSM, BUFFER_OUT); //send it
 			GSM_subsequence_state = GSM_subssequence_7;
 			job_set_timeout(SYS_GSM, 2);
