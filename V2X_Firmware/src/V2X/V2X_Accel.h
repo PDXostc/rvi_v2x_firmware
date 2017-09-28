@@ -2,7 +2,7 @@
  * Accelerometer.h
  *
  * Created: 2/9/2016 10:40:47 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 

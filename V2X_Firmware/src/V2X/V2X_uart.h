@@ -2,7 +2,7 @@
  * V2X_uart.h
  *
  * Created: 2/12/2016 10:34:20 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */
 
 

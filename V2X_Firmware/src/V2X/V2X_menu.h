@@ -2,7 +2,7 @@
  * V2X_menu.h
  *
  * Created: 2/23/2016 9:00:30 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -220,4 +220,16 @@ void menu_lockup (void);
  **/
 Bool menu_verbose(void);
 
+/**
+ * @def menu_simcard_status
+ * @brief prints the state of the simcard
+ **/
+void menu_simcard_status(void);
+
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_MENU_H_ */

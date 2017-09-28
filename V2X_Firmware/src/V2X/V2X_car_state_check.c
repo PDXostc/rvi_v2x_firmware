@@ -64,7 +64,9 @@ uint16_t CSC_get_timeout_for_car_state(void) {
 void CSC_init (void) {
 	/* Might need to turn on the car-state check */
 	if (nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED) {
-		job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state);
+		job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
+	} else {
+		PWR_mode_high(); //called at init, if no CSC the board will never start
 	}
 }
 
@@ -173,16 +175,16 @@ void CSC_car_state_check(void) {
         case CSC_state_start:
 		
             menu_send_CSC();
-            usb_tx_string_PVO(PSTR("Car-state check - "));
-
+            //usb_tx_string_PVO(PSTR("Car-state check - "));
+			   
             if (PWR_is_low_power()) {
 
                 usb_tx_string_PVO(PSTR("low power!\r\n>"));
-
-                CSC_sequence_state = CSC_state_low_power;
+				 CSC_sequence_state = CSC_state_low_power;
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_1;
             } else {
                 usb_tx_string_PVO(PSTR("high power!\r\n>"));
+				flash_red();
 
                 CSC_sequence_state = CSC_state_high_power;
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_1;
@@ -215,11 +217,10 @@ void CSC_car_state_low_power_flow(void) {
 
                 CSC_print_to_CMD(PSTR("Car-state check - starting CAN"));
 
-                PWR_4_start();
-                CAN_elm_init();
+                reset_trigger_CAN();
             
 			    retries = 0;
-                job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_INIT_TIMEOUT);
+                job_set_timeout(SYS_CAR_STATE_CHECK, 1);
             }
 
             break;
@@ -241,7 +242,7 @@ void CSC_car_state_low_power_flow(void) {
                     retries++;
                     job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_INIT_RETRY_TIMEOUT);
 
-                    CSC_print_to_CMD(PSTR("Retry"));
+                    CSC_print_to_CMD(PSTR("Timeout, Retry"));
                 }
             }
 
@@ -250,7 +251,7 @@ void CSC_car_state_low_power_flow(void) {
         case CSC_low_power_subsequence_3: /* CAN is online, so start the process for listening to CAN chatter */
             CSC_low_power_subsequence_state = CSC_low_power_subsequence_4;
 
-            CSC_print_to_CMD(PSTR("Car-state check - listening for CAN chatter"));
+            CSC_print_to_CMD(PSTR("listening for CAN chatter"));
 
             CAN_hear_chatter_start();
 
@@ -264,7 +265,7 @@ void CSC_car_state_low_power_flow(void) {
             if (CAN_get_hear_chatter_subsequence_state() == CAN_hear_chatter_subsequence_COMPLETE) {
                 if (CAN_get_last_did_hear_chatter()) { /* If we do, turn on the raspi, and reset our job */
 
-                    CSC_print_to_CMD(PSTR("Car-state check - CAN chatter heard; powering up"));
+                    CSC_print_to_CMD(PSTR("CAN chatter heard; powering up"));
 
                     CSC_sequence_state = CSC_state_start;
                     CSC_low_power_subsequence_state = CSC_low_power_subsequence_COMPLETE;
@@ -282,17 +283,18 @@ void CSC_car_state_low_power_flow(void) {
 					
                 }
             } else if (CAN_get_hear_chatter_subsequence_state() == CAN_hear_chatter_subsequence_FAIL) {
-                CSC_handle_low_power_sequence_fail(PSTR("Car-state check failed - listening for CAN chatter failed"));
+                CSC_handle_low_power_sequence_fail(PSTR("listening for CAN chatter failed"));
+				reset_trigger_CAN();
 				
             } else { /* Otherwise, try again soon */
 				if (retries > CSC_CAN_HEAR_CHATTER_NUM_RETRIES) {
-					CSC_handle_low_power_sequence_fail(PSTR("Car-state check failed - CAN hear chatter timeout"));
+					CSC_handle_low_power_sequence_fail(PSTR("failed - CAN hear chatter timeout"));
 
 				} else {
 					retries++;
 					job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_HEAR_CHATTER_RETRY_TIMEOUT);
 
-					CSC_print_to_CMD(PSTR("Retry"));
+					CSC_print_to_CMD(PSTR("Timeout, Retry"));
 				}
             }
 
@@ -301,7 +303,7 @@ void CSC_car_state_low_power_flow(void) {
         case CSC_low_power_subsequence_5: /* What is the battery voltage? */
             CSC_low_power_subsequence_state = CSC_low_power_subsequence_6;
             
-			CSC_print_to_CMD(PSTR("Car-state check - CAN chatter not heard; checking voltage"));
+			CSC_print_to_CMD(PSTR("CAN chatter not heard; checking voltage"));
 
 			CAN_read_voltage_start();
 
@@ -315,7 +317,7 @@ void CSC_car_state_low_power_flow(void) {
             if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_COMPLETE) {
                 if (CAN_get_last_read_voltage() < 11.0) { /* The voltage is too low, shut everything down */
 
-                    CSC_print_to_CMD(PSTR("Car-state check - voltage low; powering off"));
+                    CSC_print_to_CMD(PSTR("voltage low; powering off"));
 
                     PWR_shutdown();
 
@@ -325,7 +327,7 @@ void CSC_car_state_low_power_flow(void) {
                     CSC_sequence_state = CSC_state_start;
                     CSC_car_state = CSC_car_state_sleeping;
 
-                    CSC_print_to_CMD(PSTR("Car-state check - rescheduling job"));
+                    CSC_print_to_CMD(PSTR("rescheduling job"));
 
                     PWR_mode_low();
 
@@ -333,11 +335,11 @@ void CSC_car_state_low_power_flow(void) {
                 }
 
             } else if (CAN_get_read_voltage_subsequence_state() == CAN_read_voltage_subsequence_FAIL) {
-                CSC_handle_low_power_sequence_fail(PSTR("Car-state check failed - reading voltage failed"));
+                CSC_handle_low_power_sequence_fail(PSTR("failed - reading voltage failed"));
 				
             } else { /* Otherwise, try again soon */
 				if (retries > CSC_CAN_READ_VOLTAGE_NUM_RETRIES) {
-					CSC_handle_low_power_sequence_fail(PSTR("Car-state check failed - CAN read voltage timeout"));
+					CSC_handle_low_power_sequence_fail(PSTR("failed - CAN read voltage timeout"));
 
 				} else {
 					retries++;
@@ -368,8 +370,8 @@ void CSC_car_state_high_power_flow(void) {
     switch (CSC_high_power_subsequence_state) {
         case CSC_high_power_subsequence_1:
             if (CAN_get_sequence_state() != CAN_state_idle) { /* If for some reason the CAN is starting up by someone else or in some other state, just fail and check later */
-                CSC_handle_high_power_sequence_fail(PSTR("Car-state check failed - CAN isn't idle"));
-
+                CSC_handle_high_power_sequence_fail(PSTR("failed - CAN isn't idle"));
+				//CSC_print_to_CMD(0x20 + CAN_get_sequence_state());
             } else { /* Otherwise, start our check sequence */
                 CSC_high_power_subsequence_state = CSC_high_power_subsequence_2;
                 CSC_car_state_check();
@@ -381,12 +383,12 @@ void CSC_car_state_high_power_flow(void) {
         case CSC_high_power_subsequence_2: /* CAN is online, so start the process for listening to CAN chatter */
             CSC_high_power_subsequence_state = CSC_high_power_subsequence_3;
 
-            CSC_print_to_CMD(PSTR("Car-state check - listening for CAN chatter"));
+            CSC_print_to_CMD(PSTR("listening for CAN chatter"));
 
             CAN_hear_chatter_start();
 
 			retries = 0;
-			job_set_timeout(SYS_CAR_STATE_CHECK, CSC_CAN_HEAR_CHATTER_TIMEOUT);
+			job_set_timeout(SYS_CAR_STATE_CHECK, 1);//CSC_CAN_HEAR_CHATTER_TIMEOUT);
 
             break;
 
@@ -396,12 +398,12 @@ void CSC_car_state_high_power_flow(void) {
                 if (CAN_get_last_did_hear_chatter()) { /* If we do, just reset our job */
                     CSC_car_state = CSC_car_state_running;
 
-                    CSC_print_to_CMD(PSTR("Car-state check - CAN chatter heard; rescheduling job"));
+                    CSC_print_to_CMD(PSTR("CAN chatter heard; rescheduling job"));
 
                 } else { /* If we don't, put everything to sleep */
                     CSC_car_state = CSC_car_state_sleeping;
 
-                    CSC_print_to_CMD(PSTR("Car-state check - CAN chatter not heard; powering down"));
+                    CSC_print_to_CMD(PSTR("CAN chatter not heard; powering down"));
 
                     PWR_mode_low();
                 }
@@ -412,11 +414,12 @@ void CSC_car_state_high_power_flow(void) {
                 job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
 
             } else if (CAN_get_hear_chatter_subsequence_state() == CAN_hear_chatter_subsequence_FAIL) {
-                CSC_handle_high_power_sequence_fail(PSTR("Car-state check failed - listening for CAN chatter failed"));
-				
+                CSC_handle_high_power_sequence_fail(PSTR("listening for CAN chatter failed"));
+				reset_trigger_CAN();
+
             } else {
 				if (retries > CSC_CAN_HEAR_CHATTER_NUM_RETRIES) {
-					CSC_handle_high_power_sequence_fail(PSTR("Car-state check failed - CAN hear chatter timeout"));
+					CSC_handle_high_power_sequence_fail(PSTR("CAN hear chatter timeout"));
 
 				} else {
 					retries++;

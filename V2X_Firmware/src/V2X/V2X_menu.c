@@ -2,7 +2,7 @@
  * V2X_menu.c
  *
  * Created: 2/23/2016 9:00:14 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */
 
 #include <errno.h>
@@ -188,15 +188,15 @@ void menu_accel (void) {
 			switch (CMD_buffer[3]) {
 				case 'x':
 					if (verbose) {usb_tx_string_P(PSTR("X"));}
-					ACL_set_offset(ACL_X_OFFSET, data8);
+						ACL_set_offset(ACL_X_OFFSET, data8);
 					break;
 				case 'y':
 					if (verbose) {usb_tx_string_P(PSTR("Y"));}
-					ACL_set_offset(ACL_Y_OFFSET, data8);
+						ACL_set_offset(ACL_Y_OFFSET, data8);
 					break;
 				case 'z':
 					if (verbose) {usb_tx_string_P(PSTR("Z"));}
-					ACL_set_offset(ACL_Z_OFFSET, data8);
+						ACL_set_offset(ACL_Z_OFFSET, data8);
 					break;
 				default:
 					menu_send_q();
@@ -210,25 +210,25 @@ void menu_accel (void) {
 		break;
 	case 'g':
 		if (ACL_sampling()){
-			if (usb_cdc_is_active(USB_ACL)) {
+			if (USB_port_is_active(USB_ACL)) {
 				ACL_get_last_sample(sample);
 			} else {
 				ACL_take_sample(sample);
 			}
 			ACL_data_to_string(sample, CMD_buffer);
 			for (int i = 0; i < strlen(CMD_buffer); i++)
-				{usb_cdc_send_byte(USB_CMD, CMD_buffer[i]);}
+				{USB_send_char(USB_CMD, CMD_buffer[i]);}
 		} else {
 			usb_tx_string_P(PSTR("ERROR: Not currently sampling, use VXAE"));
-		}
+ 		}
 		break;
 	case 'f':
 		if (CMD_buffer[4] == '0') {
-			ACL_set_full_resolution(0);
+				ACL_set_full_resolution(0);
 			usb_tx_string_PV(PSTR("10bit resolution, scale changes with 'G' range"));
 		}
 		else if (CMD_buffer[4] == '1') {
-			ACL_set_full_resolution(1);
+				ACL_set_full_resolution(1);
 			usb_tx_string_PV(PSTR("Full resolution, 4mg/bit"));
 		}
 		else {menu_send_q();}
@@ -241,7 +241,6 @@ void menu_accel (void) {
 }
 
 void menu_modem (void) {
-	int i;
 	switch (CMD_buffer[3]) {
 	case 'd':
 		PWR_gsm_stop(); //disable
@@ -249,11 +248,15 @@ void menu_modem (void) {
 		break;
 	case 'e':  //enable modem
 		usb_tx_string_PV(PSTR("GSM Start pending"));
-		GSM_modem_init();
+			GSM_modem_init();
 		break;
-	case 'r':  //reset
+	case 'r':  //reset modem
 		reset_trigger_GSM();
-		usb_tx_string_PV(PSTR("GSM RESET"));
+		//usb_tx_string_PV(PSTR("GSM RESET"));
+		break;
+	case 'g':
+		usb_tx_string_PV(PSTR("Enable GPS"));
+		GSM_command_enable_gps_auto(true);
 		break;
 	case 'q':
 		menu_modem_status();
@@ -264,18 +267,18 @@ void menu_modem (void) {
 	case 'x':
 	// FIXME: please verify that the newline is actually warranted here
 		strcat_P(CMD_buffer, PSTR("\r"));  //put these char at the end of the string
+		USB_send_string(USB_CMD, &CMD_buffer[4]);
 		GSM_add_string_to_buffer(BUFFER_OUT, &CMD_buffer[4]); //send it on to the modem
 		GSM_mark_for_processing(BUFFER_OUT); //initiate send
  		break;
 	case '?':
 	default:
-		usb_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nXs: Comand Pass through"));
+		usb_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nG: Enable GPS\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nXs: Comand Pass through"));
 		break;
 	}
 }
 
 void menu_can (void) {
-	int i;
 	char buffer[EE_CAN_ARRAY_SIZE+1];
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable;
@@ -288,7 +291,7 @@ void menu_can (void) {
 		CAN_elm_init();
 		break;
 	case 'r':  //reset
-		usb_tx_string_PV(PSTR("CAN restarting"));
+		//usb_tx_string_PV(PSTR("CAN restarting"));
 		reset_trigger_CAN();
 		break;
 	case 'q': //query
@@ -310,7 +313,7 @@ void menu_can (void) {
 		break;
 	case 'w': //what is stored in EE?
  		eeprom_read_CAN_string(buffer);
- 		usb_cdc_send_string(USB_CMD, buffer);
+ 		USB_send_string(USB_CMD, buffer);
 		break;
 	case 'a': //load string and parse from eeprom
 		CAN_EE_start();
@@ -337,9 +340,7 @@ void menu_power (void) {
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Disabling 5V supply"));
-			// PWR_turn_off((1<<ENABLE_5V0)|(1<<ENABLE_5V0B)|(1<<ENABLE_CAN_RESET));
 			PWR_5_stop();
-			PWR_push();
 			break;
 		case 'h':  //host
 			usb_tx_string_PV(PSTR("Disabling Host power supply"));
@@ -362,8 +363,7 @@ void menu_power (void) {
 			break;
 		case '5':  //5v
 			usb_tx_string_PV(PSTR("Enabling 5V supply"));
-			PWR_turn_on((1<<ENABLE_5V0));
-			PWR_push();
+			PWR_5_start();
 			break;
 		case 'h':  //host
 			usb_tx_string_PV(PSTR("Enabling Host power supply"));
@@ -384,20 +384,20 @@ void menu_power (void) {
         if (verbose) {
             switch (PWR_get_wake_up_reason()) {
                 case PWR_WAKE_UP_REASON_UNKNOWN:
-                    snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "UNKNOWN");
+                    	snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "UNKNOWN");
                     break;
                 case PWR_WAKE_UP_REASON_BUTTON:
-                    snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "BUTTON PRESS");
+                    	snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "BUTTON PRESS");
                     break;
                 case PWR_WAKE_UP_REASON_CAR_RUNNING:
-                    snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "CAR RUNNING");
+                    	snprintf(printBuffer, 200, "Wake up reason: %u - %s", PWR_get_wake_up_reason(), "CAR RUNNING");
                     break;
             }
         } else {
             snprintf(printBuffer, 200, "%u", PWR_get_wake_up_reason());
         }
 
-        usb_cdc_send_string(USB_CMD, printBuffer);
+        USB_send_string(USB_CMD, printBuffer);
 
         break;
 	case 'q':
@@ -417,7 +417,6 @@ void menu_power (void) {
 }
 
 void menu_timer(void) {
-	long data32;
 	switch (CMD_buffer[3]) {
 	case 's':  //set V2X time
 		time_set(menu_sample_number(CMD_buffer+4));
@@ -506,8 +505,7 @@ void menu_sleep(void) {
 		case 'e':  //enable sleep-state checks
 			switch (CMD_buffer[4]) {
 				case 'c':  // Car-on check
-
-                    CSC_enable_car_state_check();
+	                 CSC_enable_car_state_check();
                     usb_tx_string_PV(PSTR("Enabling car-state check"));
                     break;
 					
@@ -566,12 +564,12 @@ void menu_sleep(void) {
 			break;  // set check timeout intervals
 			
 		case 'q': // query state of checks
-            snprintf(printBuffer, 200, "Car-state check: %s\n\rLow-power car-state check interval: %u\n\rHigh-power car-state check interval: %u\n\r",
-											nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED ? "ENABLED" : "DISABLED",
-											eeprom_read_unsigned_int_16(EE_car_state_check_low_power_check_interval),
-											eeprom_read_unsigned_int_16(EE_car_state_check_high_power_check_interval));
+             snprintf(printBuffer, 200, "Car-state check: %s\n\rLow-power car-state check interval: %u\n\rHigh-power car-state check interval: %u\n\r",
+ 											nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED ? "ENABLED" : "DISABLED",
+ 											eeprom_read_unsigned_int_16(EE_car_state_check_low_power_check_interval),
+ 											eeprom_read_unsigned_int_16(EE_car_state_check_high_power_check_interval));
 
-            usb_cdc_send_string(USB_CMD, printBuffer);
+            USB_send_string(USB_CMD, printBuffer);
 
             break;
 			
@@ -631,7 +629,7 @@ void menu_print_int(long value) {
 	ltoa(value, c_buf, 10);
 	int i = 0;  //clear the pointer
 	while (c_buf[i] != 0)
-		{usb_cdc_send_byte(USB_CMD, c_buf[i++]);}
+		{USB_send_char(USB_CMD, c_buf[i++]);}
 }
 
 long menu_sample_number(char * input) {
@@ -640,7 +638,7 @@ long menu_sample_number(char * input) {
 
 void usb_tx_string_P(const char *data) {
 	while (pgm_read_byte(data))
-		usb_cdc_send_byte(USB_CMD, pgm_read_byte(data++));
+		USB_send_char(USB_CMD, pgm_read_byte(data++));
 }
 
 void usb_tx_string_PV(const char *data) {
@@ -660,9 +658,9 @@ void usb_tx_string_PVO(const char *data) {
 
 void menu_lockup (void) {
 	char msg[] = "AVR>>RESET:\r\n";
-	usb_cdc_send_string(USB_CMD, msg);
-	usb_cdc_send_string(USB_ACL, msg);
-	usb_cdc_send_string(USB_CAN, msg);
+	USB_send_string(USB_CMD, msg);
+	USB_send_string(USB_ACL, msg);
+	USB_send_string(USB_CAN, msg);
 	delay_s(1);
 	RST_CTRL = true; //force SW reset
 }
@@ -677,14 +675,14 @@ void menu_status (void) {
 
 void menu_accel_status(void) {
 	usb_tx_string_P(PSTR("ACL="));
-	if (ACL_sampling())
-	{menu_send_1();}
-	else	{menu_send_0();}
+ 	if (ACL_sampling())
+ 	{menu_send_1();}
+ 	else	{menu_send_0();}
 }
 
 void menu_modem_status(void) {
 	usb_tx_string_P(PSTR("SIMPWR="));
-	if (sim_power_status())
+ 	if (sim_power_status())
 	{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("SIMNET="));
@@ -696,7 +694,7 @@ void menu_modem_status(void) {
 	{menu_send_1();}
 	else	{menu_send_0();}
 	usb_tx_string_P(PSTR("IMEI="));
-	usb_cdc_send_string(USB_CMD, GSM_get_imei());
+	USB_send_string(USB_CMD, GSM_get_imei());
 	menu_send_n();
 }
 

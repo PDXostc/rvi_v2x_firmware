@@ -2,7 +2,7 @@
  * V2X_command.h
  *
  * Created: 3/15/2016 9:47:11 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -201,4 +201,10 @@ void job_clear_timeout (uint8_t system);
  **/
 void job_check_fail (uint8_t system);
 
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_COMMAND_H_ */

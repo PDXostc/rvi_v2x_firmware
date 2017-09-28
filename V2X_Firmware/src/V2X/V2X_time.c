@@ -2,7 +2,7 @@
  * V2X_time.c
  *
  * Created: 3/2/2016 3:24:15 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 #include "V2X.h"

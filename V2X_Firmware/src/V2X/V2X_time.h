@@ -2,7 +2,7 @@
  * V2X_time.h
  *
  * Created: 3/2/2016 3:24:33 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -10,7 +10,7 @@
 #define V2X_TIME_H_
 
 #define time_seed 1456961042  //time starter
-#define RTC_VALIDITY_PERIOD 3*24*60*60 //after 3 days (scaled up to seconds) the RTC syncs with GPS
+#define RTC_VALIDITY_PERIOD (3*24*60*60) //after 3 days (scaled up to seconds) the RTC syncs with GPS
 #define RTC_TZ_OFFSET 20  //a offset larger than the largets time zone
 #define RTC_DEFAULT_TIMEZONE -6 //for Nevada
 #define RTC_DEFAULT_TIMEZONE_OFFSET (RTC_TZ_OFFSET + RTC_DEFAULT_TIMEZONE)

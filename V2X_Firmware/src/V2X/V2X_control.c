@@ -2,7 +2,7 @@
  * V2X_command.c
  *
  * Created: 3/15/2016 9:46:58 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 #include "V2X.h"
@@ -40,7 +40,6 @@ void CTL_add_string_to_buffer(buff * buffer, Bool in_out, char * to_add) {
 }
 
 int CTL_bytes_to_send (buff * buffer, Bool in_out) {
-	int value;
 	switch (in_out) {
 	case BUFFER_IN:
 		return strlen((buffer->input_proc_buf+buffer->input_proc_index));
@@ -115,7 +114,7 @@ void CTL_copy_to_proc(buff * buffer) { //enters with buffer->input_proc_flag tru
 	uint16_t t_buf = buffer->input_proc_index; //save proc index so it can be reset if incomplete string
 	while  (buffer->input_proc_flag && buffer->input_proc_index != buffer->input_index) { //while still processing
 		char temp = buffer->input_buf[buffer->input_proc_index++]; //get char from input array
- 		CTL_input_proc_index_check(buffer);
+ 		CTL_input_proc_index_check(buffer); //reset input_proc_index if needed
 		if ( temp == '\n' || temp == '\r' || temp == 0x07 || temp == '>') {//an end of string char has been found
 			if (i != 0)	{
 				buffer->input_proc_loaded = true; //set flag of buffer copied

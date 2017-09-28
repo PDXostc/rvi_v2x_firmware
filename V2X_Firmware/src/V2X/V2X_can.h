@@ -2,7 +2,7 @@
  * V2X_can.h
  *
  * Created: 3/10/2016 12:25:21 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -154,7 +154,7 @@ void CAN_purge_buffer(uint8_t buffer_select);
  * @brief swaps the roles of the A/B buffers, starts sending routines
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
 */
-void CAN_mark_for_processing (Bool in_out);
+void CAN_mark_for_processing (Bool buffer_select);
 
 /**
  * @def CAN_add_string_to_buffer
@@ -162,7 +162,7 @@ void CAN_mark_for_processing (Bool in_out);
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
  * @param *to_add pointer to the string that should be added
 */
-void CAN_add_string_to_buffer(Bool in_out, char * to_add);
+void CAN_add_string_to_buffer(Bool buffer_select, char * to_add);
 
 
 /**

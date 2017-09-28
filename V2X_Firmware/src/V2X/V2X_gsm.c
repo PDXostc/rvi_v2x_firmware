@@ -2,11 +2,10 @@
  * V2X_gsm.c
  *
  * Created: 2/12/2016 11:01:08 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */
 
 #include "V2X.h"
-
 
 char imei[16] = "\0";
 char latitude[13] = "\0";
@@ -19,32 +18,34 @@ char stng[100] = "\0";
 int GSM_sequence_state = GSM_state_idle;
 int GSM_subsequence_state = GSM_subssequence_FAIL;
 
-void GSM_usart_init (void) {
-	sysclk_enable_module(USART_SIM_PORT_SYSCLK, USART_SIM_SYSCLK);
-	USART_SIM.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_SIM_CHAR_LENGTH | USART_SIM_PARITY | USART_SIM_STOP_BIT;
-	USART_SIM.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_CLK2X_bm;
-	uint16_t b_sel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 1) / ((uint32_t) USART_SIM_BAUDRATE * 8)) + 1) >> 1) - 1);
-	USART_SIM.BAUDCTRLA = b_sel & 0xFF;
-	USART_SIM.BAUDCTRLB = b_sel >> 8;
-	USART_SIM_PORT.DIRSET = USART_PORT_PIN_TX; // TX as output.
-	USART_SIM_PORT.DIRCLR = USART_PORT_PIN_RX; // RX as input.
-	GSM_clear_tx_int();
-
- 	clear_buffer(stng);
+void GSM_uart_start (void) {
+	usart_rs232_options_t usart_cfg = {
+		.baudrate =   SIM_BAUDRATE,
+		.charlength = SIM_CHAR_LENGTH,
+		.paritytype = SIM_PARITY,
+		.stopbits =   SIM_STOP_BIT
+	};
+		
+	//start UART
+	sysclk_enable_module(SIM_PORT_SYSCLK, SIM_SYSCLK);
+	usart_init_rs232(SIM_UART, &usart_cfg);  //returns true if successfull at calculating the baud rate
+	usart_set_rx_interrupt_level(SIM_UART, USART_INT_LVL_HI);
+	usart_set_tx_interrupt_level(SIM_UART, USART_INT_LVL_OFF);
+		
+	//initialize buffers
 	GSM.input_proc_flag = GSM.input_proc_index = GSM.input_index = 0;
 	GSM.output_proc_active_flag = GSM.output_proc_index = 0;
-	CTL_add_to_buffer(&GSM, BUFFER_IN, '\r'); //put something in buffer so pointers are different
+	CTL_add_to_buffer(&GSM, BUFFER_IN, '\n'); //put something in buffer so pointers are different
+	CTL_mark_for_processing(&GSM, BUFFER_IN);
 }
 
-
 void GSM_set_tx_int(void) {
-	USART_SIM.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_HI_gc;
+	usart_set_tx_interrupt_level(SIM_UART, USART_INT_LVL_HI);
 }
 
 void GSM_clear_tx_int(void) {
-	USART_SIM.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_OFF_gc;
+	usart_set_tx_interrupt_level(SIM_UART, USART_INT_LVL_OFF);
 }
-
 
 void GSM_add_string_to_buffer(Bool in_out, char * to_add) {
 	CTL_add_string_to_buffer(&GSM, in_out, to_add);
@@ -54,19 +55,16 @@ void GSM_mark_for_processing(Bool in_out) {
 	CTL_mark_for_processing(&GSM, in_out);
 }
 
-ISR(USART_SIM_RX_Vect)
-{
-	char value = USART_SIM.DATA;
+void GSM_new_data (uint8_t value) {
 	CTL_add_to_buffer(&GSM, BUFFER_IN, value);
 	if (value == '\n' || value == '\r' ) {
 		GSM.input_proc_flag = true;
 	}
 }
 
-ISR(USART_SIM_DRE_Vect)
-{
+void GSM_send_data (void) {
 	if (CTL_bytes_to_send(&GSM, BUFFER_OUT)) { //if bytes left to send
-		USART_SIM.DATA = CTL_next_byte(&GSM, BUFFER_OUT);
+		usart_putchar(SIM_UART, CTL_next_byte(&GSM, BUFFER_OUT) );
 	} else { //clean up
 		GSM_clear_tx_int();
 		GSM.output_proc_loaded = false; //mark string as sent
@@ -88,6 +86,29 @@ void GSM_time_job (void) {
 		GSM_subsequence_state = GSM_subssequence_1; //move to response state
 		char hold[2];
 		GSM_control (hold);
+	}
+}
+
+void GSM_process_buffer (void) {
+	if (GSM.output_proc_active_flag) {
+		if (GSM.output_proc_loaded) { //output buffer is ready to send
+			GSM_set_tx_int();		//set ISR flag
+			if (GSM.output_proc_index == 0) {//new command
+				GSM_send_data();
+			}
+		} else {
+			CTL_purge_buffer(&GSM, BUFFER_OUT);
+		}
+	}
+	while (GSM.input_proc_flag) {
+		CTL_copy_to_proc(&GSM); //copy string from buffer
+		if (GSM.input_proc_loaded) { //process string
+			menu_send_GSM();
+			USB_send_string(USB_CMD, GSM.input_proc_buf);
+			menu_send_n_st();
+			GSM_control(GSM.input_proc_buf);
+			GSM.input_proc_loaded = false;		//input proc buffer has been handled
+		}
 	}
 }
 
@@ -232,7 +253,7 @@ void GSM_control_start (char * responce_buffer){
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("IMEI captured \r\n"));
 			menu_send_n_st();
-			job_set_timeout(SYS_GSM, 2);
+			job_set_timeout(SYS_GSM, 12);
 			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
 		}
 #elif SIMCOM == SIMCOM_SIM7100A
@@ -243,17 +264,17 @@ void GSM_control_start (char * responce_buffer){
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("IMEISV captured \r\n"));
 			menu_send_n_st();
-			job_set_timeout(SYS_GSM, 2);
+			job_set_timeout(SYS_GSM, 12);
 			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
 		}
 #endif
 		job_check_fail(SYS_GSM);
 		break;
 	case GSM_subssequence_6:
-		if (strcmp_P(responce_buffer, PSTR("OK")) == 0){
+		if (strcmp_P(responce_buffer, PSTR("PB DONE")) == 0){
 			menu_send_CTL();
 			usb_tx_string_P(PSTR("GSM Started\r\n>"));
-			CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("\rAT+CGPS=1\r")); //compose message
+			CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSAUTO=1\r")); //compose message
 			CTL_mark_for_processing(&GSM, BUFFER_OUT); //send it
 			GSM_subsequence_state = GSM_subssequence_7;
 			job_set_timeout(SYS_GSM, 2);
@@ -276,26 +297,6 @@ void GSM_control_start (char * responce_buffer){
 		GSM_sequence_state = GSM_state_idle;
 		job_clear_timeout(SYS_GSM);
 		break;
-	}
-}
-
-void GSM_process_buffer (void) {
-	if (GSM.output_proc_active_flag) {
-		if (GSM.output_proc_loaded) { //output buffer is ready to send
-			GSM_set_tx_int();		//set ISR flag
-		} else {
-			CTL_purge_buffer(&GSM, BUFFER_OUT);
-		}
-	}
-	while (GSM.input_proc_flag) {
-		CTL_copy_to_proc(&GSM); //copy string from buffer
-		if (GSM.input_proc_loaded) { //process string
-			menu_send_GSM();
-			usb_cdc_send_string(USB_CMD, GSM.input_proc_buf);
-			menu_send_n_st();
-			GSM_control(GSM.input_proc_buf);
-			GSM.input_proc_loaded = false;		//input proc buffer has been handled
-		}
 	}
 }
 
@@ -343,7 +344,7 @@ void GSM_time_sync (char * responce_buffer) {
 
 void show_buffer(char * buffer) {
 	usb_tx_string_P(PSTR("\""));
-	usb_cdc_send_string(USB_CMD, buffer);
+	USB_send_string(USB_CMD, buffer);
 	usb_tx_string_P(PSTR("\""));
 
 }

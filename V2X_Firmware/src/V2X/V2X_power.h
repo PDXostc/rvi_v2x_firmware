@@ -3,13 +3,13 @@
  *
  * /brief Hardware driver functions for operating the V2X board
  *
- * Author: Jesse Banks (jbanks2)
+ *  Author: Jesse Banks
  **/
 
 #ifndef V2X_DRIVERS_H_
 #define V2X_DRIVERS_H_
 
-#include "V2X_board.h"
+#include "V2X.h"
 
 /**
  * @def PWR_WAKE_UP_REASON

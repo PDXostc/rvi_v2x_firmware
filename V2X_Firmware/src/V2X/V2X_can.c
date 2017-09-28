@@ -2,7 +2,7 @@
  * V2X_can.c
  *
  * Created: 3/10/2016 12:25:37 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */
 
 #include <errno.h>
@@ -14,7 +14,7 @@ uint8_t CAN_init_subsequence_state = CAN_init_subsequence_1;
 uint8_t CAN_ee_subsequence_state = CAN_ee_subsequence_1;
 uint8_t CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_1;
 uint8_t CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_1;
-Bool CAN_in_command = false;
+Bool CAN_in_CTL = false;
 Bool CAN_snoop = false;
 
 double CAN_last_read_voltage = 0;
@@ -40,12 +40,12 @@ uint8_t CAN_chatter_count = 0;
 	CTL_purge_buffer(&CAN, buffer_select);
  }
 
-void CAN_mark_for_processing (Bool in_out) {
-	CTL_mark_for_processing(&CAN, in_out);
+void CAN_mark_for_processing (Bool buffer_select) {
+	CTL_mark_for_processing(&CAN, buffer_select);
 }
 
-void CAN_add_string_to_buffer(Bool in_out, char * to_add) {
-	CTL_add_string_to_buffer(&CAN, in_out, to_add);
+void CAN_add_string_to_buffer(Bool buffer_select, char * to_add) {
+	CTL_add_string_to_buffer(&CAN, buffer_select, to_add);
 }
 
 void CAN_mark_as_sent(void) {
@@ -53,23 +53,35 @@ void CAN_mark_as_sent(void) {
 }
 
 void CAN_uart_start (void) {
-		uart_open(USB_CAN);
-		uint16_t b_sel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 1) / ((uint32_t) USART_BAUDRATE * 8)) + 1) >> 1) - 1);
-		USART.BAUDCTRLA = b_sel & 0xFF;
-		USART.BAUDCTRLB = b_sel >> 8;
-		USART.CTRLC = USART_CMODE_ASYNCHRONOUS_gc | USART_CHAR_LENGTH | USART_PARITY | USART_STOP_BIT;
-		
-		CAN.input_proc_flag = CAN.input_proc_index = CAN.input_index = 0;
-		CAN.output_proc_active_flag = CAN.output_proc_index = 0;
-		CTL_add_to_buffer(&CAN, BUFFER_IN, '\r'); //put something in buffer so pointers are different
+	usart_rs232_options_t usart_cfg = {
+		.baudrate = CAN_BAUDRATE,
+		.charlength = CAN_CHAR_LENGTH,
+		.paritytype = CAN_PARITY,
+		.stopbits = CAN_STOP_BIT 
+	};
+	
+	//start UART
+	sysclk_enable_module(CAN_PORT_SYSCLK, CAN_SYSCLK);
+	usart_init_rs232(CAN_UART, &usart_cfg);  //returns true if successfull at calculating the baud rate
+	usart_set_rx_interrupt_level(CAN_UART, USART_INT_LVL_HI);
+	usart_set_tx_interrupt_level(CAN_UART, USART_INT_LVL_OFF);
+	
+	//initialize buffers
+	CAN.input_proc_flag = CAN.input_proc_index = CAN.input_index = 0;
+	CAN.output_proc_active_flag = CAN.output_proc_index = 0;
+	CTL_add_to_buffer(&CAN, BUFFER_IN, '\n'); //put something in buffer so pointers are different
+	CTL_mark_for_processing(&CAN, BUFFER_IN);
 }
 
-void CAN_uart_stop (void) {
-	uart_close(USB_CAN);
+void CAN_uart_stop (void) 
+{
+	usart_rx_disable(CAN_UART);
+	usart_tx_disable(CAN_UART);
 }
 
-Bool CAN_is_controlled(void) {
-	return CAN_in_command;
+Bool CAN_is_controlled(void) 
+{
+	return CAN_in_CTL;
 }
 
 void CAN_start_snoop (void) {
@@ -87,33 +99,37 @@ Bool CAN_is_snooping(void) {
 }
 
 void CAN_set_tx_int(void) {
-	USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_HI_gc;
+	usart_set_tx_interrupt_level(CAN_UART, USART_INT_LVL_HI);
 }
 
 void CAN_clear_tx_int(void) {
-	USART.CTRLA = (register8_t) USART_RXCINTLVL_HI_gc | (register8_t) USART_DREINTLVL_OFF_gc;
+	usart_set_tx_interrupt_level(CAN_UART, USART_INT_LVL_OFF);
 }
 
 void CAN_new_data (uint8_t value) {
-	CAN_add_to_buffer(BUFFER_IN, value);
-	if (value == '>' || value == '\r' || value == 0x07) {
-		CAN_mark_for_processing(BUFFER_IN);
+	CTL_add_to_buffer(&CAN, BUFFER_IN, value);
+	if ( value == '>' || value == '\r' ) {
+		CAN_mark_for_processing(BUFFER_IN);  //called from inside ISR, mark flag and exit
 	}
 }
 
-void CAN_send_data (void) {	
+void  CAN_send_data (void) {	
 	if (CAN_bytes_to_send(BUFFER_OUT)) {
-		USART.DATA = CAN_next_byte(BUFFER_OUT);
-		} else {
-		CAN_clear_tx_int();
+		usart_putchar(CAN_UART, CAN_next_byte(BUFFER_OUT) );
+	} else {
 		CAN_mark_as_sent();
-	}
+ 		CAN_clear_tx_int();
+ 	}
 }
+
 void CAN_process_buffer (void) {
 	if (CAN.output_proc_active_flag) {
 		if (CAN.output_proc_loaded) { //output buffer is ready to send
 			CAN_set_tx_int();		//set ISR flag
-			} else {
+			if (CAN.output_proc_index == 0) {//new command
+				CAN_send_data();
+			}
+		} else {
 			CTL_purge_buffer(&CAN, BUFFER_OUT);
 		}
 	}
@@ -121,8 +137,8 @@ void CAN_process_buffer (void) {
 		CTL_copy_to_proc(&CAN); //copy string from buffer
 		if (CAN.input_proc_loaded) { //process string
 			menu_send_CAN();
-			usb_cdc_send_string(USB_CMD, CAN.input_proc_buf);
-			menu_send_n_st();
+ 			USB_send_string(USB_CMD, CAN.input_proc_buf);
+ 			menu_send_n_st();
 			CAN_control(CAN.input_proc_buf);
 			CAN.input_proc_loaded = false;		//input proc buffer has been handled
 		}
@@ -132,7 +148,7 @@ void CAN_process_buffer (void) {
 void CAN_control (char * response_buffer) {
 	switch (CAN_sequence_state) {
 	case CAN_state_idle:
-		CAN_in_command = false;
+		CAN_in_CTL = false;
 		break;
 	case CAN_state_power:
 		CAN_control_init(response_buffer);
@@ -158,12 +174,14 @@ void CAN_control_init_fail(void) {
 
 void CAN_elm_init (void) {
 	if (CAN_sequence_state == CAN_state_idle) {
+		usb_tx_string_P(PSTR("CAN>:Init begin\r\n"));
 		CAN_sequence_state = CAN_state_power;
 		CAN_init_subsequence_state = CAN_init_subsequence_1; //move to response state
-		CAN_in_command = true; //make sure responses come back to command processor
+		CAN_in_CTL = true; //make sure responses come back to command processor
 		char hold[2] = "\0";
 		CAN_control (hold);
 	} else {
+		usb_tx_string_P(PSTR("CAN:> Init failed to start\r\n"));
         CAN_init_subsequence_state = CAN_init_subsequence_FAIL;
     }
 }
@@ -175,7 +193,8 @@ void CAN_control_init (char * response_buffer){
 			CAN_init_subsequence_state = CAN_init_subsequence_2;
 			CAN_control(response_buffer);
         } else { //if not power it up
-			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
+//			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
+			PWR_4_start();
 			PWR_can_start();
 			CAN_init_subsequence_state = CAN_init_subsequence_4;
 			job_set_timeout(SYS_CAN, 4); //give elm module 3 seconds to start
@@ -209,7 +228,7 @@ void CAN_control_init (char * response_buffer){
 			usb_tx_string_P(PSTR("CAN Responding\r\n>"));
 			CAN_sequence_state = CAN_state_idle;
             CAN_init_subsequence_state = CAN_init_subsequence_COMPLETE;
-			CAN_in_command = false;
+			CAN_in_CTL = false;
 			job_clear_timeout(SYS_CAN);
 		} else {
 			job_check_fail(SYS_CAN);
@@ -217,11 +236,14 @@ void CAN_control_init (char * response_buffer){
 		break;
 	case CAN_init_subsequence_FAIL:
 		default:
-		CAN_sequence_state = CAN_state_idle;
-		CAN_in_command = false;
-		job_clear_timeout(SYS_CAN);
+ 		CAN_sequence_state = CAN_state_idle;
+// 		CAN_sequence_state = CAN_state_power;
+// 		CAN_init_subsequence_state = CAN_init_subsequence_1;
+		PWR_can_stop();
+		//CAN_in_CTL = false;
+		job_set_timeout(SYS_CAN, 2);
 		menu_send_CTL();
-		usb_tx_string_P(PSTR("CAN start fail\r\n>"));
+		usb_tx_string_P(PSTR("CAN init fail\r\n>"));
 		break;
 	}
 }
@@ -230,7 +252,7 @@ void CAN_EE_start (void) {
 	if (CAN_sequence_state == CAN_state_idle) {
 		CAN_sequence_state = CAN_state_EE;
 		CAN_ee_subsequence_state = CAN_ee_subsequence_1; //move to response state
-		CAN_in_command = true; //make sure responses come back to command processor
+		CAN_in_CTL = true; //make sure responses come back to command processor
 		char hold[2] = "\0";
 		CAN_control (hold);
     } else {
@@ -289,17 +311,17 @@ void CAN_ee_sequence (char * response_buffer) {
 				menu_send_n_st();
 			}
 		} else { //the response was bad
-			CAN_ee_subsequence_state == CAN_ee_subsequence_FAIL;
+			CAN_ee_subsequence_state = CAN_ee_subsequence_FAIL;
 			job_set_timeout(SYS_CAN, 1);  //end quickly
 		}
 	} else { //is the first command, just send a message
 		eeprom_read_CAN_string(buffer); //get copy of the entire string
-		if (found = CAN_find_message(buffer, CAN_ee_subsequence_state++)) {//CAN_subsequence_state);
+		if ( ( found = CAN_find_message(buffer, CAN_ee_subsequence_state++) ) ) {//CAN_subsequence_state);
 			CTL_add_string_to_buffer(&CAN, BUFFER_OUT, buffer);
 			CTL_mark_for_processing(&CAN, BUFFER_OUT);
 			job_set_timeout(SYS_CAN, 2); //give ELM module 2 seconds to respond
 		} else { //the buffer was bad
-			CAN_ee_subsequence_state == CAN_ee_subsequence_FAIL;
+			CAN_ee_subsequence_state = CAN_ee_subsequence_FAIL;
 			job_set_timeout(SYS_CAN, 1);  //end quickly
 		}
 	}
@@ -309,7 +331,7 @@ void CAN_read_voltage_start(void) {
     if (CAN_sequence_state == CAN_state_idle) {
         CAN_sequence_state = CAN_state_read_voltage;
         CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_1;
-        CAN_in_command = true; //make sure responses come back to command processor
+        CAN_in_CTL = true; //make sure responses come back to command processor
         char hold[2] = "\0"; // ??
         CAN_control (hold);
     } else {
@@ -377,7 +399,7 @@ void CAN_read_voltage_sequence (char * response_buffer) {
 
                 CAN_sequence_state = CAN_state_idle;
                 CAN_read_voltage_subsequence_state = CAN_read_voltage_subsequence_COMPLETE;
-                CAN_in_command = false;
+                CAN_in_CTL = false;
 
                 job_clear_timeout(SYS_CAN);
 
@@ -392,7 +414,7 @@ void CAN_read_voltage_sequence (char * response_buffer) {
         case CAN_read_voltage_subsequence_FAIL:
         default:
             CAN_sequence_state = CAN_state_idle;
-            CAN_in_command = false;
+            CAN_in_CTL = false;
             job_clear_timeout(SYS_CAN);
             menu_send_CTL();
             usb_tx_string_P(PSTR("CAN read voltage fail\r\n>"));
@@ -406,7 +428,7 @@ void CAN_hear_chatter_start(void) {
         CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_1;
 		CAN_last_did_hear_chatter = false;
 		CAN_chatter_count = 0;
-        CAN_in_command = true; //make sure responses come back to command processor
+        CAN_in_CTL = true; //make sure responses come back to command processor
         char hold[2] = "\0"; // ??
         CAN_control (hold);
     } else {
@@ -496,7 +518,7 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
 		case CAN_hear_chatter_subsequence_5:
             CAN_sequence_state = CAN_state_idle;
             CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_COMPLETE;
-            CAN_in_command = false;
+            CAN_in_CTL = false;
 
             job_clear_timeout(SYS_CAN);
 
@@ -505,7 +527,7 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
         case CAN_hear_chatter_subsequence_FAIL:
         default:
             CAN_sequence_state = CAN_state_idle;
-            CAN_in_command = false;
+            CAN_in_CTL = false;
             job_clear_timeout(SYS_CAN);
 
             menu_send_CTL();
