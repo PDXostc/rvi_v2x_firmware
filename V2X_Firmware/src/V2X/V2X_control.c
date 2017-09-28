@@ -223,7 +223,7 @@ void job_check_fail(uint8_t system) {
 			menu_send_CAN();
 			break;
 		}
-		usb_tx_string_P(PSTR("Control timeout\r\n>"));
+		USB_tx_string_P(PSTR("Control timeout\r\n>"));
 		job_set_timeout(system, 1);
 	}
 }

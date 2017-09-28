@@ -198,3 +198,22 @@ Bool USB_vbus_mount (void) {
 	}
 	return last;
 }
+
+void USB_tx_string_P(const char *data) {
+	while (pgm_read_byte(data))
+	USB_send_char(USB_CMD, pgm_read_byte(data++));
+}
+
+void USB_tx_string_PV(const char *data) {
+	if (menu_is_verbose()) {
+		USB_tx_string_P(data);
+		} else {
+		menu_send_ok();
+	}
+}
+
+void USB_tx_string_PVO(const char *data) {
+	if (menu_is_verbose()) {
+		USB_tx_string_P(data);
+	}
+}

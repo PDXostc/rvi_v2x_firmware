@@ -174,14 +174,14 @@ void CAN_control_init_fail(void) {
 
 void CAN_elm_init (void) {
 	if (CAN_sequence_state == CAN_state_idle) {
-		usb_tx_string_P(PSTR("CAN>:Init begin\r\n"));
+		USB_tx_string_P(PSTR("CAN>:Init begin\r\n"));
 		CAN_sequence_state = CAN_state_power;
 		CAN_init_subsequence_state = CAN_init_subsequence_1; //move to response state
 		CAN_in_CTL = true; //make sure responses come back to command processor
 		char hold[2] = "\0";
 		CAN_control (hold);
 	} else {
-		usb_tx_string_P(PSTR("CAN:> Init failed to start\r\n"));
+		USB_tx_string_P(PSTR("CAN:> Init failed to start\r\n"));
         CAN_init_subsequence_state = CAN_init_subsequence_FAIL;
     }
 }
@@ -193,7 +193,7 @@ void CAN_control_init (char * response_buffer){
 			CAN_init_subsequence_state = CAN_init_subsequence_2;
 			CAN_control(response_buffer);
         } else { //if not power it up
-//			usb_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
+//			USB_tx_string_P(PSTR(">CTL>>>:Power up CAN\r\n"));  //does not need end of string, exits through menu
 			PWR_4_start();
 			PWR_can_start();
 			CAN_init_subsequence_state = CAN_init_subsequence_4;
@@ -221,11 +221,11 @@ void CAN_control_init (char * response_buffer){
 		if (strcmp_P(response_buffer, PSTR("LV RESET")) == 0) { // if high-power, probably tell us this
 			CAN_init_subsequence_state = CAN_init_subsequence_3;
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("CAN Powered\r\n>"));
+			USB_tx_string_P(PSTR("CAN Powered\r\n>"));
 			CAN_control(response_buffer);
 		} else if (strcmp_P(response_buffer, PSTR("ELM327 v1.3a")) == 0) { // if booting-up probably be here
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("CAN Responding\r\n>"));
+			USB_tx_string_P(PSTR("CAN Responding\r\n>"));
 			CAN_sequence_state = CAN_state_idle;
             CAN_init_subsequence_state = CAN_init_subsequence_COMPLETE;
 			CAN_in_CTL = false;
@@ -243,7 +243,7 @@ void CAN_control_init (char * response_buffer){
 		//CAN_in_CTL = false;
 		job_set_timeout(SYS_CAN, 2);
 		menu_send_CTL();
-		usb_tx_string_P(PSTR("CAN init fail\r\n>"));
+		USB_tx_string_P(PSTR("CAN init fail\r\n>"));
 		break;
 	}
 }
@@ -292,7 +292,7 @@ void CAN_ee_sequence (char * response_buffer) {
 			CAN_sequence_state = CAN_state_idle;
 			job_clear_timeout(SYS_CAN);
 			menu_send_CAN();
-			usb_tx_string_P(PSTR("ERROR: EEPROM sequence fail"));
+			USB_tx_string_P(PSTR("ERROR: EEPROM sequence fail"));
 			menu_send_n_st();
 	} else if (CAN_ee_subsequence_state != CAN_ee_subsequence_1) { //not the first state, response_buffer should have response
 		if (strcmp_P(response_buffer, PSTR("OK")) == 0) { //if response was OK
@@ -307,7 +307,7 @@ void CAN_ee_sequence (char * response_buffer) {
 				CAN_ee_subsequence_state = CAN_ee_subsequence_COMPLETE;
 				job_clear_timeout(SYS_CAN);
 				menu_send_CAN();
-				usb_tx_string_P(PSTR("EEPROM sequence complete"));
+				USB_tx_string_P(PSTR("EEPROM sequence complete"));
 				menu_send_n_st();
 			}
 		} else { //the response was bad
@@ -417,7 +417,7 @@ void CAN_read_voltage_sequence (char * response_buffer) {
             CAN_in_CTL = false;
             job_clear_timeout(SYS_CAN);
             menu_send_CTL();
-            usb_tx_string_P(PSTR("CAN read voltage fail\r\n>"));
+            USB_tx_string_P(PSTR("CAN read voltage fail\r\n>"));
             break;
     }
 }
@@ -531,7 +531,7 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
             job_clear_timeout(SYS_CAN);
 
             menu_send_CTL();
-            usb_tx_string_P(PSTR("CAN hear chatter fail\r\n>"));
+            USB_tx_string_P(PSTR("CAN hear chatter fail\r\n>"));
 
             break;
     }

@@ -9,6 +9,8 @@
 #ifndef V2X_MENU_H_
 #define V2X_MENU_H_
 
+Bool verbose;
+
 /**
 * @def menu_init
 * @brief loads menu settings
@@ -188,27 +190,6 @@ void menu_timer_status(void);
 void menu_sleep(void);
 
 /**
- * @def usb_tx_string_P
- * @brief special routine to send program memory stored strings over USB
- * @param data pointer to PSTR() stored strings
- **/
-void usb_tx_string_P(const char *data);
-
-/**
- * @def usb_tx_string_PV
- * @brief if not verbose, strings are replaced by "OK"
- * @param data pointer to PSTR() stored strings
- **/
-void usb_tx_string_PV(const char *data);
-
-/**
- * @def usb_tx_string_PVO
- * @brief if not verbose, nothing is sent
- * @param data pointer to PSTR() stored strings
- **/
-void usb_tx_string_PVO(const char *data);
-
-/**
  * @def menu_lockup
  * @brief special routine to dump the CMD buffer from the ACL USB interface
  **/
@@ -218,13 +199,20 @@ void menu_lockup (void);
  * @def menu_verbose
  * @brief returns state of verbose variable
  **/
-Bool menu_verbose(void);
+//Bool menu_verbose(void);
 
 /**
  * @def menu_simcard_status
  * @brief prints the state of the simcard
  **/
 void menu_simcard_status(void);
+
+/**
+ * @def menu_is_verbose
+ * @brief call to determine if menu is verbose
+ * @retval verbose state
+ **/
+static inline Bool menu_is_verbose (void) {return verbose;}
 
 /**
  * @def 

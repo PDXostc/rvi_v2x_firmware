@@ -105,6 +105,27 @@ void USB_send_string(uint8_t port, char * buffer);
 void USB_send_char(uint8_t port, char value);
 
 /**
+ * @def USB_tx_string_P
+ * @brief special routine to send program memory stored strings over USB
+ * @param data pointer to PSTR() stored strings
+ **/
+void USB_tx_string_P(const char *data);
+
+/**
+ * @def USB_tx_string_PV
+ * @brief if not verbose, strings are replaced by "OK"
+ * @param data pointer to PSTR() stored strings
+ **/
+void USB_tx_string_PV(const char *data);
+
+/**
+ * @def USB_tx_string_PVO
+ * @brief if not verbose, nothing is sent
+ * @param data pointer to PSTR() stored strings
+ **/
+void USB_tx_string_PVO(const char *data);
+
+/**
  * @def 
  * @brief 
  * @param 

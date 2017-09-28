@@ -64,9 +64,7 @@ uint16_t CSC_get_timeout_for_car_state(void) {
 void CSC_init (void) {
 	/* Might need to turn on the car-state check */
 	if (nvm_eeprom_read_byte(EE_car_state_check_enabled) == CSC_CAR_STATE_CHECK_ENABLED) {
-		job_set_timeout(SYS_CAR_STATE_CHECK, CSC_get_timeout_for_car_state());
-	} else {
-		PWR_mode_high(); //called at init, if no CSC the board will never start
+		job_set_timeout(SYS_CAR_STATE_CHECK, 60); //provide time to connect before CSC pushes to low power mode
 	}
 }
 
@@ -105,7 +103,7 @@ void CSC_print_to_CMD(const char* message);
 
 void CSC_print_to_CMD(const char* message) {
 		menu_send_CSC();
-		usb_tx_string_PVO(message);
+		USB_tx_string_PVO(message);
 		menu_send_n_st();
 }
 
@@ -175,15 +173,15 @@ void CSC_car_state_check(void) {
         case CSC_state_start:
 		
             menu_send_CSC();
-            //usb_tx_string_PVO(PSTR("Car-state check - "));
+            //USB_tx_string_PVO(PSTR("Car-state check - "));
 			   
             if (PWR_is_low_power()) {
 
-                usb_tx_string_PVO(PSTR("low power!\r\n>"));
+                USB_tx_string_PVO(PSTR("low power!\r\n>"));
 				 CSC_sequence_state = CSC_state_low_power;
                 CSC_low_power_subsequence_state = CSC_low_power_subsequence_1;
             } else {
-                usb_tx_string_PVO(PSTR("high power!\r\n>"));
+                USB_tx_string_PVO(PSTR("high power!\r\n>"));
 				flash_red();
 
                 CSC_sequence_state = CSC_state_high_power;

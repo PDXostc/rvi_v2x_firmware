@@ -11,7 +11,7 @@ uint8_t reset_flags = RESET_NONE;
 void reset_processor(void) {
 	if (reset_flags) {
 		if (reset_flags & (1<<RESET_SYSTEM)) {
-			usb_tx_string_P(PSTR("V2X restarting\rReboot in 3 seconds\r\n>"));
+			USB_tx_string_P(PSTR("V2X restarting\rReboot in 3 seconds\r\n>"));
 			delay_s(3);
 			// use write protected inteface to software reset
 			ccp_write_io((uint8_t *)&RST.CTRL, RST_SWRST_bm);
@@ -20,7 +20,7 @@ void reset_processor(void) {
 		// control port happy on Linux...
 		if (reset_flags & (1<<RESET_USB))
 		{
-			usb_tx_string_P(PSTR("::Reset USB Called::\r\n"));
+			USB_tx_string_P(PSTR("::Reset USB Called::\r\n"));
 			udd_detach();
 			delay_s(1);
 			udd_attach();
@@ -28,7 +28,7 @@ void reset_processor(void) {
 		}
 		if (reset_flags & (1<<RESET_CAN)) {
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("CAN restarting\r\n>"));
+			USB_tx_string_P(PSTR("CAN restarting\r\n>"));
 			PWR_can_stop();
 			delay_ms(100);
 			CAN_elm_init();
@@ -36,7 +36,7 @@ void reset_processor(void) {
 		}
 		if (reset_flags & (1<<RESET_GSM)) {
 			menu_send_CTL();
-			usb_tx_string_P(PSTR("GSM restarting\r\n>"));
+			USB_tx_string_P(PSTR("GSM restarting\r\n>"));
 			// Forces reset of GSM
 			PWR_gsm_reset();
 			delay_ms(500);

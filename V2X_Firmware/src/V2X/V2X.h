@@ -9,6 +9,8 @@
 #ifndef V2X_H_
 #define V2X_H_
 
+#define V2X_FW_REV "Version 0.3.1"
+
 #include <asf.h>
 #include <stdio.h>
 #include <string.h>
