@@ -22,37 +22,36 @@
  */
 ISR(SW0_INT_VECT_0)
 {
-	if (ioport_get_pin_level(SW0_PIN) == SW0_ACTIVE)
-	{
+//	if (ioport_get_pin_level(SW0_PIN) == SW0_ACTIVE)
+//	{
 		// ask if 3v is up when the button was pressed
-		bool en_3v = ioport_get_pin_level(PWR_3V3_PIN);
+// 		bool en_3v = ioport_get_pin_level(PWR_3V3_PIN);
 
 		//disable 3v while button down, so 3 and 4 don't fight
-		PWR_3_stop();
+// 		PWR_3_stop();
 
 		/* Hold in interrupt while pin tests held
 		 *		service timer and increment time held
 		 * When released, exit the interrupt routine and report time held
 		 *		(call the button push consequence routine)
 		 */
-		while (ioport_get_pin_level(SW0_PIN) == SW0_ACTIVE)
-		{
-			//button_service(); //call service and record time
-		}
+// 		while (ioport_get_pin_level(SW0_PIN) == SW0_ACTIVE)
+// 		{
+// 			button_service(); //call service and record time
+//  		}
 
-		//button_service(); //call service and final delta
+		button_service(); //call service and final delta
 
-		// handle_button_check(button_get_delta());
-		//job_set_timeout(SYS_PWR, 1);
+//		job_set_timeout(SYS_PWR, 1); //eventually causes the handle_button_check to run
 
 		// if 3v was up when we entered, and 4v is NOT enabled, turn it right back on
-		if (en_3v == true);
-		{
-			PWR_3_start();
-		}
+// 		if (en_3v == true);
+// 		{
+// 			PWR_3_start();
+// 		}
 		// double check if 3 should be enabled before leaving, just in case
-		PWR_3_is_needed();
-	}
+//		PWR_3_is_needed();
+//	}
 	
 	USB_vbus_mount();
 	
