@@ -118,6 +118,13 @@ void CSC_enable_car_state_check(void);
 void CSC_car_state_check(void);
 
 /**
+ * @def CSC_get_state
+ * @brief returns active state
+ * @retval CSC_CAR_STATE value
+ **/
+uint8_t CSC_get_state(void);
+
+/**
  * @def 
  * @brief 
  * @param 

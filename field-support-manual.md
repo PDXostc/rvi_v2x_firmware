@@ -30,7 +30,6 @@ GENIVI Smart-Cities project.
         * [Smart Cities application](#requirements-smart-cities-application)
 * [Hardware setup](#hardware-setup)
     * [Cable connection](#cable-connection)
-    * [Case enclosure and mounting](#case-enclosure-and-mounting)
     * [Sim card insertion instructions](#sim-card-instructions)
     * [Bench Power Supply](#bench-power-supply)
 * [Startup procedure](#startup-procedure)
@@ -66,12 +65,12 @@ GENIVI Smart-Cities project.
 The Vehicle-to-Everything (V2X) board is a telemetry aggregation and delivery
 device. It provides access to:
 
-* Accelerometer
-* CAN/OBD interface via STN110/ELM327
+* [ADXL345BCCZ](http://www.mouser.com/ds/2/609/ADXL345-879145.pdf) Accelerometer configuration and dedicated data stream
+* CAN/OBD interface via STN110 (mimic of ELM327)
 * GPS (requires antenna)
 * GSM network connectivity, via SIMCOM chipset (requires 3g antenna, 3g SIM
   card)
-* Power over USB for host computer
+* Power management of USB for host computer
 
 Configuration and operation can be handled manually, but the device is intended
 to be complemented by a host computer for automated operation.
@@ -94,7 +93,7 @@ GPS and cellular network connections require a combination GPS/GSM 3g antenna.
 
 ### SIM card <a name="requirements-sim"></a>
 
-Celllar network connectivity requires a properly provisioned SIM card.
+Cellular network connectivity requires a properly provisioned (activated) SIM card. The V2X has a [full size SIM card socket](http://www.mouser.com/ds/2/276/0475531001_MEMORY_CARD_SOCKET-146294.pdf), allowing use of any other sized SIM card. [Adapters](https://www.amazon.com/dp/B00R25GJJW) are available to adapt up to full size. 
 
 
 ## Requirements for Smart Cities <a name="requirements-smart-cities"></a>
@@ -111,38 +110,22 @@ Celllar network connectivity requires a properly provisioned SIM card.
 
 > TODO: links to external hardware required
 
-> Please note: SIM card should be inserted before board is powered on, and it is
-> likely easier to do so before connecting cables.
+Needed:
 
-Need:
-
-* V2X Board
-* OBDII to serial cable
+* V2X Board (firmware flashed) mounted in enclosure.
+* OBDII to DB-9 cable
 * GPS/GSM antenna
 * (2) Micro USB to USB cables
+* Raspberry Pi and screen assembly
 
 ### Cable connection <a name="cable-connection"></a>
 
-1. Connect OBDII-serial cable into vehicle OBDII port (under dash) and the V2X
-   serial port.
-2. Connect GPS/GSM antenna cables.
-    > Typical configuration requires attaching
-    >* "gold" head to port marked "**GPS Antenna**"
-    >* "silver" head to port marked "**3g Cellular Network Antenna**"
-
-    > Incorrectly reversing this connection will inhibit GPS signal, and should
-      be one of the first things to check if no GPS signal is observed.
-
-3. Connect USB cable from port on board marked (Host PWR) to host computer micro
-   usb power supply port. This will supply power to host computer (Raspberry Pi
-   or other).
-4. Connect micro USB from port on board marked (Host DATA) to free USB port on
-   host computer. This is the line of communication between the board and the
+1. Connect GPS/GSM antenna cables. There are two possible types (screw type [APAMPS-106](http://www.mouser.com/ds/2/3/APAMPS-106-245254.pdf), tape type [MA-203.A](http://www.mouser.com/ds/2/398/MA.203%20GPS-Penta-band%20Cellular%20Stingray%20110310-2041.pdf)) which have exactly opposite connector colors. The V2X board has markings specifying the connector colors for the APAMPS-106 antenna. The MA-203 has labels attached to the wires adjacent to the connectors. The RF connectors on the V2X board are labeled with GPS and GSM, be mindful when making these connections.
+2. Connect a USB cable from the V2X [Type-A](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) port to the LCD [Micro-B](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) power port. This cable will supply power to screen and Raspberry Pi.
+3. Connect a USB cable from an available Raspberry Pi [Type-A](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) port to the V2X [Micro-B](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) labeled (Host DATA). This is the line of communication between the V2X board and the
    host.
-
-> TODO: Pictures!
-
-### Case enclosure and mounting <a name="case-enclosure-and-mounting"></a>
+4. Connect [OBDII-DB9 cable](http://www.obd2plugs.com/uploadfile/20130213102233930.jpg) to vehicle OBDII port (usually under dash) and V2X-DB-9 port.
+5. Secure the wires to the V2X case 'porch' with zip ties.
 
 > TODO: Pictures!
 
@@ -152,9 +135,9 @@ Need:
 
 Proper SIM card alignment is critical to cellular network operation.
 
-Please insert SIM card so that
-* Gold contacts face TOWARDS the board
-* Chipped edge of card leads into the socket
+Please insert SIM card so that:
+* Gold contacts face TOWARDS the circuit board
+* Cropped corner of card leads into the socket
 * Fully inserted card will engage the spring lock
 
 To remove the card, push in until the spring lock releases, and the card will be
@@ -183,26 +166,28 @@ For full pinout, refer to the table below.
 
 **Pinning:**
 
-| Pin Description  | OBDII | DB9 |
-|----------------- |-------|-----|
-| J1850 BUS+       | 2     | 7   |
-| Chassis Ground   | 4     | 2   |
-| Signal Ground    | 5     | 1   |
-| CAN High J-2284  | 6     | 3   |
-| ISO 9141-2 K Line| 7     | 4   |
-| J1850 BUS-       | 10    | 6   |
-| CAN Low J-2284   | 14    | 5   |
-| ISO 9141-2 L Line| 15    | 8   |
-| Battery Power    | 16    | 9   |
+| Pin Description   | OBDII | DB9  |
+| ----------------- | ----- | ---- |
+| J1850 BUS+        | 2     | 7    |
+| Chassis Ground    | 4     | 2    |
+| Signal Ground     | 5     | 1    |
+| CAN High J-2284   | 6     | 3    |
+| ISO 9141-2 K Line | 7     | 4    |
+| J1850 BUS-        | 10    | 6    |
+| CAN Low J-2284    | 14    | 5    |
+| ISO 9141-2 L Line | 15    | 8    |
+| Battery Power     | 16    | 9    |
+
+[source](http://www.obd2plugs.com/uploadfile/20130213102233930.jpg)
 
 ## Startup procedure <a name="startup-procedure"></a>
 
-1. Press red button. The driver is configured to bring all components to full
-   power. Please allow some seconds for host computer start and application
-   initialization.
-
-When the host comes on line and connects to the V2X, the lights (red, blue,
-green) on board should be visible.
+1. Press red button for 1 second. The LED's will momentarily flash and the V2X will boot and start the host. 
+2. If the car state check is running (default); 
+   1. The first delay before checking for CAN activity is 60 seconds. 
+   2. If no CAN activity is found, V2X will change to a low power mode that has no LED indication. 
+   3. To use the V2X on the bench without a CAN source, send "VXSDC", to disables the CAN search.
+3. When the Cell modem comes on line and connects to the V2X, the lights on board should be visible.
 
 ### Power requirements <a name="power-requirements"></a>
 
@@ -213,9 +198,9 @@ computer connected. When V2X is supplying power to a host such as a Raspberry Pi
 
 > #### Battery warning <a name="battery-warning"></a>
 > As noted above, the V2X firmware does not yet support low power / standby
-state. If left powered when vehicle is off, the vehicle battery could be drained
-significantly. Please power off the V2X when disengaging the vehicle. Note that
-powering off the V2X will also power off the host computer.
+> state. If left powered when vehicle is off, the vehicle battery could be drained
+> significantly. Please power off the V2X when disengaging the vehicle. Note that
+> powering off the V2X will also power off the host computer.
 
 ### Nominal light states <a name="nominal-light-states"></a>
 
@@ -225,6 +210,7 @@ status.
 * Red: SIM card insertion status.
     - Active: SIM card is inserted (properly)
     - Inactive: SIM card missing or inserted improperly
+    - Flash: Car state check performed
 
 * Blue: GSM power status.
     - Active: SIMCOM chipset is powered
@@ -238,13 +224,13 @@ A steady green light likely indicates that the signal quality is not sufficient
 to register and attach to the desired network operator.
 
 > Please note: A bug currently exists in the driver that can produce a state
-where the LEDs are not updated with the correct frequency if the host has not
-actively communicated with the board for some time. Until this issue is resolved,
-the host should use a scripted means of occaisionally contacting the V2X control
-port. The distro built for Smart Cities contains a work around service for this
-issue.
+> where the LEDs are not updated with the correct frequency if the host has not
+> actively communicated with the board for some time. Until this issue is resolved,
+> the host should use a scripted means of occaisionally contacting the V2X control
+> port. The distro built for Smart Cities contains a work around service for this
+> issue.
 
-If the lights are not visible, this should indicate the device is not powered.
+If the lights are not visible, the device may be in a low power state. Pressing the button for 1 second should boot the V2X into high power for 60 seconds.
 
 ### Smart Cities Application
 
@@ -284,7 +270,7 @@ Hold button for longer than N seconds and release.
 V2X board supports a command set over a USB-serial port.
 
 > TODO: Later section with details on using command set for power management and
-troubleshooting.
+> troubleshooting.
 
 ### When all else fails <a name="when-fails"></a>
 
@@ -294,7 +280,7 @@ reconnect. Use the button repower the system.
 ### Command options for power off (see also command set) <a name="command-power-off"></a>
 
 > TODO: Describe contacting the V2X control port, and commands that can be used
-for power state manipulation.
+> for power state manipulation.
 
 ### Nominal smart cities <a name="nominal-smart-cities"></a>
 

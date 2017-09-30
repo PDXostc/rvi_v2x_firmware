@@ -52,6 +52,10 @@ uint16_t CSC_high_power_car_check_timeout(void) {
     return eeprom_read_unsigned_int_16(EE_car_state_check_high_power_check_interval);
 }
 
+uint8_t CSC_get_state(void) {
+	return CSC_car_state;
+}
+
 uint16_t CSC_get_timeout_for_car_state(void);
 
 uint16_t CSC_get_timeout_for_car_state(void) {

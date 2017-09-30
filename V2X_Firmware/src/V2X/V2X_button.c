@@ -79,12 +79,14 @@ void handle_button_check(int sec) {
 		PWR_gsm_stop();
 		ACL_set_sample_off();
 		PWR_shutdown();
-	} else if (sec >= 3)
-	{
-		PWR_mode_low();
-	} else if (sec >= 1)
-	{
+// 	} else if (sec >= 3)
+// 	{
+// 		PWR_mode_low();
+	} else	{
 		PWR_mode_high();
+		if (CSC_get_state() == CSC_car_state_running) {
+			job_set_timeout(SYS_CAR_STATE_CHECK, 60); //provide time to connect before CSC pushes to low power mode
+		}
 	}
 	button_reset_delta();
 }
