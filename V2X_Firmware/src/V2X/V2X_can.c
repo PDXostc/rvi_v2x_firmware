@@ -500,8 +500,11 @@ void CAN_hear_chatter_sequence (char * response_buffer) {
 			} else {
 	            CAN_parse_chatter(response_buffer);
 
-                if (CAN_last_did_hear_chatter)
+                if (CAN_last_did_hear_chatter) {
                     CAN_hear_chatter_subsequence_state = CAN_hear_chatter_subsequence_4;
+					char ng = "\n";
+					CAN_control(&ng);
+				}
 			}			
 
 			break;

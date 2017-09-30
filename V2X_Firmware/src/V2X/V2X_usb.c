@@ -84,7 +84,7 @@ void USB_callback_config(uint8_t port, usb_cdc_line_coding_t * cfg)
 	// Set configuration
 	(CAN_UART)->CTRLC = reg_ctrlc;
 	// Update baudrate
-	bsel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 1) / ((uint32_t) le32_to_cpu(cfg->dwDTERate) * 8)) + 1) >> 1) - 1);
+	bsel = (uint16_t) (((((((uint32_t) sysclk_get_cpu_hz()) << 0) / ((uint32_t) le32_to_cpu(cfg->dwDTERate) * 8)) + 1) >> 1) - 1);
 	(CAN_UART)->BAUDCTRLA = bsel & 0xFF;
 	(CAN_UART)->BAUDCTRLB = bsel >> 8;
 }
