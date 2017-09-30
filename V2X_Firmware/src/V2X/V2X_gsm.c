@@ -251,7 +251,7 @@ void GSM_control_start (char * responce_buffer){
 			clear_buffer(imei);
 			strcat(imei, responce_buffer+6);
 			menu_send_CTL();
-			USB_tx_string_P(PSTR("IMEI captured \r\n"));
+			USB_tx_string_P(PSTR("IMEI captured"));
 			menu_send_n_st();
 			job_set_timeout(SYS_GSM, 12);
 			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
@@ -262,7 +262,7 @@ void GSM_control_start (char * responce_buffer){
 			clear_buffer(imei);
 			strcat(imei, responce_buffer+8);
 			menu_send_CTL();
-			USB_tx_string_P(PSTR("IMEISV captured \r\n"));
+			USB_tx_string_P(PSTR("IMEISV captured"));
 			menu_send_n_st();
 			job_set_timeout(SYS_GSM, 12);
 			GSM_subsequence_state = GSM_subssequence_6;  //got expected response, go to next step
