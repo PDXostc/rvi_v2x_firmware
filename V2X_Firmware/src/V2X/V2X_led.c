@@ -18,7 +18,10 @@ void led_update(void){
 		else													{led_green_off();	}
 		if (ioport_get_pin_level(EXT1_PIN_SIM_PWR) == true)		{led_blue_on();	}
 		else													{led_blue_off();	}
-	} else {led_red_off(); led_green_off(); led_blue_off();}
+	} else {													led_red_off(); 
+																led_green_off(); 
+																led_blue_off();
+		}
 #endif
 
 #ifdef LED_PWM
@@ -29,7 +32,10 @@ void led_update(void){
 		else													{pwm_start(&green_pwm_cfg, LED_DIM);}
 		if (ioport_get_pin_level(EXT1_PIN_SIM_PWR ) == true)	{pwm_start(&blue_pwm_cfg, LED_MAX_BLUE);	}
 		else													{pwm_start(&blue_pwm_cfg, LED_DIM);}
-		} else {pwm_start(&red_pwm_cfg, LED_DIM); pwm_start(&green_pwm_cfg, LED_DIM); pwm_start(&blue_pwm_cfg, LED_DIM);}
+		} else {												pwm_start(&red_pwm_cfg, LED_DIM); 
+																pwm_start(&green_pwm_cfg, LED_DIM); 
+																pwm_start(&blue_pwm_cfg, LED_DIM);
+		}
 
 #endif
 }
