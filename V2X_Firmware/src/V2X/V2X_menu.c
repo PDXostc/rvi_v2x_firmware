@@ -44,8 +44,11 @@ void menu_main(void) {
 				USB_tx_string_P(PSTR("\r\nFW: "));
 				USB_send_string(USB_CMD, V2X_FW_REV);
 				break;
-			case 'j': //Jaguar
-				USB_tx_string_P(PSTR("\r\n\r\n   ,ggp@@@@mgg,,\r\n,$Q$(`S@@$;g$$$$$@$@@gg,\r\n;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r\n  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r\n    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r\n         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r\n         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r\n                                    *$@@L ```T$W~)%g,\r\n                                      *%@gg,,,,,    5/Sw,     ,\r\n                                          ```` ` `9g `9g,``*^|'\r\n                                                    `#g,`)h\r\n\r\n   Developed at Jaguar Land Rover OSCT. Portland OR 2016"));
+//			case 'j': //Jaguar logo
+//				USB_tx_string_P(PSTR("\r\n\r\n   ,ggp@@@@mgg,,\r\n,$Q$(`S@@$;g$$$$$@$@@gg,\r\n;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r\n  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r\n    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r\n         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r\n         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r\n                                    *$@@L ```T$W~)%g,\r\n                                      *%@gg,,,,,    5/Sw,     ,\r\n                                          ```` ` `9g `9g,``*^|'\r\n                                                    `#g,`)h\r\n\r\n   Developed at Jaguar Land Rover OSCT. Portland OR 2016"));
+//				break;
+			case 'g'://GENIVI logo
+				USB_tx_string_P(PSTR("                        ..                               \n                        '..:;.                           \n                       ,l'.;;.                           \n                       .;'lKKo.                          \n                     .l:. .::'                           \n                     ;Od..lxd:.                          \n                    .,.  'OXKx.                          \n                   :XWx. ,;'. .lkk;                      \n                   'od;.lNX:  .OWWd..;;.                 \n                .lOc    'c:.   ';,..dWNc                 \n                 :o, .oOk,  .;k0d'  'l:.                 \n                ,kk; .dKO; ..oWMX; 'kKx'                 \n                lWMo .;l;    .:c'  cWMN:                 \n                lWMo.lWMK, .cd00o. cWMN:                 \n                cNWl.dMMN: cXWMMX; cWMN:                 \n                .,;..xMMN: cXWMMX; ,KWK,                 \n                    .xMMN: cXWMMX;  .,.                  \n                     lNW0, cXWMMX;                       \n                      ',.  :0XMMK,                       \n                            .,ll'                        \n  .......    .......   ...      .    .  ..       .   .   \n'x0OOOOO0x. l0Okkkkk:.c000x'   ,Ox..xO;.o0l    ,kk'.dO:';\ndMO,';clxk,.xM0doooo' dMOxNKx; :N0''0Nc ,0Nc  '0Nl '0Nl..\ndMd .:dd0K:.xMKxdddd' dMd.cXMXllX0''0Nc  ;KX:.kNd. '0Wc  \nlNXxodoxXX;.xMKxdddd;.dMx. ;d0NXW0''0Nc   :XXKNx.  '0Wc  \n ,:ccccc:'  'c::::::' .c'    .:::,..;:.    ,::;.    ,:.  \n"));
 				break;
 			case 'q':
 				menu_status();
@@ -336,7 +339,10 @@ void menu_power (void) {
 	switch (CMD_buffer[3]) {
 	case 'd':  //disable power
 		switch (CMD_buffer[4]) {
-
+		case '3':  //4v
+			USB_tx_string_PV(PSTR("Disabling 3V supply"));
+			PWR_3_stop();
+			break;
 		case '4':  //4v
 			USB_tx_string_PV(PSTR("Disabling 4V supply"));
 			PWR_4_stop();
@@ -359,7 +365,10 @@ void menu_power (void) {
 		break; //disable power
 	case 'e':  //enable power
 		switch (CMD_buffer[4]) {
-
+		case '3':  //4v
+			USB_tx_string_PV(PSTR("Enabling 3V supply"));
+			PWR_3_start();
+			break;
 		case '4':  //4v
 			USB_tx_string_PV(PSTR("Enabling 4V supply"));
 			PWR_4_start();
@@ -638,7 +647,6 @@ void menu_print_int(long value) {
 long menu_sample_number(char * input) {
 	return atol(input);  //convert input chars to int
 }
-
 
 void menu_lockup (void) {
 	char msg[] = "AVR>>RESET:\r\n";
