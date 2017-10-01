@@ -2,7 +2,7 @@
  * V2X_gsm.h
  *
  * Created: 2/12/2016 11:01:18 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */
 
 
@@ -74,7 +74,7 @@ void GSM_purge_buffer(uint8_t buffer_select);
  * @def GSM_usart_init
  * @brief configure the usart port used by the GSM device, active RX
  */
-void GSM_usart_init (void);
+void GSM_uart_start (void);
 
 /**
  * @def GSM_sequence_states
@@ -186,4 +186,24 @@ char * GSM_get_imei (void);
  *@brief send a shutdown command to the gsm
  */
 void GSM_command_power_off(void);
+
+/**
+ * @def GSM_new_data
+ * @brief adds new data to the input buffer from uasr ISR
+ * @param value the data to be added to the buffer
+ **/
+void GSM_new_data (uint8_t value);
+
+/**
+ * @def GSM_send_data
+ * @brief sends data to the GSM, used in tx ISR
+ **/
+void GSM_send_data (void) ;
+
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_GSM_H_ */

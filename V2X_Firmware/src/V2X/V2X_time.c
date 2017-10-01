@@ -2,7 +2,7 @@
  * V2X_time.c
  *
  * Created: 3/2/2016 3:24:15 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 #include "V2X.h"
@@ -81,7 +81,7 @@ void time_alarm_set_relative(long offset) {
 void time_alarm_event(void) {
 	alarm_is_set = false;
 	menu_send_CTL();
-	usb_tx_string_P(PSTR("ALARM\r\n"));
+	USB_tx_string_P(PSTR("ALARM\r\n"));
 	menu_send_n_st();
 	//respond to alarm
 	PWR_host_start();
@@ -117,17 +117,17 @@ int time_zone_default_offset (void) {
 void time_print_human_readable (void) {
 	calendar_timestamp_to_date_tz(rtc_get_time(),time_zone + dst,0,&date_s);
 	menu_print_int(date_s.month+1);
-	usb_tx_string_P(PSTR("/"));
+	USB_tx_string_P(PSTR("/"));
 	menu_print_int(date_s.date+1);
-	usb_tx_string_P(PSTR("/"));
+	USB_tx_string_P(PSTR("/"));
 	menu_print_int(date_s.year);
-	usb_tx_string_P(PSTR(" "));
+	USB_tx_string_P(PSTR(" "));
 	menu_print_int(date_s.hour);
-	usb_tx_string_P(PSTR(":"));
-	if (date_s.minute < 10) {usb_tx_string_P(PSTR("0"));} //add a 0 if below 10
+	USB_tx_string_P(PSTR(":"));
+	if (date_s.minute < 10) {USB_tx_string_P(PSTR("0"));} //add a 0 if below 10
 	menu_print_int(date_s.minute);
-	usb_tx_string_P(PSTR(":"));
-	if (date_s.second < 10) {usb_tx_string_P(PSTR("0"));} //add a 0 if below 10
+	USB_tx_string_P(PSTR(":"));
+	if (date_s.second < 10) {USB_tx_string_P(PSTR("0"));} //add a 0 if below 10
 	menu_print_int(date_s.second);
 }
 

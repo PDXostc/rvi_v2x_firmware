@@ -2,7 +2,7 @@
  * V2X_eeprom.c
  *
  * Created: 3/29/2016 8:19:45 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 #include "V2X.h"

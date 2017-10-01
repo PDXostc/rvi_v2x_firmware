@@ -1,12 +1,13 @@
-/**
- * /file V2X_init.h
+/*
+ * V2X_reset.h
  *
- * /brief V2X board initialization definitions
- *
- * Author: Jesse Banks (jbanks2)
- **/
-#ifndef V2X_INIT_H_
-#define V2X_INIT_H_
+ * Created: 9/20/2017 10:51:08 PM
+ *  Author: Jesse Banks
+ */ 
+
+
+#ifndef V2X_RESET_H_
+#define V2X_RESET_H_
 
 /**
  * @def reset_flag_defs
@@ -19,18 +20,6 @@ enum reset_flag_defs {
 	RESET_CAN,
 	RESET_GSM
 };
-
-/**
- * @def pin_init
- * @brief Whole chip pin initialization (mode, state)
- **/
-void pin_init(void);
-
-/**
- * @def v2x_board_init
- * @brief Whole board initialization (mode, state)
- **/
-void v2x_board_init(void);
 
 /**
  * @def reset_processor
@@ -68,4 +57,4 @@ void reset_trigger_GSM (void);
  * @param 
  * @retval
  **/
-#endif /* V2X_INIT_H_ */
+#endif /* V2X_RESET_H_ */

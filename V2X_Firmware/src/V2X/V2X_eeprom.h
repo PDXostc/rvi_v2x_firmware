@@ -2,7 +2,7 @@
  * V2X_eeprom.h
  *
  * Created: 3/29/2016 8:14:04 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -59,4 +59,10 @@ void eeprom_store_CAN_string (char * buffer);
  **/
 void eeprom_read_CAN_string (char * buffer);
 
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_EEPROM_H_ */
