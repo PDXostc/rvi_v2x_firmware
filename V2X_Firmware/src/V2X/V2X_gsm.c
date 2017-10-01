@@ -114,18 +114,21 @@ void GSM_process_buffer (void) {
 
 void GSM_control (char * responce_buffer) {
 	switch (GSM_sequence_state) {
-		case GSM_state_idle:
+	case GSM_state_idle:
 		break;
-		case GSM_power_check:
+	case GSM_power_check:
 		GSM_control_check(responce_buffer);
 		break;
-		case GSM_state_start:
+	case GSM_state_start:
 		GSM_control_start(responce_buffer);
 		break;
-		case GSM_state_time_get:
+	case GSM_state_time_get:
 		GSM_time_sync(responce_buffer);
 		break;
-		default:
+	case GSM_GPS_evaluation:
+		GSM_test_GPS(responce_buffer);
+		break;
+	default:
 		GSM_sequence_state = GSM_state_idle;
 	}
 }
@@ -413,4 +416,8 @@ void GSM_command_enable_gps_auto(int enable) {
 		default:
 		break;
 	}
+}
+
+void GSM_test_GPS (char * buffer) {
+	
 }

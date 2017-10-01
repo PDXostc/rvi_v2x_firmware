@@ -86,7 +86,8 @@ enum GSM_sequence_states {
 	GSM_state_start,
 	GSM_state_init_SMS,
 	GSM_state_time_get,
-	GSM_state_wake_host
+	GSM_state_wake_host,
+	GSM_GPS_evaluation
 	};
 
 /**
@@ -199,6 +200,13 @@ void GSM_new_data (uint8_t value);
  * @brief sends data to the GSM, used in tx ISR
  **/
 void GSM_send_data (void) ;
+
+/**
+ * @def GSM_test_GPS
+ * @brief performs several test on the GPS antenna and system
+ * @param respponce buffer back from SIM
+ **/
+void GSM_test_GPS (char * buffer);
 
 /**
  * @def 
