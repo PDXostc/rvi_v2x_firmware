@@ -380,8 +380,11 @@ COM<x> is determined at runtime:
 | VXMI       | M         | I       | Modem device information                 |
 | VXMQ       | M         | Q       | Modem state query                        |
 | VXMR       | M         | R       | Rerestart the Modem                      |
+| VXMS       | M         | S       | Stop GPS lock test                       |
+| VXMT       | M         | T       | Test GPS lock time                       |
 | VXMXttt    | M         | Xttt    | Command passthrough                      |
 | VXM        | M         |         | Display Modem menu                       |
+| VXM/       | M         | /       | Logical power down SIM chip              |
 | VXP?       | P         | ?       | Display power menu                       |
 | VXPD3      | P         | D3      | Disable the 3V power supply              |
 | VXPD4      | P         | D4      | Disable the 4V power supply              |
@@ -517,6 +520,18 @@ Ultimately, the usage will boil down to something like this:
 ```
 avrdude -p x128a4u -c <programmer-id> -e -U flash:w:<file-name>.hex
 ```
+### Using the GPS test
+
+There exists a test function to repeatedly cold acquire GPS lock and print the results.  This test should be the only automatic control sequence running, "VXSDC" to the V2X control port `ttyACM1` will stop the car state checks. Sending "VXMT" to the V2X control port will start the GPS lock time test.
+
+The control port is spammed with plenty of SIM module GPS query chatter during the test, so the results of the test are sent to the Accelerometer stream `ttyACM2` for consolidated results. Test results are in seconds and appear like this:
+
+`Acquisition time: 44`
+`Acquisition time: 46`
+`Acquisition time: 38   `
+
+The Accelerometer stream is automatically stopped when the test begins. As the test progresses a "spinner" ( |, \, -, / ) shows there is test activity, the test automatically repeats, and recovers from errors until it is stopped with "VXMS" command. The Accelerometer can then be restarted with VXAE.
+
 ## Links and Resources <a name="links-resources"></a>
 
 ## FAQ
