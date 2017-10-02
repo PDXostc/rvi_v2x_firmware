@@ -492,7 +492,7 @@ void GSM_test_GPS (char * responce_buffer) {
 			//found GPS info string
 			
 //			USB_send_char(USB_ACL, '*');
-			if  (responce_buffer[10] == ',') {
+			if  (responce_buffer[12] == ',') {
 //				USB_send_char(USB_ACL, ',');
 				// no lock, 
 				if (loopCnt < GPS_TEST_TIMEOUT) { //if not timeout
