@@ -65,7 +65,6 @@ asf.h
 [Rr]elease/
 [Dd]ebug/
 *.atsln
-config/
 .vs/
 atmel*.*
 
