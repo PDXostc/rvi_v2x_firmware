@@ -39,8 +39,8 @@ void menu_main(void) {
 	if (CMD_buffer[0] == 'v' && CMD_buffer[1] == 'x') {
 		switch(CMD_buffer[2]) {
 			case 'i': //information
-				USB_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016 -2017\r\nOpen source hardware and software\r\nHW: :"));
-				USB_send_string(USB_CMD, V2X_REV);
+				USB_tx_string_P(PSTR("Vehicle to Everything (V2X) RVI Node 2016 -2017\r\nOpen source hardware and software\r\nHW: "));
+				USB_send_string(USB_CMD, BOARD_NAME);
 				USB_tx_string_P(PSTR("\r\nFW: "));
 				USB_send_string(USB_CMD, V2X_FW_REV);
 				break;
@@ -48,7 +48,7 @@ void menu_main(void) {
 //				USB_tx_string_P(PSTR("\r\n\r\n   ,ggp@@@@mgg,,\r\n,$Q$(`S@@$;g$$$$$@$@@gg,\r\n;gP'$@gg)$$@@$@@@$(L$$||$$@g,\r\n  `g$P`  ``*%@@@P`)Eg|||lLLL||$Bgg,\r\n    `       ,gg$$@gg,`$..``$Z$$$$$EB$$@g,\r\n         @P`pgg$$$||`)gggg;,,     |$$$|$$$@g,\r\n         9w&    '*^^` ``*P#9BB00000$$$@|`$$$g|Sg,\r\n                                    *$@@L ```T$W~)%g,\r\n                                      *%@gg,,,,,    5/Sw,     ,\r\n                                          ```` ` `9g `9g,``*^|'\r\n                                                    `#g,`)h\r\n\r\n   Developed at Jaguar Land Rover OSCT. Portland OR 2016"));
 //				break;
 			case 'g'://GENIVI logo
-				USB_tx_string_P(PSTR("                        ..                               \n                        '..:;.                           \n                       ,l'.;;.                           \n                       .;'lKKo.                          \n                     .l:. .::'                           \n                     ;Od..lxd:.                          \n                    .,.  'OXKx.                          \n                   :XWx. ,;'. .lkk;                      \n                   'od;.lNX:  .OWWd..;;.                 \n                .lOc    'c:.   ';,..dWNc                 \n                 :o, .oOk,  .;k0d'  'l:.                 \n                ,kk; .dKO; ..oWMX; 'kKx'                 \n                lWMo .;l;    .:c'  cWMN:                 \n                lWMo.lWMK, .cd00o. cWMN:                 \n                cNWl.dMMN: cXWMMX; cWMN:                 \n                .,;..xMMN: cXWMMX; ,KWK,                 \n                    .xMMN: cXWMMX;  .,.                  \n                     lNW0, cXWMMX;                       \n                      ',.  :0XMMK,                       \n                            .,ll'                        \n  .......    .......   ...      .    .  ..       .   .   \n'x0OOOOO0x. l0Okkkkk:.c000x'   ,Ox..xO;.o0l    ,kk'.dO:';\ndMO,';clxk,.xM0doooo' dMOxNKx; :N0''0Nc ,0Nc  '0Nl '0Nl..\ndMd .:dd0K:.xMKxdddd' dMd.cXMXllX0''0Nc  ;KX:.kNd. '0Wc  \nlNXxodoxXX;.xMKxdddd;.dMx. ;d0NXW0''0Nc   :XXKNx.  '0Wc  \n ,:ccccc:'  'c::::::' .c'    .:::,..;:.    ,::;.    ,:.  \n"));
+				USB_tx_string_P(PSTR("GENIVI 2017"));
 				break;
 			case 'q':
 				menu_status();
@@ -277,9 +277,18 @@ void menu_modem (void) {
 		GSM_add_string_to_buffer(BUFFER_OUT, &CMD_buffer[4]); //send it on to the modem
 		GSM_mark_for_processing(BUFFER_OUT); //initiate send
  		break;
+	case 't':
+		GSM_start_GPS_test();
+		break;
+	case 's':
+		GSM_stop_test();
+		break;
+	case '/':	
+		GSM_command_power_off();
+		break;
 	case '?':
 	default:
-		USB_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nG: Enable GPS\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nXs: Comand Pass through"));
+		USB_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nG: Enable GPS\r\nT: Test GPS lock time\r\nS: Stop GPS lock test\r\n/: Power down SIM Chip\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nXt: Comand Pass through"));
 		break;
 	}
 }
@@ -293,7 +302,7 @@ void menu_can (void) {
 		PWR_is_5_needed();
 		break;
 	case 'e':  //enable
-		USB_tx_string_PV(PSTR("CAN Starting"));
+		USB_tx_string_PV(PSTR("CAN Starting\n"));
 		CAN_elm_init();
 		break;
 	case 'r':  //reset
@@ -307,8 +316,7 @@ void menu_can (void) {
 		USB_tx_string_P(PSTR("V2X uses the STN1110 CANbus interface from Scantool\r\nThe STN1110 is compliant with the ELM327 V1.3"));
 		break;
 	case 'x': //pass command
-		strcat_P(CMD_buffer, PSTR("\r\n"));
-
+		strcat_P(CMD_buffer, PSTR("\r"));
 		CAN_add_string_to_buffer(BUFFER_OUT, CMD_buffer+4);
 		CAN_mark_for_processing(BUFFER_OUT);
 		CAN_start_snoop();
@@ -326,7 +334,7 @@ void menu_can (void) {
 		break;
 	case '?':
 	default:
-		USB_tx_string_P(PSTR("*** CANbus Menu ***\r\nE: Enable\r\nD: Disable\r\nR: Restart\r\nS: Store config string to EE\r\nA: Execute config string in EE\r\nW: Display config string in EE\r\nI: Subsystem Information\r\nQ: Query status"));
+		USB_tx_string_P(PSTR("*** CANbus Menu ***\r\nE: Enable\r\nD: Disable\r\nR: Restart\r\nSt: Store config string to EE\r\nA: Execute config string in EE\r\nW: Display config string in EE\r\nI: Subsystem Information\r\nQ: Query status\r\nXt: Command pass through"));
 		break;
 	}
 }
@@ -423,7 +431,7 @@ void menu_power (void) {
 		break;
 	case '?':
 	default:
-		USB_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H)\r\nDn: Disable power supply (3, 4, 5, H, A(ll)\r\nR: Reset to defaults\r\nQ: Query status\r\nY: Why did I wake up?\r\nH: High power mode (all peripherals enabled)\r\nL: Low power mode (all peripherals disabled)"));
+		USB_tx_string_P(PSTR("*** Power Menu ***\r\nEn: Enable power supply (3, 4, 5, H(ost) )\r\nDn: Disable power supply (3, 4, 5, H(ost), A(ll) )\r\nR: Reset to defaults\r\nQ: Query status\r\nY: Why did I wake up?\r\nH: High power mode (all peripherals enabled)\r\nL: Low power mode (all peripherals disabled)"));
 		break;
 	}
 }
