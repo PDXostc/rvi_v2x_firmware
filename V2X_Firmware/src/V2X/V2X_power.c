@@ -73,6 +73,7 @@ Bool PWR_is_low_power(void) {
  */
 void PWR_3_start(void) {
 	gpio_set_pin_high(PWR_3V3_PIN);
+	gpio_set_pin_low(PWR_4TO3_PIN);
 }
 
 /* 3 volt power pin manipulation
@@ -83,6 +84,7 @@ void PWR_3_start(void) {
 
 void PWR_3_stop(void) {
 	gpio_set_pin_low(PWR_3V3_PIN);
+	gpio_set_pin_high(PWR_4TO3_PIN);
 }
 
 void PWR_3_is_needed(void) {
