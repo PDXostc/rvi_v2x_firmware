@@ -277,9 +277,18 @@ void menu_modem (void) {
 		GSM_add_string_to_buffer(BUFFER_OUT, &CMD_buffer[4]); //send it on to the modem
 		GSM_mark_for_processing(BUFFER_OUT); //initiate send
  		break;
+	case 't':
+		GSM_start_GPS_test();
+		break;
+	case 's':
+		GSM_stop_test();
+		break;
+	case '/':	
+		GSM_command_power_off();
+		break;
 	case '?':
 	default:
-		USB_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nG: Enable GPS\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nXt: Comand Pass through"));
+		USB_tx_string_P(PSTR("*** Modem Menu ***\r\nE: Enable\r\nD: Disable\r\nG: Enable GPS\r\nT: Test GPS lock time\r\nS: Stop GPS lock test\r\n/: Power down SIM Chip\r\nR: RESET. Emergency use.\r\nI: Subsystem Information\r\nQ: Query status\r\nXt: Comand Pass through"));
 		break;
 	}
 }

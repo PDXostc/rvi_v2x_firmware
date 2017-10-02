@@ -206,8 +206,10 @@ void GSM_send_data (void) ;
  * @brief performs several test on the GPS antenna and system
  * @param respponce buffer back from SIM
  **/
-void GSM_test_GPS (char * buffer);
-
+void GSM_test_GPS (char * responce_buffer);
+#define GPS_TEST_TIMEOUT 1200
+void GSM_start_GPS_test(void);
+void GSM_stop_test(void);
 /**
  * @def 
  * @brief 

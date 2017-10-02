@@ -89,6 +89,19 @@ void GSM_time_job (void) {
 	}
 }
 
+void GSM_start_GPS_test (void) {
+	if (GSM_sequence_state == GSM_state_idle) {
+		GSM_sequence_state = GSM_GPS_evaluation;
+		GSM_subsequence_state = GSM_subssequence_1; //move to response state
+		char hold[2];
+		GSM_control (hold);
+	}
+}
+
+void GSM_stop_test (void) {
+	GSM_sequence_state = GSM_state_idle; //move to response state
+}
+
 void GSM_process_buffer (void) {
 	if (GSM.output_proc_active_flag) {
 		if (GSM.output_proc_loaded) { //output buffer is ready to send
@@ -418,6 +431,160 @@ void GSM_command_enable_gps_auto(int enable) {
 	}
 }
 
-void GSM_test_GPS (char * buffer) {
+void GSM_test_GPS (char * responce_buffer) {
+	static int loopCnt;  //tracks long term counts
+	static long startTime;
+	static uint8_t spinner = 0;
+	switch (GSM_subsequence_state) {
+	case GSM_subssequence_1:
+		ACL_set_sample_off();//disable the accelerometer, using this path for test results
+		GSM_subsequence_state = GSM_subssequence_10; //move to start state
+		job_set_timeout(SYS_GSM, 2);
+		break;
+	case GSM_subssequence_10:	
+		USB_tx_string_P(PSTR("Open ACL comm path for test results\r\n>"));// SIM module interaction will spam the CMD path so data is sent to the ACL
+		USB_send_string(USB_ACL, "GPS test under way\r");
+		GSM_subsequence_state = GSM_subssequence_2; //move to start state
+		job_set_timeout(SYS_GSM, 1);
+		break;
+	case GSM_subssequence_2:
+		//turn off GPS
+//		USB_send_char(USB_ACL, '2');	
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPS=0\r")); 
+		CTL_mark_for_processing(&GSM, BUFFER_OUT);
+		//move to response state
+		GSM_subsequence_state = GSM_subssequence_7; 
+		job_set_timeout(SYS_GSM, 2);  
+		break;
+	case GSM_subssequence_3:
+//		USB_send_char(USB_ACL, '3');
+		menu_send_CTL();
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSCOLD\r")); //compose message
+		CTL_mark_for_processing(&GSM, BUFFER_OUT);		
+		GSM_subsequence_state = GSM_subssequence_4; //move to response state
+		job_set_timeout(SYS_GSM, 2);  //test after 1 second
+		break;
+	case GSM_subssequence_4: //enters after cold start, confirm accepted command
+//		USB_send_char(USB_ACL, '4');
+		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {// cold start accepted
+			startTime = time_get();//begin lock tracking
+			menu_send_CTL();
+			USB_tx_string_P(PSTR("GPS Cold Start @"));
+			menu_print_int(startTime);
+			menu_send_n_st();
+			GSM_subsequence_state = GSM_subssequence_6;
+			job_set_timeout(SYS_GSM, 1);  //test after 1 second
+		}
+		if (strcmp_P(responce_buffer, PSTR("ERROR")) == 0) {// cold start accepted
+			menu_send_CTL();
+			USB_tx_string_P(PSTR("ERROR, reissue cold start command"));
+			menu_send_n_st();
+			GSM_subsequence_state = GSM_subssequence_2;
+			job_set_timeout(SYS_GSM, 1);  //test after 1 second
+		}
+		job_check_fail(SYS_GSM);
+		break;
+	case GSM_subssequence_5: // look for GPS lock
+//		USB_send_char(USB_ACL, '5');
+		
+		loopCnt = startTime - time_get();
+		if ((responce_buffer[0] == '+')) { //kinda test for +CGPSINFO: string beginning
+			//found GPS info string
+			
+//			USB_send_char(USB_ACL, '*');
+			if  (responce_buffer[10] == ',') {
+//				USB_send_char(USB_ACL, ',');
+				// no lock, 
+				if (loopCnt < GPS_TEST_TIMEOUT) { //if not timeout
+					//USB_send_string(USB_ACL, "\nInfo Received, no lock");
+				} else { //timeout
+					USB_send_string(USB_ACL, "\rAcquisition failed");
+				}
+			} else { // GPS lock found
+				USB_send_char(USB_ACL, 8); //backspace to remove spinner
+				USB_send_string(USB_ACL, "Acquisition time: ");
+				//long finalTime = startTime - time_get();
+				char c_buf[13];
+				//ltoa(finalTime, c_buf, 10);
+				ltoa( (time_get() - startTime ), c_buf, 10);
+				int i = 0;  //clear the pointer
+				while (c_buf[i] != 0)
+					{USB_send_char(USB_ACL, c_buf[i++]);}
+				USB_send_char(USB_ACL, '\r');
+				GSM_subsequence_state = GSM_subssequence_8; //restart sequence
+			}
+		} else {//some other responce from the SIM
+			if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {// GPS responce finished
+				if (loopCnt < GPS_TEST_TIMEOUT) {
+// 					USB_send_char(USB_ACL, '-');
+// 					if (loopCnt % 80 == 0) {USB_send_string(USB_ACL, "\n");}
+					switch (spinner) {
+					case 0:
+						USB_send_char(USB_ACL, 8); //backspace to remove spinner
+						USB_send_char(USB_ACL, '|'); //this version of spinner
+						spinner++;
+						break;
+					case 1:
+						USB_send_char(USB_ACL, 8);
+						USB_send_char(USB_ACL, '\\');
+						spinner++;
+						break;
+					case 2:
+						USB_send_char(USB_ACL, 8);
+						USB_send_char(USB_ACL, '-');
+						spinner++;
+						break;
+					default:
+					case 3:	
+						USB_send_char(USB_ACL, 8);
+						USB_send_char(USB_ACL, '/');
+						spinner = 0;
+						break;
+					}
+					GSM_subsequence_state = GSM_subssequence_6; //ask again
+				} else{
+					GSM_subsequence_state = GSM_subssequence_8; //restart sequence
+				}
+				
+			}
+		}	
+		job_check_fail(SYS_GSM);
+		break;
+	case GSM_subssequence_6: // should have been called by timeout
+//		USB_send_char(USB_ACL, '6');
+		CTL_add_string_to_buffer_P(&GSM, BUFFER_OUT, PSTR("AT+CGPSINFO\r")); //query GPS info
+		CTL_mark_for_processing(&GSM, BUFFER_OUT);
+		GSM_subsequence_state = GSM_subssequence_5; //ask again
+		job_set_timeout(SYS_GSM, 1);
+		break;
+	case GSM_subssequence_7: // delay
+//		USB_send_char(USB_ACL, '7');
+		if (strcmp_P(responce_buffer, PSTR("OK")) == 0) {
+			menu_send_CTL();
+			USB_tx_string_P(PSTR("GPS stopped"));
+			menu_send_n_st();
+			GSM_subsequence_state = GSM_subssequence_3; //ask again
+			job_set_timeout(SYS_GSM, 1);
+		}
+		job_check_fail(SYS_GSM);
+		break;
+	case GSM_subssequence_8: // delay
+//		USB_send_char(USB_ACL, '8');
+			menu_send_CTL();
+			USB_tx_string_P(PSTR("GPS test complete\n"));
+			menu_send_n_st();
+			GSM_subsequence_state = GSM_subssequence_2; //ask again
+			job_set_timeout(SYS_GSM, 1);
+		break;
+	case GSM_subssequence_FAIL:
+	default:
+//		USB_send_char(USB_ACL, 'F');
+		menu_send_CTL();
+		USB_tx_string_P(PSTR("GPS test failed, retry\r\n>"));
+		GSM_subsequence_state = GSM_subssequence_8;
+		GSM_control(responce_buffer);
+		break;
+	}
 	
 }
+
