@@ -44,10 +44,14 @@ GENIVI Smart-Cities project.
     * [When all else fails](#when-fails)
 * [V2X Interface and Control](#runtime-operation)
     * [Communication Ports](#communication-ports)
-        * [Linux](#communication-ports-linux)
+        * [Linux](#communication-linux)
+          * [Discover active USB ports](#active-usb)
+          * [Install Minicom](#install-minicom)
+          * [Setup Serial Terminal](#serial_terminal_linux)
         * [Windows](#communication-ports-windows)
     * [Smart-cities interaction](#smart-cities-interaction)
-    * [Cellular](#cellular-operations)
+
+        ​
     * [Verification](#verification)
     * [Toubleshooting](#troubleshooting)
 * [V2X Command set](#v2x-command-set)
@@ -226,7 +230,7 @@ to register and attach to the desired network operator.
 
 If the lights are not visible, the device may be in a low power state. Pressing the button for <5 seconds should boot the V2X into high power for 10-60 seconds.
 
-### Smart Cities Application
+### Smart Cities Application <a name="nominal-smart-cities"></a>
 
 In addition, the color of the time and date lines under the GENIVI logo indicate
 the status of GPS and RVI, respectively.
@@ -289,11 +293,12 @@ depend on the operating system of the host computer.
 
 > Depending on operating system, arrangement of the virtual ports is at the
 > mercy of whatever order they are mounted in. This means that the serial port
-> for a particular device may not remain consistent. It is encouraged for the
-> host computer to use a rules system (like `udev` in Linux) to map consistent
-> port aliases.
+> for a particular device may not remain consistent.
 
-#### Linux <a name="communication-ports-linux"></a> 
+### Linux <a name="communication-linux"></a> 
+
+> It is encouraged for the host computer to use a rules system (like `udev` in Linux)
+> to map consistent port aliases.
 
 The common port mounting arrangement observed in Linux:
 
@@ -306,8 +311,43 @@ The common port mounting arrangement observed in Linux:
   internet connection)
 * `/dev/ttyUSB3` -> SIMCOM AT control (AT command set)
 
-#### Windows <a name="communication-ports-windows"></a>
+#### Discover active USB ports:<a name="active-usb"></a>
+After plugging in and starting the V2X, type into a terminal window;
+`dmesg | grep tty`
+The most recently mounted ports will appear at the bottom of the list.
 
+#### Install minicom, <a name="install-minicom"></a>
+1. In a terminal window:
+
+  `sudo apt-get install minicom`
+
+2. Type in admin password of computer
+3. Confirm with 'y, allow to install
+
+#### Setup Serial Terminal <a name="serial_terminal_linux"></a>
+1. To setup minicom to access the V2X command interface, from a terminal:
+
+  `sudo minicom -s`
+
+2. arrow down to "Serial port setup", press enter
+3. press 'a' to modify the serial device line, 
+4. change the line to /dev/ttyAMC1, enter to confirm
+5. press 'f' to toggle flow control to "off"
+6. press enter to confirm setup
+
+optional: 
+    1. arrow down to "Save setup as.." 
+    2. select with enter 
+    3. give a name like "CMD"
+    4. Now you can use `sudo minicom CMD` to call a terminal with the correct settings
+
+7. Arrow down to "Exit"
+8. Press 'Ctrl+a' then 'z' to open the commant menu
+9. Press 'a' to add line feed
+
+The serial terminal should now be setup to use.
+
+### Windows <a name="communication-ports-windows"></a>
 On Windows, the arrangement is slightly less intuitive, and the ports require a
 driver to be installed. The requisite files, *atmel_devices_cdc.cat* and
 *atmel_devices_cdc.inf* are available in the Atmel Software Framework, [on
@@ -520,9 +560,9 @@ Ultimately, the usage will boil down to something like this:
 ```
 avrdude -p x128a4u -c <programmer-id> -e -U flash:w:<file-name>.hex
 ```
-### Using the GPS test
+### Using the GPS test<a name="gps_test"></a>
 
-There exists a test function to repeatedly cold acquire GPS lock and print the results.  This test should be the only automatic control sequence running, "VXSDC" to the V2X control port `ttyACM1` will stop the car state checks. Sending "VXMT" to the V2X control port will start the GPS lock time test.
+There exists a test function to repeatedly cold acquire GPS lock and print the results.  This test should be the only automatic control sequence running, send "VXSDC" to the V2X control port `ttyACM1` to stop the car state checks. Sending "VXMT" to the V2X control port will start the GPS lock time test.
 
 The control port is spammed with plenty of SIM module GPS query chatter during the test, so the results of the test are sent to the Accelerometer stream `ttyACM2` for consolidated results. Test results are in seconds and appear like this:
 
@@ -530,7 +570,7 @@ The control port is spammed with plenty of SIM module GPS query chatter during t
 `Acquisition time: 46`
 `Acquisition time: 38   `
 
-The Accelerometer stream is automatically stopped when the test begins. As the test progresses a "spinner" ( |, \, -, / ) shows there is test activity, the test automatically repeats, and recovers from errors until it is stopped with "VXMS" command. The Accelerometer can then be restarted with VXAE.
+The Accelerometer stream is automatically stopped when the test begins. As the test progresses a "spinner" ( |, \, -, / ) shows there is test activity, the test automatically repeats, and recovers from errors until it is stopped with "VXMS" command. The Accelerometer can then be restarted with "VXAE".
 
 ## Links and Resources <a name="links-resources"></a>
 
