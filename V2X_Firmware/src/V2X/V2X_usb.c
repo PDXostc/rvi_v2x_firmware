@@ -33,6 +33,8 @@ void USB_callback_resume_action(void)
 
 void USB_callback_config(uint8_t port, usb_cdc_line_coding_t * cfg)
 {
+	if (port != USB_CAN) {return;}
+	
 	uint8_t reg_ctrlc = 0;
 	uint16_t bsel = 0;
 
@@ -150,7 +152,7 @@ void USB_callback_cdc_set_dtr(uint8_t port, bool b_enable)
 	} else {
 		// Host terminal has close COM
 		if (port == USB_CAN) { 
-
+			CAN_uart_start();
 		}else if (port == USB_CMD) {
 
 		}else if (port == USB_ACL) {
