@@ -43,7 +43,8 @@ void board_init(void)
 	ioport_configure_pin(BUTTON_1_PIN					, IOPORT_DIR_INPUT  | IOPORT_PULL_UP	);  //NON_REM[1] USB hub Boot Strapping option
 
 	/* 3v3 pin init, low by default... */
-	ioport_configure_pin(PWR_3V3_PIN					, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	);
+	ioport_configure_pin(PWR_3V3_PIN					, IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH	); //only low power on initially
+	ioport_configure_pin(PWR_4TO3_PIN					, IOPORT_DIR_OUTPUT | IOPORT_INIT_LOW	);
 
 	irq_initialize_vectors();
 	sysclk_init();							//configure clock sources for core and USB
@@ -55,8 +56,7 @@ void board_init(void)
 	PWR_mode_low();
 	led_init();
 
-	PORTA.INT0MASK = 0b000001001;			// select PA0 and PA3 for INT source, button and usb-vbus
-//	PORTA.INT0MASK = 0b000000001;			// select PA0 for INT source, button
+	PORTA.INT0MASK = 0b00001001;			// select PA0 and PA3 for INT source, button and usb-vbus
 	PORTA.INTCTRL |= PORT_INT0LVL_MED_gc;	// enable interrupt 0 at medium
 	
  	eeprom_init();							//verifies eeprom safe for use
@@ -68,8 +68,9 @@ void board_init(void)
  	GSM_uart_start();						//starts direct serial channel to the SIM module
  	CAN_uart_start();						//starts direct serial channel to the ELM module
  	udc_start();							//start stack and vbus monitoring
+	PWR_mode_high();						//board start
  	USB_vbus_mount();						//check vbus mount if req.
 	CSC_init();								//gets eeprom saved enable states
-	 
+ 	CAN_uart_start();						//starts direct serial channel to the ELM module
 }
 
