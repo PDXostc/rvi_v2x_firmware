@@ -32,7 +32,7 @@ reference implementation.
 
 ## Installation
 
-Please see the [*V2X-project-setup.pdf*](V2X-project-setup.pdf) for instructions
+Please see the [*V2X_SetupGuide.md*](V2X_SetupGuide.md) for instructions
 on correctly setting up the project in the Atmel environment and with the 
 [Atmel Software Framework](http://www.atmel.com/tools/avrsoftwareframework.aspx).
 
