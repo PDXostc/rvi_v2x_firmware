@@ -32,7 +32,7 @@ reference implementation.
 
 ## Installation
 
-Please see the [*V2X-project-setup.pdf*](V2X-project-setup.pdf) for instructions
+Please see the [*V2X_SetupGuide.md*](V2X_SetupGuide.md) for instructions
 on correctly setting up the project in the Atmel environment and with the 
 [Atmel Software Framework](http://www.atmel.com/tools/avrsoftwareframework.aspx).
 
@@ -53,12 +53,14 @@ Tools in use:
 
 Primary contact: [rstreif@partner.jaguarlandrover.com](rstreif@partner.jaguarlandrover.com)
 
-Primary Development by Jesse Banks - jese@jopeldesigns.com.
+Primary Development by Jesse Banks - [jesse@jopeldesigns.com](jesse@jopeldesigns.com).
 
 Other Contributions from UCSD ECE191 Students Jaguar Land Rover OSTC - Portland,
 Oregon 2015-2016.
 
 Additional development and 0.2.0 release by Steve Miller - [stevemillercode@gmail.com](stevemillercode@gmail.com)
+
+Additional development and 0.3.0-0.3.1 release by Jesse Banks and Lilli Szafranski - [lilli@daoofdev.com](lilli@daoofdev.com)
 
 __Contributions and feedback are most welcome!__
 Please use the Github [issue tracking system](https://github.com/PDXostc/rvi_v2x_firmware/issues) for bugs and suggestions. Please feel free to fork this repo and send a merge request if you'd like to make an improvement or fix.

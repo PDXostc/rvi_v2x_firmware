@@ -2,7 +2,7 @@
  * V2X_spi.c
  *
  * Created: 2/12/2016 10:57:35 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 #include "V2X.h"
@@ -20,6 +20,8 @@ void spi_write_read_packet (SPI_t* spi, uint8_t cmd, uint8_t* data, uint8_t leng
 	}
 }
 
+// the shift register and the accelerometer use different SPI bus configurations. 
+// setting up these structs make switching easier
 void spi_start(void)
 {
 	spi_master_init(ACL_SPI);

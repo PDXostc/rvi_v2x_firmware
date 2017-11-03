@@ -3,10 +3,12 @@
  *
  * /brief V2X board hardware driver functions
  *
- * Author: Jesse Banks (jbanks2)
+ *  Author: Jesse Banks
  **/
 
 #include "V2X.h"
+
+PWR_WAKE_UP_REASON PWR_wake_up_reason = PWR_WAKE_UP_REASON_UNKNOWN;
 
 void PWR_init(void)
 {
@@ -21,6 +23,8 @@ void PWR_init(void)
 	PWR_3_is_needed();
 	PWR_push();		//update shift register state
 	delay_ms(100);				//allow power to stabilize
+
+    PWR_wake_up_reason = PWR_WAKE_UP_REASON_BUTTON;
 }
 
 void PWR_latch(void)
@@ -54,8 +58,12 @@ void PWR_turn_off(SHIFT_REGISTER_TYPE pins_mask) {  //updates the power state va
 }
 
 Bool PWR_query(SHIFT_REGISTER_TYPE mask) {
-	if ((power_control_state & mask) != 0) {return true;}
+	if ( (power_control_state & mask) ) {return true;}
 	else {return false;}
+}
+
+Bool PWR_is_low_power(void) {
+    return (Bool) ((power_control_state & ((1<<ENABLE_4V1) | (1<<ENABLE_5V0) | (1<<ENABLE_5V0B))) == 0);
 }
 
 /* 3 volt power pin manipulation
@@ -65,6 +73,7 @@ Bool PWR_query(SHIFT_REGISTER_TYPE mask) {
  */
 void PWR_3_start(void) {
 	gpio_set_pin_high(PWR_3V3_PIN);
+	gpio_set_pin_low(PWR_4TO3_PIN);
 }
 
 /* 3 volt power pin manipulation
@@ -75,6 +84,7 @@ void PWR_3_start(void) {
 
 void PWR_3_stop(void) {
 	gpio_set_pin_low(PWR_3V3_PIN);
+	gpio_set_pin_high(PWR_4TO3_PIN);
 }
 
 void PWR_3_is_needed(void) {
@@ -116,8 +126,8 @@ void PWR_shutdown(void) {
 }
 
 void PWR_5_start(void) {
-	PWR_4_start();
 	PWR_turn_on(1<<ENABLE_5V0);
+	PWR_push();
 }
 
 void PWR_5_stop (void) {
@@ -131,7 +141,6 @@ void PWR_is_5_needed (void) { //turn off 5v0 if host and can are off
 	} else {
 		PWR_5_stop();
 	}
-	PWR_push();
 }
 void PWR_host_start(void) {
 	PWR_turn_on((1<<ENABLE_5V0B));
@@ -146,9 +155,8 @@ void PWR_host_stop(void){
 
 
 void PWR_can_stop (void) {
-	PWR_turn_off((1<<ENABLE_CAN_RESET));
+	PWR_turn_off((1<<ENABLE_CAN_RESET)|(1<<ENABLE_CAN_SLEEP));
 	PWR_is_5_needed();
-	PWR_push();
 };
 
 void PWR_can_start (void) {
@@ -157,26 +165,23 @@ void PWR_can_start (void) {
 };
 
 void PWR_gsm_stop(void) {
-	// GSM_command_power_off();
-	PWR_turn_on(1<<ENABLE_SIM_PWR_ON);
+	//GSM_command_power_off();
+	PWR_turn_off((1<<ENABLE_SIM_PWR_ON)|(1<<ENABLE_SIM_RESET));  //drops the reset pin, forcing the SIM chip into low power
 	PWR_push();
 }
 
 void PWR_gsm_start(void) {
-	PWR_turn_on(1<<ENABLE_SIM_RESET);
-	PWR_4_start();
- 	if (PWR_query(1<<ENABLE_SIM_PWR_ON))
-	{
-		PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
-		PWR_push();
-		delay_ms(500);
-	}
-
-	PWR_turn_on((1<<ENABLE_SIM_PWR_ON));
+	PWR_4_start(); //make sure power is on
+ 	delay_ms(100); //delay for powre to stabilize
+	PWR_turn_off((1<<ENABLE_SIM_PWR_ON)); //ensure the "power on" signal is in the correct starting state
+	PWR_turn_on(1<<ENABLE_SIM_RESET); //allow SIM chip out of reset
+ 	PWR_push();
+	delay_ms(100); //allow wake time for SIM chip after reset high
+	PWR_turn_on((1<<ENABLE_SIM_PWR_ON));  //start turn on pulse
 	PWR_push();
-	delay_ms(250);
-	PWR_turn_off((1<<ENABLE_SIM_PWR_ON));
-	PWR_push();					//clear the start bit
+	delay_ms(200); //data sheet says min:65ms, typical:180ms
+	PWR_turn_off((1<<ENABLE_SIM_PWR_ON));  //end turn on pulse
+	PWR_push();	
 }
 
 /* Force GSM reset. Please use with caution */
@@ -191,22 +196,30 @@ void PWR_gsm_reset(void) {
 void PWR_mode_high(void) {
 	PWR_4_start();
 	PWR_5_start();
-	usb_tx_string_P(PSTR("Power Full\r\n"));
-	udd_attach();
-	ACL_set_sample_on();
-	GSM_modem_init();
-	CAN_elm_init();
+ 	USB_tx_string_PV(PSTR("Power Full\r\n"));
+ 	ACL_set_sample_on();
+ 	GSM_modem_init();
 	PWR_host_start();
 }
 
 void PWR_mode_low(void) {
-	usb_tx_string_P(PSTR("Power 3v Only\r\n"));
-	// do 3v only
+ 	USB_tx_string_PV(PSTR("Power 3v Only\r\n"));
+// 	
+	PWR_can_stop();
 	PWR_host_stop();
 	PWR_5_stop();
 	ACL_set_sample_off();
 	PWR_4_stop();
+	PWR_gsm_stop();
 	// maybe we'd like to force the leds to update here, just in case...
-	led_1_off();
-	led_2_off();
+//	led_1_off();
+//	led_2_off();
+}
+
+void PWR_set_wake_up_reason(PWR_WAKE_UP_REASON reason) {
+    PWR_wake_up_reason = reason;
+}
+
+PWR_WAKE_UP_REASON PWR_get_wake_up_reason(void) {
+    return PWR_wake_up_reason;
 }

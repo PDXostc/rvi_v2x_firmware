@@ -2,7 +2,7 @@
  * V2X_gsm.h
  *
  * Created: 2/12/2016 11:01:18 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */
 
 
@@ -15,12 +15,14 @@
  * returns "true" if SIMCARD installed
  **/
 inline static bool simcard_status(void) {return 1-ioport_get_pin_level(SW1_PIN);}
+	
 	/**
  * @def sim_power_status
  * @brief detection of SIM module by pin
  * returns "true" if SIM module is powered
  **/
 inline static bool sim_power_status(void) {return ioport_get_pin_level(EXT1_PIN_SIM_PWR);}
+	
 /**
  * @def sim_net_status
  * @brief detection of SIM network status pin
@@ -47,7 +49,6 @@ void GSM_clear_tx_int(void);
  */
 void GSM_process_buffer (void);
 
-
 /**
  * @def GSM_add_string_to_buffer
  * @brief adds a passed char* string to the active buffer
@@ -73,7 +74,7 @@ void GSM_purge_buffer(uint8_t buffer_select);
  * @def GSM_usart_init
  * @brief configure the usart port used by the GSM device, active RX
  */
-void GSM_usart_init (void);
+void GSM_uart_start (void);
 
 /**
  * @def GSM_sequence_states
@@ -85,7 +86,8 @@ enum GSM_sequence_states {
 	GSM_state_start,
 	GSM_state_init_SMS,
 	GSM_state_time_get,
-	GSM_state_wake_host
+	GSM_state_wake_host,
+	GSM_GPS_evaluation
 	};
 
 /**
@@ -185,4 +187,33 @@ char * GSM_get_imei (void);
  *@brief send a shutdown command to the gsm
  */
 void GSM_command_power_off(void);
+
+/**
+ * @def GSM_new_data
+ * @brief adds new data to the input buffer from uasr ISR
+ * @param value the data to be added to the buffer
+ **/
+void GSM_new_data (uint8_t value);
+
+/**
+ * @def GSM_send_data
+ * @brief sends data to the GSM, used in tx ISR
+ **/
+void GSM_send_data (void) ;
+
+/**
+ * @def GSM_test_GPS
+ * @brief performs several test on the GPS antenna and system
+ * @param respponce buffer back from SIM
+ **/
+void GSM_test_GPS (char * responce_buffer);
+#define GPS_TEST_TIMEOUT 1200
+void GSM_start_GPS_test(void);
+void GSM_stop_test(void);
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_GSM_H_ */

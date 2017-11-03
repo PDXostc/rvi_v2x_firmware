@@ -1,21 +1,14 @@
-/**
- * \file clock_conf.h
+/*
+ * conf_clock.h
  *
- * \brief Initial firmware for V2X bring up
- *
- * Author: Jesse Banks (jbanks2)
- *
- * Usage: move this file to src/config/clock_conf.h by replacing the existing file.
- */
+ * Created: 9/17/2017 10:36:25 PM
+ *  Author: Jesse Banks
+ */ 
 
 #ifndef CONF_CLOCK_H_INCLUDED
 #define CONF_CLOCK_H_INCLUDED
 
-
-
 #define V2X_CLOCK_DEF
-
-//#include "../V2X/V2X_board.h"
 
 #define CONFIG_SYSCLK_SOURCE				SYSCLK_SRC_PLL
 #define CONFIG_SYSCLK_PSADIV				SYSCLK_PSADIV_1
