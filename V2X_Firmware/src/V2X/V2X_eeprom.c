@@ -12,7 +12,7 @@ void eeprom_init (void) {
 		//the check byte was not found, set EE defaults
 		nvm_eeprom_write_byte(EE_timezone, time_zone_default_offset());  
 		nvm_eeprom_write_byte(EE_dst, false);
-		nvm_eeprom_write_byte(EE_verbose, true);
+		nvm_eeprom_write_byte(EE_verbose, false);
 		nvm_eeprom_write_byte(EE_car_state_check_enabled, CSC_get_car_state_check_default_enabled());
         eeprom_write_unsigned_int_16(EE_car_state_check_low_power_check_interval,
                                      CSC_get_car_state_check_low_power_default_interval());

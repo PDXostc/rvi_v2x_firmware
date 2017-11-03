@@ -11,12 +11,12 @@
 #define CSC_LOW_POWER_CAR_CHECK_DEFAULT_TIMEOUT  10
 #define CSC_HIGH_POWER_CAR_CHECK_DEFAULT_TIMEOUT 10
 
-#define CSC_CAN_INIT_TIMEOUT               0
-#define CSC_CAN_INIT_RETRY_TIMEOUT         0
-#define CSC_CAN_HEAR_CHATTER_TIMEOUT       0
-#define CSC_CAN_HEAR_CHATTER_RETRY_TIMEOUT 0
-#define CSC_CAN_READ_VOLTAGE_TIMEOUT       0
-#define CSC_CAN_READ_VOLTAGE_RETRY_TIMEOUT 0
+#define CSC_CAN_INIT_TIMEOUT               01
+#define CSC_CAN_INIT_RETRY_TIMEOUT         01
+#define CSC_CAN_HEAR_CHATTER_TIMEOUT       03
+#define CSC_CAN_HEAR_CHATTER_RETRY_TIMEOUT 03
+#define CSC_CAN_READ_VOLTAGE_TIMEOUT       03
+#define CSC_CAN_READ_VOLTAGE_RETRY_TIMEOUT 03
 
 #define CSC_CAN_INIT_NUM_RETRIES         1000
 #define CSC_CAN_HEAR_CHATTER_NUM_RETRIES 1000
@@ -178,7 +178,7 @@ void CSC_car_state_check(void) {
 		
             menu_send_CSC();
             //USB_tx_string_PVO(PSTR("Car-state check - "));
-			   
+			     
             if (PWR_is_low_power()) {
 
                 USB_tx_string_PVO(PSTR("low power!\r\n>"));

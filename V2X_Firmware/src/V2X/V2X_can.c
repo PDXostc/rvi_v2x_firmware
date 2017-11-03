@@ -22,7 +22,8 @@ Bool CAN_last_did_hear_chatter = false;
 uint8_t CAN_chatter_count = 0;
 
 #define READ_VOLTAGE_DIODE_DROP  (0.6)
-#define CAN_HEARD_CHATTER_CUTOFF 10
+#define CAN_HEARD_CHATTER_CUTOFF 3
+
 
  void CAN_add_to_buffer(uint8_t buffer_select, char value) {
 	CTL_add_to_buffer(&CAN, buffer_select, value);

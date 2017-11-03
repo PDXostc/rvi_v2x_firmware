@@ -19,7 +19,7 @@
 
 //! Device definition
 #define  USB_DEVICE_VENDOR_ID             USB_VID_ATMEL
-#define  USB_DEVICE_PRODUCT_ID            USB_PID_ATMEL_ASF_CDC
+#define  USB_DEVICE_PRODUCT_ID            USB_PID_ATMEL_ASF_SEVEN_CDC
 #define  USB_DEVICE_MAJOR_VERSION         1
 #define  USB_DEVICE_MINOR_VERSION         2
 #define  USB_DEVICE_POWER                 100 // Consumption on Vbus line (mA)
