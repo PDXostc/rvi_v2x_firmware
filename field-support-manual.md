@@ -30,7 +30,6 @@ GENIVI Smart-Cities project.
         * [Smart Cities application](#requirements-smart-cities-application)
 * [Hardware setup](#hardware-setup)
     * [Cable connection](#cable-connection)
-    * [Case enclosure and mounting](#case-enclosure-and-mounting)
     * [Sim card insertion instructions](#sim-card-instructions)
     * [Bench Power Supply](#bench-power-supply)
 * [Startup procedure](#startup-procedure)
@@ -40,15 +39,19 @@ GENIVI Smart-Cities project.
     * [Nominal smart cities](#nominal-smart-cities)
 * [Shutdown procedure](#shutdown-procedure)
     * [Button power off](#button-power-off)
-        * [Button failure or fallback procedure](#button-failure)
-    * [When all else fails](#when-fails)
     * [Command options for power off (see also command set)](#command-power-off)
+    * [Button failure or fallback procedure](#button-failure)
+    * [When all else fails](#when-fails)
 * [V2X Interface and Control](#runtime-operation)
     * [Communication Ports](#communication-ports)
-        * [Linux](#communication-ports-linux)
+        * [Linux](#communication-linux)
+          * [Discover active USB ports](#active-usb)
+          * [Install Minicom](#install-minicom)
+          * [Setup Serial Terminal](#serial_terminal_linux)
         * [Windows](#communication-ports-windows)
     * [Smart-cities interaction](#smart-cities-interaction)
-    * [Cellular](#cellular-operations)
+
+        ​
     * [Verification](#verification)
     * [Toubleshooting](#troubleshooting)
 * [V2X Command set](#v2x-command-set)
@@ -66,12 +69,12 @@ GENIVI Smart-Cities project.
 The Vehicle-to-Everything (V2X) board is a telemetry aggregation and delivery
 device. It provides access to:
 
-* Accelerometer
-* CAN/OBD interface via STN110/ELM327
+* [ADXL345BCCZ](http://www.mouser.com/ds/2/609/ADXL345-879145.pdf) Accelerometer configuration and dedicated data stream
+* CAN/OBD interface via STN110 (mimic of ELM327)
 * GPS (requires antenna)
 * GSM network connectivity, via SIMCOM chipset (requires 3g antenna, 3g SIM
   card)
-* Power over USB for host computer
+* Power management of USB for host computer
 
 Configuration and operation can be handled manually, but the device is intended
 to be complemented by a host computer for automated operation.
@@ -94,7 +97,7 @@ GPS and cellular network connections require a combination GPS/GSM 3g antenna.
 
 ### SIM card <a name="requirements-sim"></a>
 
-Celllar network connectivity requires a properly provisioned SIM card.
+Cellular network connectivity requires a properly provisioned (activated) SIM card. The V2X has a [full size SIM card socket](http://www.mouser.com/ds/2/276/0475531001_MEMORY_CARD_SOCKET-146294.pdf), allowing use of any other sized SIM card. [Adapters](https://www.amazon.com/dp/B00R25GJJW) are available to adapt up to full size. 
 
 
 ## Requirements for Smart Cities <a name="requirements-smart-cities"></a>
@@ -111,38 +114,22 @@ Celllar network connectivity requires a properly provisioned SIM card.
 
 > TODO: links to external hardware required
 
-> Please note: SIM card should be inserted before board is powered on, and it is
-> likely easier to do so before connecting cables.
+Needed:
 
-Need:
-
-* V2X Board
-* OBDII to serial cable
+* V2X Board (firmware flashed) mounted in enclosure.
+* OBDII to DB-9 cable
 * GPS/GSM antenna
 * (2) Micro USB to USB cables
+* Raspberry Pi and screen assembly
 
 ### Cable connection <a name="cable-connection"></a>
 
-1. Connect OBDII-serial cable into vehicle OBDII port (under dash) and the V2X
-   serial port.
-2. Connect GPS/GSM antenna cables.
-    > Typical configuration requires attaching
-    >* "gold" head to port marked "**GPS Antenna**"
-    >* "silver" head to port marked "**3g Cellular Network Antenna**"
-
-    > Incorrectly reversing this connection will inhibit GPS signal, and should
-      be one of the first things to check if no GPS signal is observed.
-
-3. Connect USB cable from port on board marked (Host PWR) to host computer micro
-   usb power supply port. This will supply power to host computer (Raspberry Pi
-   or other).
-4. Connect micro USB from port on board marked (Host DATA) to free USB port on
-   host computer. This is the line of communication between the board and the
+1. Connect GPS/GSM antenna cables. There are two possible types (screw type [APAMPS-106](http://www.mouser.com/ds/2/3/APAMPS-106-245254.pdf), tape type [MA-203.A](http://www.mouser.com/ds/2/398/MA.203%20GPS-Penta-band%20Cellular%20Stingray%20110310-2041.pdf)) which have exactly opposite connector colors. The V2X board has markings specifying the connector colors for the APAMPS-106 antenna. The MA-203 has labels attached to the wires adjacent to the connectors. The RF connectors on the V2X board are labeled with GPS and GSM, be mindful when making these connections.
+2. Connect a USB cable from the V2X [Type-A](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) port to the LCD [Micro-B](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) power port. This cable will supply power to screen and Raspberry Pi.
+3. Connect a USB cable from an available Raspberry Pi [Type-A](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) port to the V2X [Micro-B](https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Types-usb_th1.svg/220px-Types-usb_th1.svg.png) labeled (Host DATA). This is the line of communication between the V2X board and the
    host.
-
-> TODO: Pictures!
-
-### Case enclosure and mounting <a name="case-enclosure-and-mounting"></a>
+4. Connect [OBDII-DB9 cable](http://www.obd2plugs.com/uploadfile/20130213102233930.jpg) to vehicle OBDII port (usually under dash) and V2X-DB-9 port.
+5. Secure the wires to the V2X case 'porch' with zip ties.
 
 > TODO: Pictures!
 
@@ -152,9 +139,9 @@ Need:
 
 Proper SIM card alignment is critical to cellular network operation.
 
-Please insert SIM card so that
-* Gold contacts face TOWARDS the board
-* Chipped edge of card leads into the socket
+Please insert SIM card so that:
+* Gold contacts face TOWARDS the circuit board
+* Cropped corner of card leads into the socket
 * Fully inserted card will engage the spring lock
 
 To remove the card, push in until the spring lock releases, and the card will be
@@ -183,39 +170,40 @@ For full pinout, refer to the table below.
 
 **Pinning:**
 
-| Pin Description  | OBDII | DB9 |
-|----------------- |-------|-----|
-| J1850 BUS+       | 2     | 7   |
-| Chassis Ground   | 4     | 2   |
-| Signal Ground    | 5     | 1   |
-| CAN High J-2284  | 6     | 3   |
-| ISO 9141-2 K Line| 7     | 4   |
-| J1850 BUS-       | 10    | 6   |
-| CAN Low J-2284   | 14    | 5   |
-| ISO 9141-2 L Line| 15    | 8   |
-| Battery Power    | 16    | 9   |
+| Pin Description   | OBDII | DB9  |
+| ----------------- | ----- | ---- |
+| J1850 BUS+        | 2     | 7    |
+| Chassis Ground    | 4     | 2    |
+| Signal Ground     | 5     | 1    |
+| CAN High J-2284   | 6     | 3    |
+| ISO 9141-2 K Line | 7     | 4    |
+| J1850 BUS-        | 10    | 6    |
+| CAN Low J-2284    | 14    | 5    |
+| ISO 9141-2 L Line | 15    | 8    |
+| Battery Power     | 16    | 9    |
+
+[source](http://www.obd2plugs.com/uploadfile/20130213102233930.jpg)
 
 ## Startup procedure <a name="startup-procedure"></a>
 
-1. Press red button. The driver is configured to bring all components to full
-   power. Please allow some seconds for host computer start and application
-   initialization.
-
-When the host comes on line and connects to the V2X, the lights (red, blue,
-green) on board should be visible.
+1. Press red button for 1 second. The LED's will momentarily flash and the V2X will boot and start the host. 
+2. If the car state check is running (default); 
+   1. The first delay before checking for CAN activity is 60 seconds. 
+   2. If no CAN activity is found, V2X will change to a low power mode that has no LED indication. 
+   3. To use the V2X on the bench without a CAN source, send "VXSDC", to disables the CAN search.
+3. When the Cell modem comes online and connects to the V2X, the lights on board should be visible.
 
 ### Power requirements <a name="power-requirements"></a>
 
 V2X requires constant 12v power supply to sustain operation. Very informal
-testing shows average draw of ~0.15 amps during normal operation, with no host
+testing shows average draw of 0.1-0.2 amps during normal operation, with no host
 computer connected. When V2X is supplying power to a host such as a Raspberry Pi
-3 with attached touch screen, power draw is ~0.6 amps.
+3 with attached touch screen, power draw is ~0.6 amps. Since the car should be running while the system is on, 
 
-> #### Battery warning <a name="battery-warning"></a>
-> As noted above, the V2X firmware does not yet support low power / standby
-state. If left powered when vehicle is off, the vehicle battery could be drained
-significantly. Please power off the V2X when disengaging the vehicle. Note that
-powering off the V2X will also power off the host computer.
+#### Battery warning <a name="battery-warning"></a>
+it is assumed that if the car is running the alternator is maintaining the battery and the voltage is not checked. If the car state check discovers the car is 'off' the V2X will also check the battery voltage. If the battery has reached 11V, the V2X will power itself completely off in order to protect the battery and hopefully still allow the engine to be started. Once off, the power draw is micro-amps therefore negligible in this application.
+
+In low power mode, the rev 2.1 board draws about 60mA while observing the car. A typical economy car sized battery should allow **Low power operation for about 15 days** without impacting drivability. If the vehicle will be unused for longer, switch the power off at the ODBii cable.
 
 ### Nominal light states <a name="nominal-light-states"></a>
 
@@ -225,6 +213,7 @@ status.
 * Red: SIM card insertion status.
     - Active: SIM card is inserted (properly)
     - Inactive: SIM card missing or inserted improperly
+    - Flash: Car state check performed
 
 * Blue: GSM power status.
     - Active: SIMCOM chipset is powered
@@ -237,16 +226,11 @@ status.
 A steady green light likely indicates that the signal quality is not sufficient
 to register and attach to the desired network operator.
 
-> Please note: A bug currently exists in the driver that can produce a state
-where the LEDs are not updated with the correct frequency if the host has not
-actively communicated with the board for some time. Until this issue is resolved,
-the host should use a scripted means of occaisionally contacting the V2X control
-port. The distro built for Smart Cities contains a work around service for this
-issue.
+> Please note: A bug existed in a previous firmware revision in the driver that can produce a state where the LEDs are not updated with the correct frequency if the host has not actively communicated with the board for some time. Until this issue is resolved, the host should use a scripted means of occasionally contacting the V2X control port. The distro built for Smart Cities contains a work around service for this issue.
 
-If the lights are not visible, this should indicate the device is not powered.
+If the lights are not visible, the device may be in a low power state. Pressing the button for <5 seconds should boot the V2X into high power for 10-60 seconds.
 
-### Smart Cities Application
+### Smart Cities Application <a name="nominal-smart-cities"></a>
 
 In addition, the color of the time and date lines under the GENIVI logo indicate
 the status of GPS and RVI, respectively.
@@ -269,32 +253,28 @@ methods available.
 
 The button on the V2X board can be used to control the power states.
 
-Hold button for longer than N seconds and release.
+Hold button for N seconds and release.
 
-* \> 1 second: Turn on all board components (including Host)
-* \> 3 seconds: Turn off all board components (including Host), only Atmel CPU
-  will retain power
-* \> 5 seconds: Turn off V2X board
+* \<5 second: Turn on all board components (including Host), including bring up from low power state
+* \>5 seconds: Turn off V2X board
 
 > While no LEDs currently dedicated to indicating power state of the board
 > itself, powering off the board will deactivate the LEDs.
 
+> 
+
+### Command options for power off (see also command set) <a name="command-power-off"></a>
+
+V2X board supports a command set over a USB-serial port. The V2X chip mounts as 3 sequential ttyACM devices and the GSM modem mounts as 5 ttyUSB devices. Connect a terminal window to the middle ttyACM port. There is no physical manifestation of these serial signals, so the port configuration settings are unimportant. Sending "VXPDA" will perform a complete system power down.  After that the V2X can only be woken by the button.
+
 ### Button failure or fallback procedure <a name="button-failure"></a>
 
-V2X board supports a command set over a USB-serial port.
-
-> TODO: Later section with details on using command set for power management and
-troubleshooting.
+> TODO: Improve this section with more details on using command set for power management and troubleshooting.
 
 ### When all else fails <a name="when-fails"></a>
 
 Disconnect the board from the OBD port to cut power. Allow a few seconds, then
 reconnect. Use the button repower the system.
-
-### Command options for power off (see also command set) <a name="command-power-off"></a>
-
-> TODO: Describe contacting the V2X control port, and commands that can be used
-for power state manipulation.
 
 ### Nominal smart cities <a name="nominal-smart-cities"></a>
 
@@ -313,25 +293,61 @@ depend on the operating system of the host computer.
 
 > Depending on operating system, arrangement of the virtual ports is at the
 > mercy of whatever order they are mounted in. This means that the serial port
-> for a particular device may not remain consistent. It is encouraged for the
-> host computer to use a rules system (like `udev` in Linux) to map consistent
-> port aliases.
+> for a particular device may not remain consistent.
 
-#### Linux <a name="communication-ports-linux"></a> 
+### Linux <a name="communication-linux"></a> 
+
+> It is encouraged for the host computer to use a rules system (like `udev` in Linux)
+> to map consistent port aliases.
 
 The common port mounting arrangement observed in Linux:
 
 * `/dev/ttyACM0` -> STN110/ELM327 CAN chip
 * `/dev/ttyACM1` -> V2X control port (VX command set)
-* `/dev/ttyACM2` -> Accelerometer data stream (and secret reset back channel)
+* `/dev/ttyACM2` -> Accelerometer data stream
 * `/dev/ttyUSB0` -> SIMCOM diagnostic port (unused)
 * `/dev/ttyUSB1` -> GPS stream
 * `/dev/ttyUSB2` -> GSM modem AT command port (PPP dialer should use this for
   internet connection)
 * `/dev/ttyUSB3` -> SIMCOM AT control (AT command set)
 
-#### Windows <a name="communication-ports-windows"></a>
+#### Discover active USB ports:<a name="active-usb"></a>
+After plugging in and starting the V2X, type into a terminal window;
+`dmesg | grep tty`
+The most recently mounted ports will appear at the bottom of the list.
 
+#### Install minicom, <a name="install-minicom"></a>
+1. In a terminal window:
+
+  `sudo apt-get install minicom`
+
+2. Type in admin password of computer
+3. Confirm with 'y, allow to install
+
+#### Setup Serial Terminal <a name="serial_terminal_linux"></a>
+1. To setup minicom to access the V2X command interface, from a terminal:
+
+  `sudo minicom -s`
+
+2. arrow down to "Serial port setup", press enter
+3. press 'a' to modify the serial device line, 
+4. change the line to /dev/ttyAMC1, enter to confirm
+5. press 'f' to toggle flow control to "off"
+6. press enter to confirm setup
+
+optional: 
+    1. arrow down to "Save setup as.." 
+    2. select with enter 
+    3. give a name like "CMD"
+    4. Now you can use `sudo minicom CMD` to call a terminal with the correct settings
+
+7. Arrow down to "Exit"
+8. Press 'Ctrl+a' then 'z' to open the commant menu
+9. Press 'a' to add line feed
+
+The serial terminal should now be setup to use.
+
+### Windows <a name="communication-ports-windows"></a>
 On Windows, the arrangement is slightly less intuitive, and the ports require a
 driver to be installed. The requisite files, *atmel_devices_cdc.cat* and
 *atmel_devices_cdc.inf* are available in the Atmel Software Framework, [on
@@ -363,48 +379,92 @@ COM<x> is determined at runtime:
 ### Toubleshooting <a name="troubleshooting"></a>
 ## V2X Command set <a name="v2x-command-set"></a>
 
-> TODO: Include V2X command set
+| Command    | Submodule | Action  | Description                              |
+| ---------- | --------- | ------- | ---------------------------------------- |
+| VX         |           |         | Display main menu                        |
+| VX?        |           | ?       | Display main menu                        |
+| VXG        |           | G       | GENIVI Logo                              |
+| VXI        |           | I       | V2X Device Information                   |
+| VXQ        |           | Q       | Query system status                      |
+| VXR        |           | R       | Restart system                           |
+| VXV        |           | V       | Verbose communication toggle             |
+| VXA?       | A         | ?       | Display Accelerometer menu               |
+| VXAD       | A         | D       | Disable the accelerometer                |
+| VXAE       | A         | E       | Enable the accelerometer                 |
+| VXAF       | A         | F       | Set Fixed/10-bit resolution              |
+| VXAG       | A         | G       | Get single Accelerometer sample          |
+| VXAI       | A         | I       | Accelerometer device information         |
+| VXAQ       | A         | Q       | query Accelerometer state                |
+| VXAR       | A         | R       | Restart the Accelerometer                |
+| VXAWxx     | A         | Wxx     | Set G-range                              |
+| VXASxxxx   | A         | Sxxxx   | Change the sample rate to xxx            |
+| VXAXxxxx   | A         | Xxxxx   | Accelerometer X axis offset (zero)       |
+| VXAYxxxx   | A         | Yxxxx   | Accelerometer Y axis offset (zero)       |
+| VXAZxxxx   | A         | Zxxxx   | Accelerometer Z axis offset (zero)       |
+| VXA        | A         |         | Display Accelerometer menu               |
+| VXC?       | C         | ?       | Display CAN menu                         |
+| VXCA       | C         | A       | Use init string in EE (action)           |
+| VXCD       | C         | D       | Disable the CAN interface                |
+| VXCE       | C         | E       | Enable the CAN interface                 |
+| VXCI       | C         | I       | CANbus device information                |
+| VXCQ       | C         | Q       | Query CAN state                          |
+| VXCR       | C         | R       | Restart the CAN                          |
+| VXCSttt    | C         | Sttt    | Store init string to EE                  |
+| VXCW       | C         | W       | Show init string in EE                   |
+| VXCXttt    | C         | Xttt    | Command passthrough                      |
+| VXC        | C         |         | Display CAN menu                         |
+| VXM?       | M         | ?       | Display modem menu                       |
+| VXMD       | M         | D       | Disable the Modem                        |
+| VXME       | M         | E       | Enable the Modem                         |
+| VXMG       | M         | G       | Enable GPS                               |
+| VXMI       | M         | I       | Modem device information                 |
+| VXMQ       | M         | Q       | Modem state query                        |
+| VXMR       | M         | R       | Rerestart the Modem                      |
+| VXMS       | M         | S       | Stop GPS lock test                       |
+| VXMT       | M         | T       | Test GPS lock time                       |
+| VXMXttt    | M         | Xttt    | Command passthrough                      |
+| VXM        | M         |         | Display Modem menu                       |
+| VXM/       | M         | /       | Logical power down SIM chip              |
+| VXP?       | P         | ?       | Display power menu                       |
+| VXPD3      | P         | D3      | Disable the 3V power supply              |
+| VXPD4      | P         | D4      | Disable the 4V power supply              |
+| VXPD5      | P         | D5      | Disable the 5V power supply              |
+| VXPDA      | P         | DA      | Disable all power                        |
+| VXPDDx     | P         | DDx     | Disable host with delay                  |
+| VXPDH      | P         | DH      | Disable the Host power port              |
+| VXPE3      | P         | E3      | Enable the 3V power supply               |
+| VXPE4      | P         | E4      | Enable the 4V power supply               |
+| VXPE5      | P         | E5      | Enable the 5V power supply               |
+| VXPEH      | P         | EH      | Enable the Host power port               |
+| VXPH       | P         | H       | Go to high powerr state                  |
+| VXPL       | P         | L       | Go to low poower mode                    |
+| VXPQ       | P         | Q       | Power state query                        |
+| VXPR       | P         | R       | Reset to dafaults                        |
+| VXPY       | P         | Y       | Wake up event query                      |
+| VXP        | P         |         | Display power menu                       |
+| VXS?       | S         | ?       |                                          |
+| VXSDx      | S         | Dx      | Disable sleep-state checks               |
+| VXSEx      | S         | Ex      | Enable sleep-state checks                |
+| VXSI       | S         | I       | Info about the submenu                   |
+| VXSQ       | S         | Q       | Query the states and timeouts of the sleep-state checks |
+| VXSTHxxxxx | S         | THxxxxx | Set the high-power sleep-state check timeout to value, in seconds |
+| VXSTLxxxxx | S         | TLxxxxx | Set the low-power sleep-state check timeout to value, in seconds |
+| VXS        | S         |         |                                          |
+| VXT?       | T         | ?       | display timer menu                       |
+| VXTA       | T         | A       | Set an alarm for UET                     |
+| VXTD       | T         | D       | disable wakeup timers                    |
+| VXTDn      | T         | Dn      | Set daylight saings mode                 |
+| VXTG       | T         | G       | get current sytem time                   |
+| VXTI       | T         | I       | Timer information                        |
+| VXTQ       | T         | Q       | query time status                        |
+| VXTR       | T         | R       | Set alarm with relative offset           |
+| VXTS       | T         | S       | Set ssytem time with UET                 |
+| VXTU       | T         | U       | attemp to update time from GPS           |
+| VXTWxxxxx  | T         | Wxxxxx  | Wakeup timer set for xxxxx seconds from now |
+| VXTZnnn    | T         | Znnn    | Set clock time zone                      |
+| VXT        | T         |         | display timer menu                       |
 
-|  Command     | Submodule | Action | Description                    |
-|--------------|-----------|--------|--------------------------------|
-| VXAD         | A         |  D     | Disable the accelerometer   
-| VXAE         | A         |  E     | Enable the accelerometer    
-| VXAI         | A         |  I     | Accelerometer device information
-| VXAQ         | A         |  Q     | Accelerometer state query   
-| VXAR         | A         |  R     | Restart the Accelerometer   
-| VXASxxx      | A         | Sxxxx  | Change the sample rate to xxx   1,3,6,12,25,50,100,200,400,800,1600,3200
-| VXAXxxx      | A         | Xxxxx  | Accelerometer X axis offset (zero)  -127 to 127 Number confirmed    
-| VXAYxxx      | A         | Yxxxx  | Accelerometer Y axis offset (zero)  -127 to 127 Number confirmed    
-| VXAZxxx      | A         | Zxxxx  | Accelerometer Z axis offset (zero)  -127 to 127 Number confirmed    
-| VXAG         | A         |  G     | Get single Accelerometer sample 
-| VXARxx       | A         | Rxx    | Set G-range 
-| VXCD         | C         |  D     | Disable the CAN interface   
-| VXCE         | C         |  E     | Enable the CAN interface    
-| VXCI         | C         |  I     | CANbus device information   
-| VXCQ         | C         |  Q     | CAN state information 
-| VXCR         | C         |  R     | Restart the CAN 
-| VXI          | I         |        | V2X   Device Information 
-| VXMD         | M         |  D     | Disable the Modem   
-| VXME         | M         |  E     | Enable the Modem    
-| VXMI         | M         |  I     | Modem device information  
-| VXMQ         | M         |  Q     | Modem state query   
-| VXMR         | M         |  R     | Rerestart the Modem 
-| VXPD3        | P         | D3     | Disable the 3V power supply
-| VXPD4        | P         | D4     | Disable the 4V power supply
-| VXPD5        | P         | D5     | Disable the 5V power supply
-| VXPDH        | P         | DH     | Disable the Host power port
-| VXPDDx       | P         | DDx    | Disable host with delay x: seconds
-| VXPE3        | P         | E3     | Enable the 3V power supply 
-| VXPE4        | P         | E4     | Enable the 4V power supply 
-| VXPE5        | P         | E5     | Enable the 5V power supply 
-| VXPEH        | P         | EH     | Enable the Host power port 
-| VXPQ         | P         | Q      | Power state query       "3V3=x, 4V1=x, 5V0=x, HOST=x" 1=on 0=off    
-| VXW          | W         |        | Wake   up event query         
-| VXQ          | Q         |        | Whole   system status query     All other query results rolled into one    
-| VXTD         | T         |    D   | disable wakeup timers         
-| VXTWxxxx     | x         |        | Wxxxxx      Wakeup timer set for xxxxx seconds from now         
-| VXR          | R         |        | V2X   board reset         
-| VXS          | S         |        | SIMCARD   check     "SIMCARD=x" 1=in 0=out    
+
 
 ## Firmware upgrade <a name="firmware-upgrade"></a>
 
@@ -426,20 +486,27 @@ into a *.hex* format. The AVR toolchain is available for
 [Windows](http://www.atmel.com/tools/atmelavrtoolchainforwindows.aspx), and
 comes bundled in [Atmel Studio](http://www.atmel.com/microsite/atmel-studio/).
 
-### Tools required <a name="firmware-tools-required"></a>
+### Atmel Studio <a name="firmware-atmel-studio"></a>
 
-#### Programmer/Debugger <a name="tools-programmer"></a>
+> A full reiteration of the programming instructions for the board are currently
+> out of scope of this document.
 
-A plethora of hardware programming/debugger solutions are available. The AVR
-Dragon is one such device.
+Atmel Studio provides an easy programming interface for loading firmware .hex or .elf
+files onto the board. 
+
+[Atmel Studio Programming Dialog
+documentation](http://www.atmel.com/webdoc/atmelstudio/atmelstudio.AVRStudio.ProgrammingDialog.Introduction.html)
+
+### Dragon Programmer/Debugger <a name="tools-programmer"></a>
+
+The AVR Dragon is the chosen programmer because of it's native integration in Atmel Studio and because it offers many tools and features for developers for a low price.
 
 [AVR Dragon product page](http://www.atmel.com/tools/avrdragon.aspx)
 
 > TODO: AVR Dragon or compatible debugging board
 
-### Programmer Connection to the V2X Board <a name="programmer-connection"></a>
-
-#### Example: AVR Dragon <a name="programmer-connection-dragon"></a>
+###  Connection to the V2X Board <a name="programmer-connection"></a>
+The V2X programming connector is a 6-pin (2x3) 0.1in header near the corner of the board. 
 
 * Connect one end of the programming ribbon cable to the Dragon board on the set
   of pins marked *1 ISP 5*. Ensure that the red stripe on the ribbon is aligned
@@ -454,6 +521,17 @@ To check if the cable has been correctly connected and aligned, use programming
 software to read the voltage of the device while the board is powered. The
 voltage should read **3.2v**.
 
+### Verify Programmer Connection<a name="verify-connection></a>
+
+1. Open programming dialog from menu `Tools -> Device Programming` or use shortcut `Ctrl+Shift+P`
+2. Select the attached Dragon programmer from the `Tool`  dropdown menu
+3. Select `ATxmega128A4U` from the `Device` drop down list
+4. `PDI` is the only interface option, click `Apply`
+5. Press and hold the  button on the  V2X
+6. Under `Device Signature` click `Read`
+7. If the signature window quickly fills with `0x1E9746`, then communications are established
+8. release V2X button
+
 ### Firmware Upgrade Procedure <a name="firmware-procedure"></a>
 
 > During the flashing process, power must be maintained to the board. A constant
@@ -461,21 +539,17 @@ voltage should read **3.2v**.
 > must be held high by pressing and holding the button prior to and during the
 > flashing process.
 
-#### Atmel Studio <a name="firmware-atmel-studio"></a>
+9. Move to the `Memories` tab on the right side
+10. In the  `Flash` tab, click the ellipsis `...` to select the .elf or .hex file to be programmed
+11. Check the `Erase` and `Verify` radio buttons
+12. Press the V2X button
+13. Click `Program` 
+14. The erase, program, and verify steps should all report "OK"
+15. Release the V2X button
 
-> A full reiteration of the programming instructions for the board are currently
-> out of scope of this document.
-
-Atmel Studio supports an easy programming interface for loading firmware .hex
-files onto the board.
-
-[Atmel Studio Programming Dialog
-documentation](http://www.atmel.com/webdoc/atmelstudio/atmelstudio.AVRStudio.ProgrammingDialog.Introduction.html)
-
-#### AVRDUDE <a name="firmware-avrdude"></a>
+### Alternat programming w/ AVRDUDE <a name="firmware-avrdude"></a>
 
 AVRDude is a cross platform (Linux/Windows) programming software utility.
-
 
 [AVRDUDE Documentation](http://nongnu.askapache.com/avrdude/avrdude-doc-6.3.pdf)
 
@@ -486,6 +560,18 @@ Ultimately, the usage will boil down to something like this:
 ```
 avrdude -p x128a4u -c <programmer-id> -e -U flash:w:<file-name>.hex
 ```
+### Using the GPS test<a name="gps_test"></a>
+
+There exists a test function to repeatedly cold acquire GPS lock and print the results.  This test should be the only automatic control sequence running, send "VXSDC" to the V2X control port `ttyACM1` to stop the car state checks. Sending "VXMT" to the V2X control port will start the GPS lock time test.
+
+The control port is spammed with plenty of SIM module GPS query chatter during the test, so the results of the test are sent to the Accelerometer stream `ttyACM2` for consolidated results. Test results are in seconds and appear like this:
+
+`Acquisition time: 44`
+`Acquisition time: 46`
+`Acquisition time: 38   `
+
+The Accelerometer stream is automatically stopped when the test begins. As the test progresses a "spinner" ( |, \, -, / ) shows there is test activity, the test automatically repeats, and recovers from errors until it is stopped with "VXMS" command. The Accelerometer can then be restarted with "VXAE".
+
 ## Links and Resources <a name="links-resources"></a>
 
 ## FAQ

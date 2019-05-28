@@ -3,13 +3,23 @@
  *
  * /brief Hardware driver functions for operating the V2X board
  *
- * Author: Jesse Banks (jbanks2)
+ *  Author: Jesse Banks
  **/
 
 #ifndef V2X_DRIVERS_H_
 #define V2X_DRIVERS_H_
 
-#include "V2X_board.h"
+#include "V2X.h"
+
+/**
+ * @def PWR_WAKE_UP_REASON
+ * @brief used to track the reason the V2X board was last started
+ **/
+typedef enum {
+	PWR_WAKE_UP_REASON_UNKNOWN,
+	PWR_WAKE_UP_REASON_BUTTON,
+	PWR_WAKE_UP_REASON_CAR_RUNNING,
+} PWR_WAKE_UP_REASON;
 
 /**
  * @def SHIFT_REGISTER_TYPE
@@ -82,6 +92,13 @@ void PWR_turn_off(SHIFT_REGISTER_TYPE pins_mask);
  * @retval if power_status_mask & var_mask != 0 returns true
  */
 Bool PWR_query(SHIFT_REGISTER_TYPE mask);
+
+/**
+ * @def PWR_is_low_power
+ * @brief returns true if none of the 4 or 5 Vs are enabled
+ * @return true if none of the 4 or 5 Vs are enabled, else false
+ */
+Bool PWR_is_low_power(void);
 
 /**
  * @def PWR_3_start
@@ -190,4 +207,19 @@ void PWR_mode_high(void);
  * @brief Turn off all peripherals and higher power rails, using only 3v and micro
  */
 void PWR_mode_low(void);
+
+/**
+ * @def PWR_set_wake_up_reason
+ * @brief saves the wake up reason
+ * @param the PWR_WAKE_UP_REASON  
+ **/
+void PWR_set_wake_up_reason(PWR_WAKE_UP_REASON reason);
+
+/**
+ * @def PWR_get_wake_up_reason
+ * @brief requests the wake up reason
+ * @retval the PWR_WAKE_UP_REASON  
+ **/
+PWR_WAKE_UP_REASON PWR_get_wake_up_reason(void);
+
 #endif /* V2X_DRIVERS_H_ */

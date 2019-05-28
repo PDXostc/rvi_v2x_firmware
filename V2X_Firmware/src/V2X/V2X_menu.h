@@ -2,12 +2,14 @@
  * V2X_menu.h
  *
  * Created: 2/23/2016 9:00:30 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
 #ifndef V2X_MENU_H_
 #define V2X_MENU_H_
+
+Bool verbose;
 
 /**
 * @def menu_init
@@ -71,26 +73,32 @@ void menu_send_n_st(void);
 void menu_send_out_of_range(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "GSM>>>:"
+ * @def menu_send_GSM
+ * @brief canned message, sends "GSM>:"
  **/
 void menu_send_GSM(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "CAN>>>:"
+ * @def menu_send_CAN
+ * @brief canned message, sends "CAN>:"
  **/
 void menu_send_CAN(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "BTN>>>:"
+ * @def menu_send_BTN
+ * @brief canned message, sends "BTN>:"
  **/
 void menu_send_BTN(void);
 
 /**
- * @def menu_send_n_st
- * @brief canned message, sends "CTL>>>:"
+ * @def menu_send_CSC
+ * @brief canned message, sends "CSC>:"
+ **/
+void menu_send_CSC(void);
+
+/**
+ * @def menu_send_CTL
+ * @brief canned message, sends "CTL>:"
  **/
 void menu_send_CTL(void);
 
@@ -176,18 +184,10 @@ void menu_timer(void);
 void menu_timer_status(void);
 
 /**
- * @def usb_tx_string_P
- * @brief special routine to send program memory stored strings over USB
- * @param data pointer to PSTR() strored strings
+ * @def menu_sleep
+ * @brief sleep-state timer checks menu content and conditional branching
  **/
-void usb_tx_string_P(const char *data);
-
-/**
- * @def usb_tx_string_PV
- * @brief if not verbose, strings are preplaced by "OK"
- * @param data pointer to PSTR() strored strings
- **/
-void usb_tx_string_PV(const char *data);
+void menu_sleep(void);
 
 /**
  * @def menu_lockup
@@ -199,6 +199,25 @@ void menu_lockup (void);
  * @def menu_verbose
  * @brief returns state of verbose variable
  **/
-Bool menu_verbose(void);
+//Bool menu_verbose(void);
 
+/**
+ * @def menu_simcard_status
+ * @brief prints the state of the simcard
+ **/
+void menu_simcard_status(void);
+
+/**
+ * @def menu_is_verbose
+ * @brief call to determine if menu is verbose
+ * @retval verbose state
+ **/
+static inline Bool menu_is_verbose (void) {return verbose;}
+
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_MENU_H_ */

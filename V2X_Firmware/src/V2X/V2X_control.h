@@ -2,7 +2,7 @@
  * V2X_command.h
  *
  * Created: 3/15/2016 9:47:11 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -55,8 +55,10 @@ enum system_switch {
 	SYS_CAN = 0,	//used for direct control of CAN
 	SYS_GSM,		//used for direct control of GSM
 	SYS_CAN_CTL,	//used for CTL passthrough of CAN
-	SYS_CTL,			//stand alone sequence jobs, wake host, etc.
-	SYS_PWR
+	SYS_CTL,		//stand alone sequence jobs, wake host, etc.
+	SYS_PWR,
+	SYS_CAR_STATE_CHECK,
+	SYS_NUM
 };
 
 /**
@@ -145,14 +147,14 @@ void CTL_copy_to_proc (buff * buffer);
 
 /**
  * @def CTL_input_index_check
- * @brief 
+ * @brief looks to see if the buffer size has been exceeded
  * @param *buffer pointer to the buffer struct buff_t
  **/
 void CTL_input_index_check (buff * buffer);
 
 /**
  * @def CTL_input_proc_index_check
- * @brief 
+ * @brief looks to see if the buffer size has been exceeded
  * @param *buffer pointer to the buffer struct buff_t
  **/
 void CTL_input_proc_index_check (buff * buffer);
@@ -164,12 +166,18 @@ void CTL_input_proc_index_check (buff * buffer);
 void job_coordinator (void);
 
 /**
+ * @def job_timeout_init
+ * @brief clears all timeout 
+ **/
+void job_timeout_init (void);
+
+/**
  * @def job_set_timeout
  * @brief sets a new timeout time and enables checking of timeouts
  * @param system - SYS_CAN or SYS_GPS system
  * @param span - number of seconds until timeout
  **/
-void job_set_timeout (uint8_t system, int span);
+void job_set_timeout (uint8_t system, uint16_t span);
 
 /**
  * @def job_check_timeout
@@ -193,4 +201,10 @@ void job_clear_timeout (uint8_t system);
  **/
 void job_check_fail (uint8_t system);
 
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_COMMAND_H_ */

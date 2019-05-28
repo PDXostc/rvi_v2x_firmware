@@ -2,7 +2,7 @@
  * V2X_time.h
  *
  * Created: 3/2/2016 3:24:33 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -10,12 +10,18 @@
 #define V2X_TIME_H_
 
 #define time_seed 1456961042  //time starter
-#define RTC_VALIDITY_PERIOD 600  //RTC syncs with GPS
-#define TZ_OFFSET 20
+#define RTC_VALIDITY_PERIOD (3*24*60*60) //after 3 days (scaled up to seconds) the RTC syncs with GPS
+#define RTC_TZ_OFFSET 20  //a offset larger than the largets time zone
+#define RTC_DEFAULT_TIMEZONE -6 //for Nevada
+#define RTC_DEFAULT_TIMEZONE_OFFSET (RTC_TZ_OFFSET + RTC_DEFAULT_TIMEZONE)
+
+#define RTC_UTC_GPS_OFFSET 18 // difference in seconds from GPS time to UTC "world" time
+//may be important for rolling cyphers. needs to be updated every leap second 
+// for the most up to date value see http://leapsecond.com/java/gpsclock.htm
 
 /**
  * @def time_init
- * @brief sets up RTC for opperation
+ * @brief sets up RTC for operation
  **/
 void time_init(void);
 
@@ -37,7 +43,7 @@ long time_get(void);
  * @def time_24hr_check
  * @brief clears time_is_current holder after 24hrs
  **/
-void time_24hr_check (void);
+void time_validity_check (void);
 
 /**
  * @def time_alarm_set
@@ -89,6 +95,15 @@ void time_zone_set (int zone);
  * @retval UTC index for time zone (+16 to -12)
  **/
 int time_zone_get (void);
+
+/**
+ * @def time_zone_default
+ * @brief set the time zone used by calender and RTC 
+ * @brief designed to feed the EEPROM default method
+ * @brief it includes a +20 offset so no negative values
+ * @retval UTC index for time zone (+16 to -12) + 20
+ **/
+int time_zone_default_offset (void);
 
 /**
  * @def time_print_human_readable

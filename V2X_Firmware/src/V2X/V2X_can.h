@@ -2,7 +2,7 @@
  * V2X_can.h
  *
  * Created: 3/10/2016 12:25:21 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 
@@ -17,26 +17,76 @@ enum CAN_sequence_states {
 	CAN_state_idle = 0,
 	CAN_state_power,
 	CAN_state_EE,
+    CAN_state_read_voltage,
+    CAN_state_hear_chatter,
 	};
 	
 /**
- * @def CAN_subsequence_states
- * @brief generic switch for moving through control substates
+ * @def CAN_init_subsequence_states
+ * @brief generic switch for moving through control substates during power-on sequence
  */
-enum CAN_subsequence_states {
-	CAN_subssequence_1 = 0,
-	CAN_subssequence_2,
-	CAN_subssequence_3,
-	CAN_subssequence_4,
-	CAN_subssequence_5,
-	CAN_subssequence_6,
-	CAN_subssequence_7,
-	CAN_subssequence_8,
-	CAN_subssequence_9,
-	CAN_subssequence_10,
-	CAN_subssequence_FAIL
+enum CAN_init_subsequence_states {
+	CAN_init_subsequence_1 = 0,
+	CAN_init_subsequence_2,
+	CAN_init_subsequence_3,
+	CAN_init_subsequence_4,
+	CAN_init_subsequence_5,
+	CAN_init_subsequence_6,
+	CAN_init_subsequence_7,
+	CAN_init_subsequence_8,
+	CAN_init_subsequence_9,
+	CAN_init_subsequence_10,
+	CAN_init_subsequence_COMPLETE,
+	CAN_init_subsequence_FAIL
 	};
-	
+
+/**
+ * @def CAN_ee_subsequence_states
+ * @brief switch for moving through control substates during ee sequence
+ */
+enum CAN_ee_subsequence_states {
+	CAN_ee_subsequence_1 = 0,
+	CAN_ee_subsequence_2,
+	CAN_ee_subsequence_3,
+	CAN_ee_subsequence_4,
+	CAN_ee_subsequence_5,
+	CAN_ee_subsequence_6,
+	CAN_ee_subsequence_7,
+	CAN_ee_subsequence_8,
+	CAN_ee_subsequence_9,
+	CAN_ee_subsequence_10,
+	CAN_ee_subsequence_COMPLETE,
+	CAN_ee_subsequence_FAIL
+	};
+
+/**
+ * @def CAN_read_voltage_subsequence_states
+ * @brief switch for moving through control substates
+ **/
+enum CAN_read_voltage_subsequence_states {
+    CAN_read_voltage_subsequence_1,
+    CAN_read_voltage_subsequence_2,
+    CAN_read_voltage_subsequence_3,
+    CAN_read_voltage_subsequence_4,
+    CAN_read_voltage_subsequence_5,
+    CAN_read_voltage_subsequence_COMPLETE,
+    CAN_read_voltage_subsequence_FAIL,
+};
+
+/**
+ * @def CAN_hear_chatter_subsequence_states
+ * @brief switch for moving through control substates
+ **/
+enum CAN_hear_chatter_subsequence_states {
+    CAN_hear_chatter_subsequence_1,
+    CAN_hear_chatter_subsequence_2,
+    CAN_hear_chatter_subsequence_3,
+    CAN_hear_chatter_subsequence_4,
+    CAN_hear_chatter_subsequence_5,
+    CAN_hear_chatter_subsequence_COMPLETE,
+    CAN_hear_chatter_subsequence_FAIL,
+};
+
 /**
  * @def CAN_uart_start
  * @brief configure the usart port used by the CAN device, active RX
@@ -104,7 +154,7 @@ void CAN_purge_buffer(uint8_t buffer_select);
  * @brief swaps the roles of the A/B buffers, starts sending routines
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
 */
-void CAN_mark_for_processing (Bool in_out);
+void CAN_mark_for_processing (Bool buffer_select);
 
 /**
  * @def CAN_add_string_to_buffer
@@ -112,21 +162,21 @@ void CAN_mark_for_processing (Bool in_out);
  * @param buffer_select "BUFFER_IN", "BUFFER_OUT"
  * @param *to_add pointer to the string that should be added
 */
-void CAN_add_string_to_buffer(Bool in_out, char * to_add);
+void CAN_add_string_to_buffer(Bool buffer_select, char * to_add);
 
 
 /**
  * @def CAN_control
  * @brief interaction control sequencer, host asleep.
- * @param *responce_buffer pointer to the buffer to be analysed
+ * @param *response_buffer pointer to the buffer to be analysed
 */
-void CAN_control (char * responce_buffer);
+void CAN_control (char * response_buffer);
 
 /**
- * @def CAN_control_fail
+ * @def CAN_control_init_fail
  * @brief puts the CAN control sequence in a fail state due to timeout
 */
-void CAN_control_fail (void);
+void CAN_control_init_fail(void);
 
 /**
  * @def CAN_mark_as_sent
@@ -143,9 +193,9 @@ void CAN_elm_init (void);
 /**
  * @def CAN_control_init
  * @brief control processor for the init sequence
- * @param *responce_buffer pointer to the buffer to be analysed
+ * @param *response_buffer pointer to the buffer to be analysed
 */
-void CAN_control_init (char * responce_buffer);
+void CAN_control_init (char * response_buffer);
 
 /**
  * @def CAN_is_controlled
@@ -188,7 +238,7 @@ Bool CAN_is_snooping(void);
  * @def CAN_ee_sequence
  * @brief used by can_control to iterate through the EE commands
 */
-void CAN_ee_sequence(char * responce_buffer);
+void CAN_ee_sequence(char * response_buffer);
 
 /**
  * @def CAN_EE_start
@@ -201,4 +251,86 @@ void CAN_EE_start (void);
  * @brief extracts sections of the EE string
 */
 Bool CAN_find_message (char * buffer, uint8_t index);
+
+/**
+ * @def CAN_read_voltage_start
+ * @brief Starts the voltage-reading state machine
+ */
+void CAN_read_voltage_start(void);
+
+/**
+ * @def CAN_read_voltage_sequence
+ * @brief Method for processing the return buffer when in the read-voltage sequence
+ * @param response_buffer buffer with CAN data
+ */
+void CAN_read_voltage_sequence(char * response_buffer);
+
+/**
+ * @def CAN_hear_chatter_start
+ * @brief Starts the hear-chatter state machine
+ */
+void CAN_hear_chatter_start(void);
+
+/**
+ * @def CAN_hear_chatter_sequence
+ * @brief Method for processing the return buffer when in the hear-chatter sequence
+ * @param response_buffer buffer with CAN data
+ */
+void CAN_hear_chatter_sequence(char * response_buffer);
+
+/**
+ * @def CAN_get_sequence_state
+ * @brief gets value of CAN_sequence_state variable
+ * @return value of CAN_sequence_state variable
+ */
+uint8_t CAN_get_sequence_state(void);
+
+/**
+ * @def CAN_get_init_subsequence_state
+ * @brief gets value of CAN_get_init_subsequence_state variable
+ * @return value of CAN_get_init_subsequence_state variable
+ */
+uint8_t CAN_get_init_subsequence_state(void);
+
+/**
+ * @def CAN_get_ee_subsequence_state
+ * @brief gets value of CAN_get_ee_subsequence_state variable
+ * @return value of CAN_get_ee_subsequence_state variable
+ */
+uint8_t CAN_get_ee_subsequence_state(void);
+
+/**
+ * @def CAN_get_read_voltage_subsequence_state
+ * @brief gets value of CAN_get_read_voltage_subsequence_state variable
+ * @return value of CAN_get_read_voltage_subsequence_state variable
+ */
+uint8_t CAN_get_read_voltage_subsequence_state(void);
+
+/**
+ * @def CAN_get_hear_chatter_subsequence_state
+ * @brief gets value of CAN_hear_chatter_subsequence_state variable
+ * @return value of CAN_hear_chatter_subsequence_state variable
+ */
+uint8_t CAN_get_hear_chatter_subsequence_state(void);
+
+/**
+ * @def CAN_get_last_read_voltage
+ * @brief gets the last read voltage
+ * @return the last read voltage
+ */
+double CAN_get_last_read_voltage(void);
+
+/**
+ * @def CAN_get_last_did_hear_chatter
+ * @brief gets the last result of whether it heard chatter
+ * @return whether it last hard chatter
+ */
+Bool CAN_get_last_did_hear_chatter(void);
+
+/**
+ * @def 
+ * @brief 
+ * @param 
+ * @retval
+ **/
 #endif /* V2X_CAN_H_ */

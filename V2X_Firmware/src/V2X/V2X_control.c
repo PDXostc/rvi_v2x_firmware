@@ -2,13 +2,13 @@
  * V2X_command.c
  *
  * Created: 3/15/2016 9:46:58 AM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 #include "V2X.h"
 
-uint32_t job_timeout[2] = {0, 0, 0, 0};
-Bool job_timeout_enable[4] = {false, false, false, false};
+uint32_t job_timeout[SYS_NUM];
+Bool job_timeout_enable[SYS_NUM];
 
 void CTL_add_to_buffer(buff * buffer, Bool in_out, char value) {
 	switch (in_out) {
@@ -40,7 +40,6 @@ void CTL_add_string_to_buffer(buff * buffer, Bool in_out, char * to_add) {
 }
 
 int CTL_bytes_to_send (buff * buffer, Bool in_out) {
-	int value;
 	switch (in_out) {
 	case BUFFER_IN:
 		return strlen((buffer->input_proc_buf+buffer->input_proc_index));
@@ -115,7 +114,7 @@ void CTL_copy_to_proc(buff * buffer) { //enters with buffer->input_proc_flag tru
 	uint16_t t_buf = buffer->input_proc_index; //save proc index so it can be reset if incomplete string
 	while  (buffer->input_proc_flag && buffer->input_proc_index != buffer->input_index) { //while still processing
 		char temp = buffer->input_buf[buffer->input_proc_index++]; //get char from input array
- 		CTL_input_proc_index_check(buffer);
+ 		CTL_input_proc_index_check(buffer); //reset input_proc_index if needed
 		if ( temp == '\n' || temp == '\r' || temp == 0x07 || temp == '>') {//an end of string char has been found
 			if (i != 0)	{
 				buffer->input_proc_loaded = true; //set flag of buffer copied
@@ -136,13 +135,13 @@ void CTL_copy_to_proc(buff * buffer) { //enters with buffer->input_proc_flag tru
 }
 
 void CTL_input_index_check (buff * buffer) {
-	if (buffer->input_index == sizeof(buffer->input_buf)) {
+	if (buffer->input_index >= sizeof(buffer->input_buf)) {
 		buffer->input_index = 0; //reset pointer
 	}
 }
 
 void CTL_input_proc_index_check (buff * buffer) {
-	if (buffer->input_proc_index == sizeof(buffer->input_buf)) {
+	if (buffer->input_proc_index >= sizeof(buffer->input_buf)) {
 		buffer->input_proc_index = 0; //reset pointer
 	}
 }
@@ -150,33 +149,53 @@ void CTL_input_proc_index_check (buff * buffer) {
 void job_coordinator (void) {
 	uint32_t temp_time = time_get();
 	if (temp_time % 60 == 0) { //check every minute
-		if (time_is_current() == 0) { //needs a sync
-			GSM_time_job(); //kick off a time sync job
+		if (PWR_query(ENABLE_SIM_RESET)) { //if sim chip not in reset i.e. low power mode
+			if (time_is_current() == 0) { //if needs a sync
+				GSM_time_job(); //kick off a time sync job
+			}
 		}
 	}
+
 	if (job_check_timeout(SYS_GSM)) {
 		char nuthin[] = ".timeout.";
 		GSM_control(nuthin);  //start another job to catch the timeout
 	}
+
 	if (job_check_timeout(SYS_CAN)) {
 		char nuthin[] = ".timeout.";
 		CAN_control(nuthin);  //start another job to catch the timeout
 	}
+
 	if (job_check_timeout(SYS_CAN_CTL)) {
 		CAN_stop_snoop();
 	}
+
 	if (job_check_timeout(SYS_PWR))
 	{
 		handle_button_check(button_get_delta());
 		job_clear_timeout(SYS_PWR);
 	}
+
+	if (job_check_timeout(SYS_CAR_STATE_CHECK))
+	{
+        CSC_car_state_check();
+	}
+
 	//more jobs to add
 	//compare GPS coordinates to trigger alarm/host
 	//compare ACL data to trigger alarm/host
 	//ignition detection to trigger alarm/host
 }
 
-void job_set_timeout (uint8_t system, int span) {
+void job_timeout_init () {
+	for (uint8_t x = 0; x < SYS_NUM; x++) {
+		//job_timeout[x] = time_get() //time does not matter if not being watched (Still a good practice to initialize variables to something as it helps prevent/find bugs down the road...)
+		job_timeout[x] = 0;
+		job_timeout_enable[x] = false;
+	}
+}
+
+void job_set_timeout (uint8_t system, uint16_t span) {
 	job_timeout[system] = time_get() + span;
 	job_timeout_enable[system] = true;
 }
@@ -200,11 +219,11 @@ void job_check_fail(uint8_t system) {
 			menu_send_GSM();
 			break;
 			case SYS_CAN:
-			CAN_control_fail();
+			CAN_control_init_fail();
 			menu_send_CAN();
 			break;
 		}
-		usb_tx_string_P(PSTR("Control timeout\r\n>"));
+		USB_tx_string_P(PSTR("Control timeout\r\n>"));
 		job_set_timeout(system, 1);
 	}
 }

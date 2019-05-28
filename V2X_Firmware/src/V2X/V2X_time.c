@@ -2,7 +2,7 @@
  * V2X_time.c
  *
  * Created: 3/2/2016 3:24:15 PM
- *  Author: jbanks2
+ *  Author: Jesse Banks
  */ 
 
 #include "V2X.h"
@@ -27,7 +27,7 @@ void time_init(void) {
 	rtc_init();
 	rtc_set_time(time_seed);
 	rtc_set_callback(time_alarm_event);
-	time_zone = nvm_eeprom_read_byte(EE_timezone) - TZ_OFFSET;
+	time_zone = nvm_eeprom_read_byte(EE_timezone) - RTC_TZ_OFFSET;
 	dst = nvm_eeprom_read_byte(EE_dst);
 }
 
@@ -55,11 +55,11 @@ void time_dst_set(Bool set) {
 }
 
 Bool time_dst_get (void) {
-	return dst;
+	return dst = nvm_eeprom_read_byte(EE_dst);
 }
 
 long time_get(void) {
-	time_24hr_check();
+	time_validity_check();
 	return  rtc_get_time();
 }
 
@@ -81,7 +81,7 @@ void time_alarm_set_relative(long offset) {
 void time_alarm_event(void) {
 	alarm_is_set = false;
 	menu_send_CTL();
-	usb_tx_string_P(PSTR("ALARM\r\n"));
+	USB_tx_string_P(PSTR("ALARM\r\n"));
 	menu_send_n_st();
 	//respond to alarm
 	PWR_host_start();
@@ -93,16 +93,16 @@ Bool time_alarm_active(void) {
 }
 
 Bool time_is_current(void) {
-	time_24hr_check();
+	time_validity_check();
 	return time_is_set;
 }
 
-void time_24hr_check (void){
+void time_validity_check (void){
 	if (rtc_get_time() - time_was_set > RTC_VALIDITY_PERIOD) {time_is_set = false;}
 }
 
 void time_zone_set (int zone) {
-	nvm_eeprom_write_byte(EE_timezone , zone + TZ_OFFSET);
+	nvm_eeprom_write_byte(EE_timezone , zone + RTC_TZ_OFFSET);
 	time_zone = zone;
 }
 
@@ -110,20 +110,24 @@ int time_zone_get (void) {
 	return (time_zone);
 }
 
+int time_zone_default_offset (void) {
+	return RTC_DEFAULT_TIMEZONE_OFFSET;
+}
+
 void time_print_human_readable (void) {
 	calendar_timestamp_to_date_tz(rtc_get_time(),time_zone + dst,0,&date_s);
 	menu_print_int(date_s.month+1);
-	usb_tx_string_P(PSTR("/"));
+	USB_tx_string_P(PSTR("/"));
 	menu_print_int(date_s.date+1);
-	usb_tx_string_P(PSTR("/"));
+	USB_tx_string_P(PSTR("/"));
 	menu_print_int(date_s.year);
-	usb_tx_string_P(PSTR(" "));
+	USB_tx_string_P(PSTR(" "));
 	menu_print_int(date_s.hour);
-	usb_tx_string_P(PSTR(":"));
-	if (date_s.minute < 10) {usb_tx_string_P(PSTR("0"));} //add a 0 if below 10
+	USB_tx_string_P(PSTR(":"));
+	if (date_s.minute < 10) {USB_tx_string_P(PSTR("0"));} //add a 0 if below 10
 	menu_print_int(date_s.minute);
-	usb_tx_string_P(PSTR(":"));
-	if (date_s.second < 10) {usb_tx_string_P(PSTR("0"));} //add a 0 if below 10
+	USB_tx_string_P(PSTR(":"));
+	if (date_s.second < 10) {USB_tx_string_P(PSTR("0"));} //add a 0 if below 10
 	menu_print_int(date_s.second);
 }
 
@@ -142,8 +146,8 @@ void time_set_by_strings (char * date, char * time) {
 	for (int i = 0; i < 2; i++) {bufr[i] = time[i+4];}
 	date_s.second = atoi(bufr);
 
-	long new_time = calendar_date_to_timestamp_tz(&date_s, 0, 0); 	// GPS time handled as Zulu time, no offset while setting
-	time_set(new_time);
+	long new_time = calendar_date_to_timestamp_tz(&date_s, 0, 0); 	// GPS time handled as Zulu time,
+	time_set(new_time - RTC_UTC_GPS_OFFSET); // "GPS is now ahead of UTC by 18 seconds" -> http://leapsecond.com/java/gpsclock.htm
 
 }
 

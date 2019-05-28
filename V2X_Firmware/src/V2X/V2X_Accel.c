@@ -1,8 +1,11 @@
 /*
- * Accelerometer.c
+ * file: V2X_Accel.c
  *
  * Created: 2/9/2016 10:53:17 AM
- *  Author: jbanks2
+ *
+ *  Author: Jesse Banks
+ *
+ * brief: accelerometer features and functions
  */ 
 
 #include "V2X.h"
@@ -186,9 +189,14 @@ void ACL_send_offset (void) {
 void report_accel_data(void) {
 	char buffer[30];  //create starting string
 	uint8_t data[6];
+	static int last_frame;
+	int cur_frame = udd_get_frame_number();
 	if (ACL_sampling()) {
-		ACL_take_sample(data); //collect sample data
-		ACL_data_to_string(data, buffer);
-		usb_cdc_send_string(USB_ACL, buffer);
+		if (last_frame != cur_frame) { //if frame has changed since last time
+			ACL_take_sample(data); //collect sample data
+			ACL_data_to_string(data, buffer);
+			USB_send_string(USB_ACL, buffer);
+			last_frame = cur_frame; //save current frame
+		}
 	}
 }
